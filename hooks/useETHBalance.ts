@@ -1,15 +1,16 @@
+import { BigNumberish } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import useSWR from "swr";
 import { parseBalance } from "../util";
 import useKeepSWRDataLiveAsBlocksArrive from "./useKeepSWRDataLiveAsBlocksArrive";
 
-function getETHBalance(library) {
-  return async (address, _) => {
-    return library.getBalance(address).then((balance) => parseBalance(balance));
+function getETHBalance(library: any) {
+  return async (address: any, _: any) => {
+    return library.getBalance(address).then((balance: BigNumberish) => parseBalance(balance));
   };
 }
 
-export default function useETHBalance(address, suspense = false) {
+export default function useETHBalance(address: any, suspense = false) {
   const { library, chainId } = useWeb3React();
 
   const shouldFetch = typeof address === "string" && !!library;

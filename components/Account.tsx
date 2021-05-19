@@ -6,7 +6,11 @@ import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import { formatEtherscanLink, shortenHex } from "../util";
 
-const Account = ({ triedToEagerConnect }) => {
+interface Props {
+    triedToEagerConnect: boolean
+}
+
+const Account = (props: Props) => {
   const {
     active,
     error,
@@ -17,7 +21,7 @@ const Account = ({ triedToEagerConnect }) => {
   } = useWeb3React();
 
   // initialize metamask onboarding
-  const onboarding = useRef();
+  const onboarding = useRef<MetaMaskOnboarding>();
 
   useLayoutEffect(() => {
     onboarding.current = new MetaMaskOnboarding();
@@ -38,7 +42,7 @@ const Account = ({ triedToEagerConnect }) => {
     return null;
   }
 
-  if (!triedToEagerConnect) {
+  if (!props.triedToEagerConnect) {
     return null;
   }
 
@@ -81,7 +85,7 @@ const Account = ({ triedToEagerConnect }) => {
   return (
     <a
       {...{
-        href: formatEtherscanLink("Account", [chainId, account]),
+        href: formatEtherscanLink("Account", [chainId!, account]),
         target: "_blank",
         rel: "noopener noreferrer",
       }}

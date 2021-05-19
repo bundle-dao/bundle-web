@@ -1,7 +1,7 @@
 import { useWeb3React } from "@web3-react/core";
 import useSWR from "swr";
 
-function getBlockNumber(library) {
+function getBlockNumber(library: any) {
   return async () => {
     return library.getBlockNumber();
   };
