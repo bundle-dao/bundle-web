@@ -1,9 +1,9 @@
 import { verifyMessage } from "@ethersproject/wallet";
 import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
-import Link from "next/link";
-import Account from "../components/Account";
+import { Layout } from "antd";
 import ETHBalance from "../components/ETHBalance";
+import Navbar from "../components/Navbar";
 import useEagerConnect from "../hooks/useEagerConnect";
 import usePersonalSign, { hexlify } from "../hooks/usePersonalSign";
 
@@ -24,23 +24,15 @@ export default function Home() {
   const isConnected = typeof account === "string" && !!library;
 
   return (
-    <div>
-      <Head>
+    <Layout>
+      <head>
         <title>Next Web3 Boilerplate</title>
         <link rel="icon" href="/favicon.ico" />
-      </Head>
+      </head>
 
-      <header>
-        <nav>
-          <Link href="/">
-            <a>Next Web3 Boilerplate</a>
-          </Link>
+      <Navbar />
 
-          <Account triedToEagerConnect={triedToEagerConnect} />
-        </nav>
-      </header>
-
-      <main>
+      <Layout.Content>
         <h1>
           Welcome to{" "}
           <a href="https://github.com/mirshko/next-web3-boilerplate">
@@ -54,36 +46,7 @@ export default function Home() {
             <button onClick={handleSign}>Personal Sign</button>
           </section>
         )}
-      </main>
-
-      <style jsx>{`
-        nav {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        main {
-          text-align: center;
-        }
-      `}</style>
-
-      <style jsx global>{`
-        body {
-          margin: 0;
-        }
-
-        html {
-          font-family: sans-serif, Apple Color Emoji, Segoe UI Emoji,
-            Segoe UI Symbol, Noto Color Emoji;
-          line-height: 1.5;
-        }
-
-        *,
-        *::after,
-        *::before {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
+      </Layout.Content>
+    </Layout>
   );
 }

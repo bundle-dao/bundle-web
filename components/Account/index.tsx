@@ -2,9 +2,9 @@ import MetaMaskOnboarding from "@metamask/onboarding";
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { injected } from "../connectors";
-import useENSName from "../hooks/useENSName";
-import { formatEtherscanLink, shortenHex } from "../util";
+import { injected } from "../../connectors";
+import useENSName from "../../hooks/useENSName";
+import { formatEtherscanLink, shortenHex } from "../../util";
 
 interface Props {
     triedToEagerConnect: boolean
@@ -52,34 +52,32 @@ const Account = (props: Props) => {
       window?.ethereum ||
       window?.web3;
 
-    return (
-      <div>
-        {hasMetaMaskOrWeb3Available ? (
-          <button
+    return (hasMetaMaskOrWeb3Available ? (
+        <a
             onClick={() => {
-              setConnecting(true);
+                setConnecting(true);
 
-              activate(injected, undefined, true).catch((error) => {
+                activate(injected, undefined, true).catch((error) => {
                 // ignore the error if it's a user rejected request
                 if (error instanceof UserRejectedRequestError) {
-                  setConnecting(false);
+                    setConnecting(false);
                 } else {
-                  setError(error);
+                    setError(error);
                 }
-              });
+                });
             }}
-          >
-            {MetaMaskOnboarding.isMetaMaskInstalled()
-              ? "Connect to MetaMask"
-              : "Connect to Wallet"}
-          </button>
-        ) : (
-          <button onClick={() => onboarding.current?.startOnboarding()}>
+        >
+            {
+                MetaMaskOnboarding.isMetaMaskInstalled()
+                ? "Connect to MetaMask"
+                : "Connect to Wallet"
+            }
+        </a>
+    ) : (
+        <a onClick={() => onboarding.current?.startOnboarding()}>
             Install Metamask
-          </button>
-        )}
-      </div>
-    );
+        </a>
+    ));
   }
 
   return (
