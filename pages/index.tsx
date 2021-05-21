@@ -24,14 +24,6 @@ export default function Home() {
   const isConnected = typeof account === "string" && !!library;
 
   return (
-    <Layout>
-      <head>
-        <title>Next Web3 Boilerplate</title>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-
-      <Navbar />
-
       <Layout.Content>
         <h1>
           Welcome to{" "}
@@ -47,6 +39,5 @@ export default function Home() {
           </section>
         )}
       </Layout.Content>
-    </Layout>
   );
 }

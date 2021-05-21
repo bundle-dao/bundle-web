@@ -1,7 +1,10 @@
 import { ExternalProvider, JsonRpcFetchFunc, Web3Provider } from "@ethersproject/providers";
 import { Web3ReactProvider } from "@web3-react/core";
 import { AppProps } from "next/app";
-import {ThemeProvider} from "styled-components";
+import { ThemeProvider } from "styled-components";
+import { Layout } from "antd";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import 'antd/dist/antd.css';
 
 function getLibrary(provider: ExternalProvider | JsonRpcFetchFunc) {
@@ -77,16 +80,18 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
         h3, h4, h5, h6, a {
             font-family: 'Visuelt';
         }
-
-        *,
-        *::after,
-        *::before {
-          box-sizing: border-box;
-          font-family: 'Visuelt';
-        }
       `}</style>
       <ThemeProvider theme={theme}>
-        <Component {...pageProps} />
+        <Layout>
+            <head>
+                <title>Bundle</title>
+                <link rel="icon" href="/favicon.ico" />
+            </head>
+
+            <Navbar />
+            <Component {...pageProps} />
+            <Footer />
+        </Layout>
       </ThemeProvider>
     </Web3ReactProvider>
   );

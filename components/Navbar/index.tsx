@@ -7,6 +7,7 @@ import { verifyMessage } from "@ethersproject/wallet";
 import { useWeb3React } from "@web3-react/core";
 import useEagerConnect from "../../hooks/useEagerConnect";
 import usePersonalSign from "../../hooks/usePersonalSign";
+import { useRouter } from "next/router";
 
 const Nav = styled(Layout.Header)`
     width: 100vw;
@@ -26,7 +27,7 @@ const NavContainer = styled(Row)`
 `;
 
 const Logo = styled(Image)`
-    margin-top: 3px;
+    margin-top: 10px;
     margin-left: 55px;
 `;
 
@@ -36,6 +37,11 @@ const MenuCol = styled(Col)`
     justify-content: flex-end;
     align-items: center;
     height: 100%;
+`;
+
+const NavMenu = styled(Menu)`
+    display: flex;
+    flex-direction: row;
 `;
 
 const NavMenuItem = styled(Menu.Item)`
@@ -61,6 +67,8 @@ const NavMenuItem = styled(Menu.Item)`
 `;
 
 const Navbar: React.FC = (): React.ReactElement => {
+    const router = useRouter();
+
     const { account, library } = useWeb3React();
 
     const triedToEagerConnect = useEagerConnect();
@@ -81,25 +89,21 @@ const Navbar: React.FC = (): React.ReactElement => {
             <NavContainer justify="center" align="middle">
                 <Col span={4} style={{height: '100%'}}>
                     <Link href="/">
-                        <a><Logo height="55px" width="55px" src="/assets/primary_logo.svg" preview={false} /></a>
+                        <a><Logo height="55px" width="55px" src="/assets/primary_logo_shadow.svg" preview={false} /></a>
                     </Link>
                 </Col>
                 <MenuCol span={20} style={{height: '100%'}}>
-                    <Menu mode="horizontal">
-                        <NavMenuItem>
+                    <NavMenu mode="horizontal" selectedKeys={[router.pathname]}>
+                        <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
                         </NavMenuItem>
-                    </Menu>
-                    <Menu mode="horizontal">
-                        <NavMenuItem>
+                        {/*<NavMenuItem key="/staking">
                             <Link href="/staking"><a>Staking</a></Link>
-                        </NavMenuItem>
-                    </Menu>
-                    <Menu mode="horizontal">
-                        <NavMenuItem>
+                        </NavMenuItem>*/}
+                        <NavMenuItem key="wallet">
                             <Account triedToEagerConnect={triedToEagerConnect}/>
                         </NavMenuItem>
-                    </Menu>
+                    </NavMenu>
                 </MenuCol>
             </NavContainer>
         </Nav>

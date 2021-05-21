@@ -4,7 +4,7 @@ import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { injected } from "../../connectors";
 import useENSName from "../../hooks/useENSName";
-import { formatEtherscanLink, shortenHex } from "../../util";
+import { shortenHex } from "../../util";
 
 interface Props {
     triedToEagerConnect: boolean
@@ -18,6 +18,7 @@ const Account = (props: Props) => {
     chainId,
     account,
     setError,
+    deactivate,
   } = useWeb3React();
 
   // initialize metamask onboarding
@@ -58,12 +59,12 @@ const Account = (props: Props) => {
                 setConnecting(true);
 
                 activate(injected, undefined, true).catch((error) => {
-                // ignore the error if it's a user rejected request
-                if (error instanceof UserRejectedRequestError) {
-                    setConnecting(false);
-                } else {
-                    setError(error);
-                }
+                    // ignore the error if it's a user rejected request
+                    if (error instanceof UserRejectedRequestError) {
+                        setConnecting(false);
+                    } else {
+                        setError(error);
+                    }
                 });
             }}
         >
@@ -81,13 +82,9 @@ const Account = (props: Props) => {
   }
 
   return (
-    <a
-      {...{
-        href: formatEtherscanLink("Account", [chainId!, account]),
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }}
-    >
+    <a onClick={() => {
+        deactivate();
+    }}>
       {ENSName || `${shortenHex(account, 4)}`}
     </a>
   );
