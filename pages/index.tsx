@@ -59,6 +59,12 @@ const BoxHeader = styled.div`
     }
 `;
 
+const BoxMain = styled.img`
+    @media (max-width: 768px) {
+        margin-right: -20% !important;
+    }
+`;
+
 const Landing: React.FC = (): React.ReactElement => {
     return (
         <Layout.Content>
@@ -87,7 +93,7 @@ const Landing: React.FC = (): React.ReactElement => {
                         </div>
                     </LandingCol>
                     <LandingCol xs={24} sm={24} md={12}>
-                        <Image height="100%" src="/assets/box_main.svg" preview={false} />
+                        <BoxMain height="100%" width="100%" src="/assets/box_main.svg" />
                     </LandingCol>
                 </LandingRow>
             </RowContainer>
