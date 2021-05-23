@@ -1,27 +1,27 @@
-import { Col, Image, Row, Menu, Layout } from "antd";
-import styled from "styled-components";
+import { Col, Image, Row, Menu, Layout } from 'antd';
+import styled from 'styled-components';
 import React from 'react';
 
 const Foot = styled(Layout.Footer)`
     width: 100vw;
     height: 60px;
-    background: ${props => props.theme.darkGrey + " 0% 0% no-repeat padding-box"};
+    background: ${(props) => props.theme.darkGrey + ' 0% 0% no-repeat padding-box'};
 
     display: flex;
     justify-content: center;
     align-items: center;
 
     a {
-        color: ${props => props.theme.white};
+        color: ${(props) => props.theme.white};
 
         &:hover {
-            color: ${props => props.theme.grey};
+            color: ${(props) => props.theme.grey};
         }
     }
 `;
 
 const FootContainer = styled(Row)`
-    max-width: ${props => props.theme.maxWidth};
+    max-width: ${(props) => props.theme.maxWidth};
     width: 100%;
     height: 60px;
     overflow: hidden;
@@ -36,7 +36,7 @@ const FlexCol = styled<any>(Col)`
     display: flex;
     flex-direction: column;
     height: 100%;
-    align-items: ${props => props.align};
+    align-items: ${(props) => props.align};
     justify-content: center;
 `;
 
@@ -66,7 +66,7 @@ const Footer: React.FC = (): React.ReactElement => {
                 <FlexCol span={4} align="center">
                     <Logo height="46px" width="55px" src="/assets/dark_logo.svg" preview={false} />
                 </FlexCol>
-                <FlexCol span={10} align="flex-end" style={{height: "69px"}}>
+                <FlexCol span={10} align="flex-end" style={{ height: '69px' }}>
                     <Dots height="172px" width="162px" src="/assets/footer_dots.svg" preview={false} />
                 </FlexCol>
             </FootContainer>

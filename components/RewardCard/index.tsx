@@ -1,25 +1,25 @@
-import { Col, Image, Row, Menu, Layout } from "antd";
-import styled from "styled-components";
+import { Col, Image, Row, Menu, Layout } from 'antd';
+import styled from 'styled-components';
 import React from 'react';
 
 interface Props {
-    image: string,
-    name: string,
-    ticker: string,
-    apy: string,
-    width?: string,
-    cardStyle?: React.CSSProperties
-    imgStyle?: React.CSSProperties
+    image: string;
+    name: string;
+    ticker: string;
+    apy: string;
+    width?: string;
+    cardStyle?: React.CSSProperties;
+    imgStyle?: React.CSSProperties;
 }
 
 interface CardProps {
-    width?: string
+    width?: string;
 }
 
 const Card = styled.div<CardProps>`
-    width: ${props => props.width ? props.width : "100%"};
+    width: ${(props) => (props.width ? props.width : '100%')};
     height: 75px;
-    background-color: ${props => props.theme.spaceGrey};
+    background-color: ${(props) => props.theme.spaceGrey};
     padding-left: 10px;
 
     h1 {
@@ -37,12 +37,12 @@ const Card = styled.div<CardProps>`
         h1 {
             font-size: 17px;
         }
-    
+
         p {
             font-size: 14px;
         }
 
-        background-color: ${props => props.theme.primary};
+        background-color: ${(props) => props.theme.primary};
         padding-left: 20px;
         transition: 0.25s padding-left;
     }
@@ -58,7 +58,7 @@ const Card = styled.div<CardProps>`
 const InternalCard = styled.div`
     width: 100%;
     height: 100%;
-    background-color: ${props => props.theme.white};
+    background-color: ${(props) => props.theme.white};
     border-radius: 5px;
     padding: 10px 20px;
     display: flex;
@@ -75,33 +75,42 @@ const ImageContainer = styled.div`
 `;
 
 const PrimaryHeader = styled.h1`
-    color: ${props => props.theme.primary};
+    color: ${(props) => props.theme.primary};
 `;
 
 const RewardCard: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
         <Card width={props.width} style={props.cardStyle}>
             <InternalCard>
-                <div style={{display: "flex"}}>
+                <div style={{ display: 'flex' }}>
                     <ImageContainer>
                         <img src={props.image} width="100%" height="100%" style={props.imgStyle} />
                     </ImageContainer>
-                    <div style={{display: "flex", flexDirection: "column", justifyContent: "center", paddingLeft: "15px", marginTop: "7px"}}>
-                        <h1>
-                            {props.name}
-                        </h1>
-                        <p>
-                            {props.ticker}
-                        </p>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            paddingLeft: '15px',
+                            marginTop: '7px',
+                        }}
+                    >
+                        <h1>{props.name}</h1>
+                        <p>{props.ticker}</p>
                     </div>
                 </div>
-                <div style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-end", paddingLeft: "15px", marginTop: "7px"}}>
-                    <PrimaryHeader>
-                        {props.apy}
-                    </PrimaryHeader>
-                    <p>
-                        APY
-                    </p>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'flex-end',
+                        paddingLeft: '15px',
+                        marginTop: '7px',
+                    }}
+                >
+                    <PrimaryHeader>{props.apy}</PrimaryHeader>
+                    <p>APY</p>
                 </div>
             </InternalCard>
         </Card>
