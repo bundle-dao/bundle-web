@@ -64,10 +64,6 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
             margin: 0;
         }
 
-        html {
-          line-height: 1.5;
-        }
-
         p {
             font-family: 'Optima';
         }
@@ -75,6 +71,12 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
         h1, h2 {
             font-family: 'Visuelt';
             font-weight: bold;
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: 45px;
+            margin-bottom: 0px;
         }
 
         h3, h4, h5, h6, a {
@@ -82,7 +84,7 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
         }
       `}</style>
       <ThemeProvider theme={theme}>
-        <Layout>
+        <Layout style={{minHeight: "100vh", overflow: "hidden"}}>
             <head>
                 <title>Bundle</title>
                 <link rel="icon" href="/favicon.ico" />

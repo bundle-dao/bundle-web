@@ -1,11 +1,10 @@
 import { Col, Image, Row, Menu, Layout } from "antd";
-import Link from "next/link";
 import styled from "styled-components";
 import React from 'react';
 
 const Foot = styled(Layout.Footer)`
     width: 100vw;
-    height: 69px;
+    height: 60px;
     background: ${props => props.theme.darkGrey + " 0% 0% no-repeat padding-box"};
 
     display: flex;
@@ -24,12 +23,13 @@ const Foot = styled(Layout.Footer)`
 const FootContainer = styled(Row)`
     max-width: ${props => props.theme.maxWidth};
     width: 100%;
-    height: 66px;
+    height: 60px;
     overflow: hidden;
 `;
 
 const Logo = styled(Image)`
     opacity: 0.3;
+    margin-top: -3px;
 `;
 
 const FlexCol = styled<any>(Col)`

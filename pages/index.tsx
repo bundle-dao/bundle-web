@@ -1,43 +1,104 @@
-import { verifyMessage } from "@ethersproject/wallet";
-import { useWeb3React } from "@web3-react/core";
-import Head from "next/head";
-import { Layout } from "antd";
-import ETHBalance from "../components/ETHBalance";
-import Navbar from "../components/Navbar";
-import useEagerConnect from "../hooks/useEagerConnect";
-import usePersonalSign, { hexlify } from "../hooks/usePersonalSign";
+import { Layout, Row, Col, Image } from "antd";
+import styled from "styled-components";
+import React from "react";
+import OutlinedButton from "../components/Button/Outline";
+import RewardCard from "../components/RewardCard";
 
-export default function Home() {
-  const { account, library } = useWeb3React();
+const RowContainer = styled.div`
+    width: 100vw;
+    background: ${props => props.theme.white + " 0% 0% no-repeat padding-box"};
 
-  const triedToEagerConnect = useEagerConnect();
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 100px;
 
-  const sign = usePersonalSign();
+    p {
+        margin-top: 10px;
+    }
+`;
 
-  const handleSign = async () => {
-    const msg = "Next Web3 Boilerplate Rules";
-    const sig = await sign(msg);
-    console.log(sig);
-    console.log("isValid", verifyMessage(msg, sig) === account);
-  };
+const LandingRow = styled(Row)`
+    max-width: ${props => props.theme.maxWidth};
+    width: 100%;
+`;
 
-  const isConnected = typeof account === "string" && !!library;
+const LandingCol = styled(Col)`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+`;
 
+const Landing: React.FC = (): React.ReactElement => {
   return (
       <Layout.Content>
-        <h1>
-          Welcome to{" "}
-          <a href="https://github.com/mirshko/next-web3-boilerplate">
-            Next Web3 Boilerplate
-          </a>
-        </h1>
-
-        {isConnected && (
-          <section>
-            <ETHBalance />
-            <button onClick={handleSign}>Personal Sign</button>
-          </section>
-        )}
+        <RowContainer>
+            <LandingRow>
+                <LandingCol span={12}>
+                    <div>
+                        <h1 style={{position: "relative"}}>
+                            <img src="/assets/bundle.svg" width="275px" style={{position: "absolute", bottom: "0px", left: "50px"}} />
+                            We are a dao.
+                        </h1>
+                        <p style={{maxWidth: "600px"}}>
+                            Bundle is redefining passive asset management within the space. We're a community-governed project 
+                            offering full exposure to crypto risk-management and the DeFi ecosystem through passively managed, non-custodial funds and indices. 
+                        </p>
+                        <div style={{margin: "30px 0px"}}>
+                            <a href="/assets/bundle_whitepaper.pdf">
+                                <OutlinedButton>Discover</OutlinedButton>
+                            </a>
+                        </div>
+                    </div>
+                </LandingCol>
+                <LandingCol span={12}>
+                    <Image height="100%" src="/assets/box_main.svg" preview={false} />
+                </LandingCol>
+            </LandingRow>
+        </RowContainer>
+        <RowContainer>
+            <LandingRow>
+                <LandingCol span={12}>
+                    <div>
+                        <h1 style={{position: "relative"}}>
+                            Earn rewards for active participation
+                        </h1>
+                        <p style={{maxWidth: "600px"}}>
+                            At Bundle, we decided to distribute governance tokens in return for active community participation. With no private investment, presale or ICO, 
+                            all tokens are being distributed fairly and deterministically to individuals actively supporting our mission. 
+                        </p>
+                    </div>
+                </LandingCol>
+                <LandingCol span={1} />
+                <LandingCol span={11}>
+                    <RewardCard image="/assets/logo.svg" name="Bundle" ticker="BDL-BNB" apy="Pending" imgStyle={{marginTop: "3px", marginLeft: "2px"}} cardStyle={{maxWidth: "650px"}} />
+                </LandingCol>
+            </LandingRow>
+        </RowContainer>
+        <RowContainer>
+            <LandingRow>
+                <LandingCol span={12}>
+                    <Image width="100%" src="/assets/box_secondary.svg" preview={false} style={{marginLeft: "-5%"}} />
+                </LandingCol>
+                <LandingCol span={12}>
+                    <div>
+                        <div style={{position: "relative"}}>
+                            <h1 style={{position: "relative"}}>A dao, <br/>that comes in <span style={{color: "white", position: "relative"}}>
+                                <img src="/assets/boxes.svg" width="125px" style={{position: "absolute", right: "3px", bottom: "5px"}} />
+                                <span style={{position: "relative"}}>boxes</span>
+                            </span></h1>
+                        </div>
+                        <p style={{maxWidth: "600px"}}>
+                            Bundle is tearing down traditional financial definitions surrounding funds and indices through our innovative Bundles. We're 
+                            building a protocol that enables users to passively maintain risk-optimal portfolios while still gaining the benefits and returns 
+                            of active DeFi protocol participation.
+                        </p>
+                    </div>
+                </LandingCol>
+            </LandingRow>
+        </RowContainer>
       </Layout.Content>
   );
 }
+
+export default Landing;

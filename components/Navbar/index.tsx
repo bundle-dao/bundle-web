@@ -3,7 +3,6 @@ import Link from "next/link";
 import styled from "styled-components";
 import React from 'react';
 import Account from '../Account';
-import { verifyMessage } from "@ethersproject/wallet";
 import { useWeb3React } from "@web3-react/core";
 import useEagerConnect from "../../hooks/useEagerConnect";
 import usePersonalSign from "../../hooks/usePersonalSign";
@@ -18,6 +17,8 @@ const Nav = styled(Layout.Header)`
     display: flex;
     justify-content: center;
     align-items: center;
+    
+    z-index: 10;
 `;
 
 const NavContainer = styled(Row)`
@@ -74,13 +75,6 @@ const Navbar: React.FC = (): React.ReactElement => {
     const triedToEagerConnect = useEagerConnect();
   
     const sign = usePersonalSign();
-  
-    const handleSign = async () => {
-      const msg = "Next Web3 Boilerplate Rules";
-      const sig = await sign(msg);
-      console.log(sig);
-      console.log("isValid", verifyMessage(msg, sig) === account);
-    };
   
     const isConnected = typeof account === "string" && !!library;
 
