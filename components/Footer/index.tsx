@@ -55,7 +55,7 @@ const Footer: React.FC = (): React.ReactElement => {
     return (
         <Foot>
             <FootContainer align="middle">
-                <FlexCol span={10} align="flex-start">
+                <FlexCol xs={20} sm={20} md={10} align="flex-start">
                     <Row>
                         <FooterLink href="https://discord.gg/QAenj3DHyc">Discord</FooterLink>
                         <FooterLink href="https://twitter.com/bundledao">Twitter</FooterLink>
@@ -66,7 +66,7 @@ const Footer: React.FC = (): React.ReactElement => {
                 <FlexCol span={4} align="center">
                     <Logo height="46px" width="55px" src="/assets/dark_logo.svg" preview={false} />
                 </FlexCol>
-                <FlexCol span={10} align="flex-end" style={{ height: '69px' }}>
+                <FlexCol sm={0} md={10} align="flex-end" style={{ height: '69px' }}>
                     <Dots height="172px" width="162px" src="/assets/footer_dots.svg" preview={false} />
                 </FlexCol>
             </FootContainer>

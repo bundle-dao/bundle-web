@@ -16,6 +16,10 @@ const RowContainer = styled.div`
     p {
         margin-top: 10px;
     }
+
+    @media (max-width: 768px) {
+        padding: 30px;
+    }
 `;
 
 const LandingRow = styled(Row)`
@@ -28,6 +32,31 @@ const LandingCol = styled(Col)`
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    @media (max-width: 768px) {
+        padding-top: 50px;
+    }
+`;
+
+const SecondaryBox = styled(Image)`
+    @media (max-width: 768px) {
+        width: 120% !important;
+        margin-left: -10% !important;
+    }
+`;
+
+const Box = styled.img`
+    @media (max-width: 768px) {
+        display: none;
+    }
+`;
+
+const BoxHeader = styled.div`
+    @media (max-width: 768px) {
+        span {
+            color: rgba(0, 0, 0, 0.85) !important;
+        }
+    }
 `;
 
 const Landing: React.FC = (): React.ReactElement => {
@@ -35,7 +64,7 @@ const Landing: React.FC = (): React.ReactElement => {
         <Layout.Content>
             <RowContainer>
                 <LandingRow>
-                    <LandingCol span={12}>
+                    <LandingCol xs={24} sm={24} md={12}>
                         <div>
                             <h1 style={{ position: 'relative' }}>
                                 <img
@@ -57,14 +86,14 @@ const Landing: React.FC = (): React.ReactElement => {
                             </div>
                         </div>
                     </LandingCol>
-                    <LandingCol span={12}>
+                    <LandingCol xs={24} sm={24} md={12}>
                         <Image height="100%" src="/assets/box_main.svg" preview={false} />
                     </LandingCol>
                 </LandingRow>
             </RowContainer>
             <RowContainer>
                 <LandingRow>
-                    <LandingCol span={12}>
+                    <LandingCol xs={24} sm={24} md={12}>
                         <div>
                             <h1 style={{ position: 'relative', maxWidth: '600px' }}>
                                 Earn rewards for active participation
@@ -76,8 +105,8 @@ const Landing: React.FC = (): React.ReactElement => {
                             </p>
                         </div>
                     </LandingCol>
-                    <LandingCol span={1} />
-                    <LandingCol span={11}>
+                    <LandingCol xs={0} sm={0} md={1}/>
+                    <LandingCol xs={24} sm={24} md={11}>
                         <RewardCard
                             image="/assets/logo.svg"
                             name="Bundle"
@@ -91,22 +120,22 @@ const Landing: React.FC = (): React.ReactElement => {
             </RowContainer>
             <RowContainer>
                 <LandingRow>
-                    <LandingCol span={12}>
-                        <Image
+                    <LandingCol xs={24} sm={24} md={12}>
+                        <SecondaryBox
                             width="100%"
                             src="/assets/box_secondary.svg"
                             preview={false}
                             style={{ marginLeft: '-5%' }}
                         />
                     </LandingCol>
-                    <LandingCol span={12}>
+                    <LandingCol xs={24} sm={24} md={12}>
                         <div>
-                            <div style={{ position: 'relative' }}>
+                            <BoxHeader style={{ position: 'relative' }}>
                                 <h1 style={{ position: 'relative' }}>
                                     A dao, <br />
                                     that comes in{' '}
                                     <span style={{ color: 'white', position: 'relative' }}>
-                                        <img
+                                        <Box
                                             src="/assets/boxes.svg"
                                             width="125px"
                                             style={{ position: 'absolute', right: '3px', bottom: '5px' }}
@@ -114,7 +143,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                         <span style={{ position: 'relative' }}>boxes</span>
                                     </span>
                                 </h1>
-                            </div>
+                            </BoxHeader>
                             <p style={{ maxWidth: '600px' }}>
                                 Bundle is tearing down traditional financial definitions surrounding funds and indices
                                 through our innovative Bundles. We're building a protocol that enables users to
