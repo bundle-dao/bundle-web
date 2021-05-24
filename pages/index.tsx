@@ -88,8 +88,8 @@ const getApy = async (pid: string, setState: React.Dispatch<React.SetStateAction
 const Landing: React.FC = (): React.ReactElement => {
     const minterAddress = getNamedAddress(CHAINID, "Minter");
     const bundleTokenAddress = getNamedAddress(CHAINID, "BundleToken");
-    const minter = useContract(minterAddress, MinterABI);
-    const bundleToken = useContract(bundleTokenAddress, BundleTokenABI);
+    const minter = useContract(minterAddress!, MinterABI);
+    const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI);
     const [bdlApy, setBdlApy] = useState("...");
 
     if (minter != undefined && bundleToken != undefined) {

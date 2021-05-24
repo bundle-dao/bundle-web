@@ -18,6 +18,7 @@ const theme = {
     grey: '#AAAAAA',
     spaceGrey: '#EFEFEF',
     white: '#FFFFFF',
+    primaryDark: '#d15e43',
 };
 
 export default function NextWeb3App({ Component, pageProps }: AppProps) {

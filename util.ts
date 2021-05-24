@@ -21,8 +21,10 @@ const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
     56: {}
 }
 
-export function getNamedAddress(chainId: number, name: string): string {
-    return NAMED_ADDRESSES[chainId][name];
+export function getNamedAddress(chainId: number | undefined, name: string): string | undefined {
+    if (!!chainId) {
+        return NAMED_ADDRESSES[chainId][name];
+    }
 }
 
 export function formatEtherscanLink(type: 'Account' | 'Transaction', data: [number, string]): string {
@@ -38,5 +40,5 @@ export function formatEtherscanLink(type: 'Account' | 'Transaction', data: [numb
     }
 }
 
-export const parseBalance = (balance: BigNumberish, decimals: number = 18, decimalsToDisplay: number = 3): string =>
+export const parseBalance = (balance: BigNumberish, decimals: number = 18, decimalsToDisplay: number = 2): string =>
     Number(formatUnits(balance, decimals)).toFixed(decimalsToDisplay);

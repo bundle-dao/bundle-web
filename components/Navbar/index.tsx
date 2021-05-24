@@ -93,9 +93,9 @@ const Navbar: React.FC = (): React.ReactElement => {
                         <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
                         </NavMenuItem>
-                        {/*<NavMenuItem key="/staking">
+                        <NavMenuItem key="/staking">
                             <Link href="/staking"><a>Staking</a></Link>
-                        </NavMenuItem>*/}
+                        </NavMenuItem>
                         <NavMenuItem key="wallet">
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
