@@ -13,6 +13,18 @@ const ETHERSCAN_PREFIXES: { [index: number]: string } = {
     42: 'kovan.',
 };
 
+const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
+    97: {
+        "BundleToken": "0xc6648498bd95cE55915fC514311D75150fFac132",
+        "Minter": "0xC4838BB05bA7f6a435d7677BeF615C4dAe2Ecc82"
+    },
+    56: {}
+}
+
+export function getNamedAddress(chainId: number, name: string): string {
+    return NAMED_ADDRESSES[chainId][name];
+}
+
 export function formatEtherscanLink(type: 'Account' | 'Transaction', data: [number, string]): string {
     switch (type) {
         case 'Account': {

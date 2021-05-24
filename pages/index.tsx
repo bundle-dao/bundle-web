@@ -1,8 +1,15 @@
 import { Layout, Row, Col, Image } from 'antd';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useState } from 'react';
 import OutlinedButton from '../components/Button/Outline';
 import RewardCard from '../components/RewardCard';
+import { getNamedAddress } from '../util';
+import useContract from '../hooks/useContract';
+import MinterABI from '../contracts/Minter.json';
+import BundleTokenABI from '../contracts/BundleToken.json';
+import { Contract } from '@ethersproject/contracts';
+
+const CHAINID = 97;
 
 const RowContainer = styled.div`
     width: 100vw;
@@ -65,7 +72,30 @@ const BoxMain = styled.img`
     }
 `;
 
+const getApy = async (pid: string, setState: React.Dispatch<React.SetStateAction<string>>, minter: Contract, bundleToken: Contract) => {
+    const pInfo = await minter.poolInfo(pid);
+    const totalAllocPoint = await minter.totalAllocPoint();
+    const tokenAddress = pInfo.stakeToken;
+    const allocPoints = pInfo.allocPoint;
+    const staked = await bundleToken.balanceOf(tokenAddress);
+    const rewardsPerDay = await minter.blockRewards() * 28800;
+    const dpr = rewardsPerDay / staked * allocPoints / totalAllocPoint + 1;
+    let apy = dpr ** 365;
+    
+    setState('' + (apy * 100).toPrecision(2) + '%');
+}
+
 const Landing: React.FC = (): React.ReactElement => {
+    const minterAddress = getNamedAddress(CHAINID, "Minter");
+    const bundleTokenAddress = getNamedAddress(CHAINID, "BundleToken");
+    const minter = useContract(minterAddress, MinterABI);
+    const bundleToken = useContract(bundleTokenAddress, BundleTokenABI);
+    const [bdlApy, setBdlApy] = useState("...");
+
+    if (minter != undefined && bundleToken != undefined) {
+        getApy("1", setBdlApy, minter, bundleToken);
+    }
+
     return (
         <Layout.Content>
             <RowContainer>
@@ -117,7 +147,7 @@ const Landing: React.FC = (): React.ReactElement => {
                             image="/assets/logo.svg"
                             name="Bundle"
                             ticker="BDL-BNB"
-                            apy="Pending"
+                            apy={bdlApy}
                             imgStyle={{ marginTop: '3px', marginLeft: '2px' }}
                             cardStyle={{ maxWidth: '550px' }}
                         />
