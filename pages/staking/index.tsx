@@ -8,6 +8,7 @@ import { getNamedAddress } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
 import { useWeb3React } from '@web3-react/core';
 import useContract from '../../hooks/useContract';
+import StakingCard from '../../components/StakingCard';
 
 const RowContainer = styled.div`
     width: 100vw;
@@ -45,6 +46,7 @@ const StakingCol = styled(Col)`
 const BoxImage = styled.img`
     @media (max-width: 768px) {
         margin-right: -20% !important;
+        display: none;
     }
 `;
 
@@ -55,7 +57,7 @@ const RewardsContainer = styled.div`
     max-width: 450px;
 
     h1 {
-        font-size: 35px;
+        font-size: 30px;
     }
 `;
 
@@ -126,7 +128,7 @@ const StakingContainer = styled.div`
     flex-direction: column;
 
     h1 {
-        font-size: 35px;
+        font-size: 30px;
     }
 `;
 
@@ -158,7 +160,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </RewardRow>
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     <p>
-                                        {(!!balance ? balance : 0.0) + ' BDL'}
+                                        {`${!!balance ? balance : '0.0'} BDL`}
                                     </p>
                                 </div>
                             </RewardCard>
@@ -171,7 +173,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </RewardRow>
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     <p>
-                                        {(!!lockedBalance ? lockedBalance : 0.0) + ' BDL'}
+                                        {`${!!lockedBalance ? lockedBalance : '0.0'} BDL`}
                                     </p>
                                 </div>
                             </RewardCard>
@@ -184,7 +186,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </RewardRow>
                                 <div style={{display: "flex", alignItems: "center"}}>
                                     <p>
-                                        {(!!unlockedBalance ? unlockedBalance : 0.0) + ' BDL'}
+                                        {`${!!unlockedBalance ? unlockedBalance : '0.0'} BDL`}
                                     </p>
                                 </div>
                             </RewardCard>
@@ -197,13 +199,19 @@ const Landing: React.FC = (): React.ReactElement => {
                     </StakingCol>
                 </StakingRow>
             </RowContainer>
-            <RowContainer>
+            <RowContainer style={{paddingTop: "50px"}}>
                 <StakingRow>
                     <StakingCol span={24}>
                         <StakingContainer>
                             <h1>
                                 Available Staking Options
                             </h1>
+                            <StakingCard 
+                                image="/assets/logo.svg"
+                                name="BDL-BNB"
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px' }}
+                                pid="1"
+                            />
                         </StakingContainer>
                     </StakingCol>
                 </StakingRow>

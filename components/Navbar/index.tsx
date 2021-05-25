@@ -53,7 +53,6 @@ const NavMenuItem = styled(Menu.Item)`
     justify-content: center !important;
     align-items: center !important;
     color: ${(props) => props.theme.primary};
-    border-color: ${(props) => props.theme.primary};
     font-size: 16px;
     flex-grow: 0;
 
@@ -78,6 +77,10 @@ const Navbar: React.FC = (): React.ReactElement => {
 
     const isConnected = typeof account === 'string' && !!library;
 
+    const activeStyle = {
+        borderColor: '#E7694C'
+    }
+
     return (
         <Nav>
             <NavContainer justify="center" align="middle">
@@ -93,7 +96,7 @@ const Navbar: React.FC = (): React.ReactElement => {
                         <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
                         </NavMenuItem>
-                        <NavMenuItem key="/staking">
+                        <NavMenuItem key="/staking" style={"/staking" == router.pathname ? activeStyle : {}}>
                             <Link href="/staking"><a>Staking</a></Link>
                         </NavMenuItem>
                         <NavMenuItem key="wallet">
