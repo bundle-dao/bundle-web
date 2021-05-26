@@ -4,7 +4,6 @@ import { parseBalance } from '../util';
 import useKeepSWRDataLiveAsBlocksArrive from './useKeepSWRDataLiveAsBlocksArrive';
 import { Contract } from '@ethersproject/contracts';
 import { useWeb3React } from '@web3-react/core';
-import useERC20Contract from './useERC20Contract';
 
 function getPendingBalance(token: Contract) {
     return async (address: any, _: any) => {

@@ -13,12 +13,17 @@ import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Col, Row, InputNumber } from 'antd';
 import useUnstakedBalance from '../../hooks/useUnstakedBalance';
 import useERC20Contract from '../../hooks/useERC20Contract';
+import OutlinedButton from '../Button/Outline';
+import useApproved from '../../hooks/useApproved';
+import { BigNumber } from '@ethersproject/bignumber';
 
 interface Props {
     image: string;
     name: string;
     imageStyle: React.CSSProperties;
     pid: string;
+    stakeToken: string;
+    account: string | undefined;
 };
 
 interface BlockProps {
@@ -43,15 +48,14 @@ const StakingCardContainer = styled.div`
     }
 `;
 
-const StakingInfoRow = styled.div`
+const StakingInfoRow = styled(Row)`
     width: 100%;
     padding: 10px 20px;
-    display: flex;
-    height: 75px;
+    min-height: 75px;
     cursor: pointer;
 `;
 
-const InfoBlock = styled.div<BlockProps>`
+const InfoBlock = styled(Col)<BlockProps>`
     height: 100%;
     display: flex;
     width: ${props => props.width};
@@ -145,19 +149,20 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const { chainId } = useWeb3React();
     const minterAddress = getNamedAddress(chainId, "Minter");
     const bundleTokenAddress = getNamedAddress(chainId, "BundleToken");
-    const minter = useContract(minterAddress!, MinterABI);
+    const minter = useContract(minterAddress!, MinterABI, true);
     const bundleToken = useContract(bundleTokenAddress, BundleTokenABI, true);
-    const bundleBNB = useERC20Contract("0xdB17f83f32127B1418e2D713635d0B5a53339720");
+    const stakeToken = useERC20Contract(props.stakeToken, true);
 
     getApyApr(props.pid, setApy, setApr, minter, bundleToken);
 
     const stakedBalance = useStakedBalance(minter, props.pid).data;
     const pendingRewards = usePendingRewards(minter, props.pid).data;
-    const unstakedBalance = useUnstakedBalance(bundleBNB).data;
+    const unstakedBalance = useUnstakedBalance(stakeToken).data;
+    const approved = useApproved(stakeToken, minterAddress).data;
 
     return (
         <StakingCardContainer>
-            <StakingInfoRow onClick={() => setExpanded(!expanded)}>
+            <StakingInfoRow onClick={() => setExpanded(!expanded)} align="middle">
                 <InfoBlock width="auto" style={{flexGrow: 1}}>
                     <ImageContainer>
                         <img src={props.image} width="100%" height="100%" style={props.imageStyle} />
@@ -188,7 +193,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             style={{width: "100%", margin: "10px 0px 10px 0px"}}
                             value={toStake}
                             onChange={setToStake}
-                            disabled={unstakedBalance < 0}
+                            disabled={unstakedBalance <= 0 && typeof props.account === 'string'}
                             size="large"
                         />
                     </Col>
@@ -210,6 +215,21 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 <div>100%</div>
                             </Percentage>
                         </PercentageContainer>
+                        <OutlinedButton 
+                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", minWidth: "222px", display: "block"}} 
+                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
+                            onClick={
+                                () => {
+                                    if (approved) {
+                                        minter?.deposit(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toStake));
+                                    } else {
+                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+                                    }
+                                }
+                            }
+                        >
+                            {approved ? 'Deposit' : 'Approve'}
+                        </OutlinedButton>
                     </Col>
                     <Col sm={24} md={6}>
                         <Text style={{margin: "0px"}}>Available: {`${stakedBalance} ${props.name}`}</Text>
@@ -218,7 +238,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             style={{width: "100%", margin: "10px 0px 10px 0px"}}
                             value={toUnstake}
                             onChange={setToUnstake}
-                            disabled={stakedBalance < 0}
+                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
                             size="large"
                         />
                     </Col>
@@ -240,6 +260,21 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 <div>100%</div>
                             </Percentage>
                         </PercentageContainer>
+                        <OutlinedButton 
+                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", minWidth: "222px", display: "block"}} 
+                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
+                            onClick={
+                                () => {
+                                    if (approved) {
+                                        minter?.withdraw(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toUnstake));
+                                    } else {
+                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+                                    }
+                                }
+                            }
+                        >
+                            {approved ? 'Withdraw' : 'Approve'}
+                        </OutlinedButton>
                     </Col>
                 </Row>
             </StakingDisplay>
