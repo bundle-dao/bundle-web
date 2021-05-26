@@ -14,8 +14,10 @@ import { Col, Row, InputNumber } from 'antd';
 import useUnstakedBalance from '../../hooks/useUnstakedBalance';
 import useERC20Contract from '../../hooks/useERC20Contract';
 import OutlinedButton from '../Button/Outline';
+import FilledButton from '../Button/Filled';
 import useApproved from '../../hooks/useApproved';
 import { BigNumber } from '@ethersproject/bignumber';
+import Filled from '../Button/Filled';
 
 interface Props {
     image: string;
@@ -28,7 +30,6 @@ interface Props {
 
 interface BlockProps {
     width: string;
-    minWidth?: string;
 }
 
 interface StakingDisplayProps {
@@ -59,7 +60,6 @@ const InfoBlock = styled(Col)<BlockProps>`
     height: 100%;
     display: flex;
     width: ${props => props.width};
-    min-width: ${props => props.minWidth ? props.minWidth : 'default'};
     align-items: center;
 `;
 
@@ -98,7 +98,6 @@ const PercentageContainer = styled.div`
     border-radius: 6px;
     height: 26px;
     width: 80%;
-    min-width: 222px;
     overflow: hidden;
     margin: 0px auto;
 `;
@@ -186,7 +185,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
             <StakingDisplay expanded={expanded}>
                 <Divider style={{margin: '5px 0px'}} />
                 <Row justify="center" style={{padding: "10px 20px"}}>
-                    <Col sm={24} md={6} flex="">
+                    <Col sm={24} md={5} flex="">
                         <Text style={{margin: "0px"}}>Available: {`${unstakedBalance} ${props.name}`}</Text>
                         <InputNumber 
                             min={0} 
@@ -197,7 +196,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col sm={24} md={6}>
+                    <Col sm={24} md={5}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToStake(unstakedBalance * 0.25)}>
                                 <div>25%</div>
@@ -216,7 +215,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             </Percentage>
                         </PercentageContainer>
                         <OutlinedButton 
-                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", minWidth: "222px", display: "block"}} 
+                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", display: "block"}} 
                             disabled={stakedBalance <= 0 && typeof props.account === 'string'}
                             onClick={
                                 () => {
@@ -231,7 +230,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             {approved ? 'Deposit' : 'Approve'}
                         </OutlinedButton>
                     </Col>
-                    <Col sm={24} md={6}>
+                    <Col sm={24} md={5}>
                         <Text style={{margin: "0px"}}>Available: {`${stakedBalance} ${props.name}`}</Text>
                         <InputNumber 
                             min={0} 
@@ -242,7 +241,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col sm={24} md={6}>
+                    <Col sm={24} md={5}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToUnstake(stakedBalance * 0.25)}>
                                 <div>25%</div>
@@ -261,7 +260,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             </Percentage>
                         </PercentageContainer>
                         <OutlinedButton 
-                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", minWidth: "222px", display: "block"}} 
+                            style={{height: "38px", margin: "12px auto", width: "80%", padding: "0px", display: "block"}} 
                             disabled={stakedBalance <= 0 && typeof props.account === 'string'}
                             onClick={
                                 () => {
@@ -275,6 +274,19 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         >
                             {approved ? 'Withdraw' : 'Approve'}
                         </OutlinedButton>
+                    </Col>
+                    <Col sm={24} md={4} style={{paddingBottom: "12px"}}>
+                        <FilledButton 
+                            style={{height: "100%", margin: "0px auto", width: "80%", padding: "0px", display: "block", minWidth: "150px", minHeight: "38px"}} 
+                            disabled={pendingRewards <= 0}
+                            onClick={
+                                () => {
+                                    minter?.harvest(props.pid);
+                                }
+                            }
+                        >
+                            <span color="white">Harvest</span>
+                        </FilledButton>
                     </Col>
                 </Row>
             </StakingDisplay>

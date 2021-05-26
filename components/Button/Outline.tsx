@@ -5,7 +5,7 @@ interface Props {
     disabled?: boolean;
 }
 
-export default styled(Button)`
+export default styled(Button)<Props>`
     background: ${(props) => props.disabled ? props.theme.spaceGrey : props.theme.white + ' 0% 0% no-repeat padding-box'};
     border: ${(props) => '2px solid ' + (props.disabled ? props.theme.grey : props.theme.primary)} !important;
     border-radius: 6px;
@@ -17,6 +17,6 @@ export default styled(Button)`
 
     &:hover {
         background: ${(props) => props.disabled ? 'default' : props.theme.primary + ' 0% 0% no-repeat padding-box'};
-        color: ${(props) => props.disabled ? 'default' : props.theme.white};
+        color: ${(props) => props.disabled ? 'default' : props.theme.white} !important;
     }
 `;
