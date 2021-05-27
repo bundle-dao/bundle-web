@@ -17,7 +17,8 @@ import OutlinedButton from '../Button/Outline';
 import FilledButton from '../Button/Filled';
 import useApproved from '../../hooks/useApproved';
 import { BigNumber } from '@ethersproject/bignumber';
-import Filled from '../Button/Filled';
+import { TransactionResponse } from '@ethersproject/abstract-provider';
+import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
 
 interface Props {
     image: string;
@@ -27,10 +28,6 @@ interface Props {
     stakeToken: string;
     account: string | undefined;
 };
-
-interface BlockProps {
-    width: string;
-}
 
 interface StakingDisplayProps {
     expanded: boolean;
@@ -56,24 +53,31 @@ const StakingInfoRow = styled(Row)`
     cursor: pointer;
 `;
 
-const InfoBlock = styled(Col)<BlockProps>`
+const InfoBlock = styled(Col)`
     height: 100%;
     display: flex;
-    width: ${props => props.width};
     align-items: center;
 `;
 
 const TextBold = styled.div`
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     font-family: 'Visuelt';
-    margin: 0px 10px 0px 10px;
+    margin: 3px 10px 0px 10px;
+`;
+
+const PrimaryContainer = styled.div`
+    height: 100%;
+    background-color: ${props => props.theme.primary};
+    color: ${props => props.theme.white};
+    border-radius: 3px;
+    margin: 0px 10px;
 `;
 
 const Text = styled.div`
-    font-size: 18px;
+    font-size: 16px;
     font-family: 'Visuelt';
-    margin: 0px 10px 0px 10px;
+    margin: 3px 10px 0px 10px;
 `;
 
 const ImageContainer = styled.div`
@@ -123,6 +127,14 @@ const PercentageDivider = styled.div`
     background-color: ${props => props.theme.grey};
 `;
 
+const HideOnMobile = styled.div`
+    display: block;
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
+`;
+
 const getApyApr = async (pid: string, setApy: React.Dispatch<React.SetStateAction<string>>, setApr: React.Dispatch<React.SetStateAction<string>>, minter: Contract | undefined, bundleToken: Contract | undefined) => {
     if (!!minter && !!bundleToken) {
         const pInfo = await minter.poolInfo(pid);
@@ -161,32 +173,36 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
 
     return (
         <StakingCardContainer>
-            <StakingInfoRow onClick={() => setExpanded(!expanded)} align="middle">
-                <InfoBlock width="auto" style={{flexGrow: 1}}>
+            <StakingInfoRow onClick={() => setExpanded(!expanded)} align="middle" gutter={[0, 10]}>
+                <InfoBlock xs={24} sm={24} md={24} lg={5} style={{flexGrow: 1}}>
                     <ImageContainer>
                         <img src={props.image} width="100%" height="100%" style={props.imageStyle} />
                     </ImageContainer>
                     <TextBold>{props.name}</TextBold>
                 </InfoBlock>
-                <Divider type="vertical" style={{height: "100%"}} />
-                <InfoBlock width="auto" style={{justifyContent: "center", flexGrow: 1}}>
-                    <TextBold>{`APY: ${apy}`}</TextBold>
-                    <TextBold>{`APR: ${apr}`}</TextBold>
+                <HideOnMobile>
+                    <Divider type="vertical" style={{height: "55px"}}/>
+                </HideOnMobile>
+                <InfoBlock xs={24} sm={24} md={24} lg={8} style={{justifyContent: "center", flexGrow: 1}}>
+                    <PrimaryContainer><TextBold>{`APY: ${apy}`}</TextBold></PrimaryContainer>
+                    <PrimaryContainer><TextBold>{`APR: ${apr}`}</TextBold></PrimaryContainer>
                 </InfoBlock>
-                <Divider type="vertical" style={{height: "100%"}} />
-                <InfoBlock width="auto" style={{justifyContent: "center", flexGrow: 2}}>
+                <HideOnMobile>
+                    <Divider type="vertical" style={{height: "55px"}}/>
+                </HideOnMobile>
+                <InfoBlock xs={23} sm={23} md={23} lg={9} style={{justifyContent: "center", flexGrow: 2}}>
                     <Text>{`Staked: ${stakedBalance ? stakedBalance : '0.00'} ${props.name}`}</Text>
                     <Text>{`Rewards: ${pendingRewards ? pendingRewards : '0.00'} BDL`}</Text>
                 </InfoBlock>
-                <InfoBlock width="auto">
+                <InfoBlock xs={1} sm={1} md={1} lg={1}>
                     { expanded ? <CaretUpOutlined style={{marginBottom: '3px'}}/> : <CaretDownOutlined style={{marginBottom: '3px'}}/> }
                 </InfoBlock>
             </StakingInfoRow>
             <StakingDisplay expanded={expanded}>
                 <Divider style={{margin: '5px 0px'}} />
                 <Row justify="center" style={{padding: "10px 20px"}}>
-                    <Col sm={24} md={5} flex="">
-                        <Text style={{margin: "0px"}}>Available: {`${unstakedBalance} ${props.name}`}</Text>
+                    <Col xs={24} sm={24} md={5} flex="">
+                        <Text style={{margin: "0px"}}>Available: {`${unstakedBalance}`}</Text>
                         <InputNumber 
                             min={0} 
                             style={{width: "100%", margin: "10px 0px 10px 0px"}}
@@ -196,7 +212,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col sm={24} md={5}>
+                    <Col xs={24} sm={24} md={5}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToStake(unstakedBalance * 0.25)}>
                                 <div>25%</div>
@@ -220,9 +236,23 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             onClick={
                                 () => {
                                     if (approved) {
-                                        minter?.deposit(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toStake));
+                                        minter?.deposit(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toStake)).then((tx: TransactionResponse) => {
+                                            txMessage(tx);
+                                            return tx.wait(1);
+                                        }).then((tx: TransactionResponse) => {
+                                            depositMessage(tx);
+                                        }).catch((e: any) => {
+                                            errorMessage(e.data.message);
+                                        });
                                     } else {
-                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")).then((tx: TransactionResponse) => {
+                                            txMessage(tx);
+                                            return tx.wait(1);
+                                        }).then((tx: TransactionResponse) => {
+                                            approveMessage(tx);
+                                        }).catch((e: any) => {
+                                            errorMessage(e.data.message);
+                                        });
                                     }
                                 }
                             }
@@ -230,8 +260,8 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             {approved ? 'Deposit' : 'Approve'}
                         </OutlinedButton>
                     </Col>
-                    <Col sm={24} md={5}>
-                        <Text style={{margin: "0px"}}>Available: {`${stakedBalance} ${props.name}`}</Text>
+                    <Col xs={24} sm={24} md={5}>
+                        <Text style={{margin: "0px"}}>Available: {`${stakedBalance}`}</Text>
                         <InputNumber 
                             min={0} 
                             style={{width: "100%", margin: "10px 0px 10px 0px"}}
@@ -241,7 +271,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col sm={24} md={5}>
+                    <Col xs={24} sm={24} md={5}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToUnstake(stakedBalance * 0.25)}>
                                 <div>25%</div>
@@ -265,9 +295,23 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             onClick={
                                 () => {
                                     if (approved) {
-                                        minter?.withdraw(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toUnstake));
+                                        minter?.withdraw(props.account, props.pid, BigNumber.from("1000000000000000000").mul(toUnstake)).then((tx: TransactionResponse) => {
+                                            txMessage(tx);
+                                            return tx.wait(1);
+                                        }).then((tx: TransactionResponse) => {
+                                            withdrawMessage(tx);
+                                        }).catch((e: any) => {
+                                            errorMessage(e.data.message);
+                                        });
                                     } else {
-                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+                                        stakeToken?.approve(minterAddress, BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")).then((tx: TransactionResponse) => {
+                                            txMessage(tx);
+                                            return tx.wait(1);
+                                        }).then((tx: TransactionResponse) => {
+                                            approveMessage(tx);
+                                        }).catch((e: any) => {
+                                            errorMessage(e.data.message);
+                                        });
                                     }
                                 }
                             }
@@ -275,13 +319,20 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             {approved ? 'Withdraw' : 'Approve'}
                         </OutlinedButton>
                     </Col>
-                    <Col sm={24} md={4} style={{paddingBottom: "12px"}}>
+                    <Col xs={24} sm={24} md={4} style={{paddingBottom: "12px"}}>
                         <FilledButton 
-                            style={{height: "100%", margin: "0px auto", width: "80%", padding: "0px", display: "block", minWidth: "150px", minHeight: "38px"}} 
+                            style={{height: "100%", margin: "0px auto", width: "80%", padding: "0px", display: "block", minHeight: "38px"}} 
                             disabled={pendingRewards <= 0}
                             onClick={
                                 () => {
-                                    minter?.harvest(props.pid);
+                                    minter?.harvest(props.pid).then((tx: TransactionResponse) => {
+                                        txMessage(tx);
+                                        return tx.wait(1);
+                                    }).then((tx: TransactionResponse) => {
+                                        harvestMessage(tx);
+                                    }).catch((e: any) => {
+                                        errorMessage(e.data.message);
+                                    });
                                 }
                             }
                         >

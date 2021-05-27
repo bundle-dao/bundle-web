@@ -1,12 +1,12 @@
 import { Col, Image, Row, Menu, Layout } from 'antd';
 import Link from 'next/link';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useState } from 'react';
 import Account from '../Account';
-import { useWeb3React } from '@web3-react/core';
 import useEagerConnect from '../../hooks/useEagerConnect';
-import usePersonalSign from '../../hooks/usePersonalSign';
 import { useRouter } from 'next/router';
+import SubMenu from 'antd/lib/menu/SubMenu';
+import { MenuOutlined } from '@ant-design/icons';
 
 const Nav = styled(Layout.Header)`
     width: 100vw;
@@ -43,6 +43,10 @@ const MenuCol = styled(Col)`
 const NavMenu = styled(Menu)`
     display: flex;
     flex-direction: row;
+
+    @media (max-width: 768px) {
+        visibility: hidden;
+    }
 `;
 
 const NavMenuItem = styled(Menu.Item)`
@@ -66,16 +70,26 @@ const NavMenuItem = styled(Menu.Item)`
     }
 `;
 
+const NavMenuMobile = styled(Menu)`
+    display: flex;
+
+    @media (min-width: 768px) {
+        visibility: hidden;
+        width: 0px;
+    }
+
+    @media (max-width: 768px) {
+        visibility: visible;
+        width: auto;
+    }
+
+    color: ${(props) => props.theme.primary} !important;
+`;
+
 const Navbar: React.FC = (): React.ReactElement => {
     const router = useRouter();
 
-    const { account, library } = useWeb3React();
-
     const triedToEagerConnect = useEagerConnect();
-
-    const sign = usePersonalSign();
-
-    const isConnected = typeof account === 'string' && !!library;
 
     const activeStyle = {
         borderColor: '#E7694C'
@@ -84,14 +98,14 @@ const Navbar: React.FC = (): React.ReactElement => {
     return (
         <Nav>
             <NavContainer justify="center" align="middle">
-                <Col span={4} style={{ height: '100%' }}>
+                <Col xs={10} sm={10} md={4} style={{ height: '100%' }}>
                     <Link href="/">
                         <a>
                             <Logo height="55px" width="55px" src="/assets/primary_logo_shadow.svg" preview={false} />
                         </a>
                     </Link>
                 </Col>
-                <MenuCol span={20} style={{ height: '100%' }}>
+                <MenuCol xs={14} sm={14} md={20} style={{ height: '100%' }}>
                     <NavMenu mode="horizontal" selectedKeys={[router.pathname]}>
                         <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
@@ -103,6 +117,23 @@ const Navbar: React.FC = (): React.ReactElement => {
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
                     </NavMenu>
+                    <NavMenuMobile mode="horizontal">
+                        <SubMenu key="SubMenu" icon={<MenuOutlined />} title="Menu">
+                            <Menu.ItemGroup title="Navigation">
+                                <Menu.Item key="whitepaper">
+                                    <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
+                                </Menu.Item>
+                                <Menu.Item key="/staking" style={"/staking" == router.pathname ? activeStyle : {}}>
+                                    <Link href="/staking"><a>Staking</a></Link>
+                                </Menu.Item>
+                            </Menu.ItemGroup>
+                            <Menu.ItemGroup title="Wallet">
+                                <Menu.Item key="wallet">
+                                    <Account triedToEagerConnect={triedToEagerConnect} />
+                                </Menu.Item>
+                            </Menu.ItemGroup>
+                        </SubMenu>
+                    </NavMenuMobile>
                 </MenuCol>
             </NavContainer>
         </Nav>

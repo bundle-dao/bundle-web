@@ -9,6 +9,8 @@ import BundleTokenABI from '../../contracts/BundleToken.json';
 import { useWeb3React } from '@web3-react/core';
 import useContract from '../../hooks/useContract';
 import StakingCard from '../../components/StakingCard';
+import { TransactionResponse } from '@ethersproject/providers';
+import { errorMessage, txMessage, unlockMessage } from '../../components/Messages';
 
 const RowContainer = styled.div`
     width: 100vw;
@@ -148,7 +150,7 @@ const Landing: React.FC = (): React.ReactElement => {
                     <StakingCol md={12}>
                         <BoxImage height="80%" width="80%" src="/assets/staking_boxes.svg" />
                     </StakingCol>
-                    <StakingCol sm={24} md={12}>
+                    <StakingCol xs={24} sm={24} md={12}>
                         <RewardsContainer>
                             <h1>Rewards</h1>
                             <RewardCard>
@@ -192,7 +194,14 @@ const Landing: React.FC = (): React.ReactElement => {
                             </RewardCard>
                             <ClaimButton enabled={unlockedBalance > 0} onClick={() => {
                                 if (unlockedBalance > 0) {
-                                    bundleToken?.unlock();
+                                    bundleToken?.unlock().then((tx: TransactionResponse) => {
+                                        txMessage(tx);
+                                        return tx.wait(1);
+                                    }).then((tx: TransactionResponse) => {
+                                        unlockMessage(tx);
+                                    }).catch((e: any) => {
+                                        errorMessage(e.data.message);
+                                    });
                                 }
                             }}><p>Claim</p></ClaimButton>
                         </RewardsContainer>

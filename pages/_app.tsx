@@ -87,6 +87,14 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
                 a {
                     font-family: 'Visuelt';
                 }
+
+                img {
+                    -webkit-user-drag: none;
+                    -khtml-user-drag: none;
+                    -moz-user-drag: none;
+                    -o-user-drag: none;
+                    user-drag: none;
+                }
             `}</style>
             <ThemeProvider theme={theme}>
                 <Layout style={{ minHeight: '100vh', overflow: 'hidden' }}>

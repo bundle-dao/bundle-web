@@ -1,0 +1,61 @@
+@import '~antd/lib/style/themes/default.less';
+
+@primary-color: #E7694C;
+@processing-color: #E7694C;
+
+// Color used by default to control hover and active backgrounds and for
+// alert info backgrounds.
+@primary-1: color(~`colorPalette('@{primary-color}', 1) `); // replace tint(@primary-color, 90%)
+@primary-2: color(~`colorPalette('@{primary-color}', 2) `); // replace tint(@primary-color, 80%)
+@primary-3: color(~`colorPalette('@{primary-color}', 3) `); // unused
+@primary-4: color(~`colorPalette('@{primary-color}', 4) `); // unused
+@primary-5: color(
+  ~`colorPalette('@{primary-color}', 5) `
+); // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
+@primary-6: @primary-color; // color used to control the text color of active buttons, don't use, use @primary-color
+@primary-7: color(~`colorPalette('@{primary-color}', 7) `); // replace shade(@primary-color, 5%)
+@primary-8: color(~`colorPalette('@{primary-color}', 8) `); // unused
+@primary-9: color(~`colorPalette('@{primary-color}', 9) `); // unused
+@primary-10: color(~`colorPalette('@{primary-color}', 10) `); // unused
+
+.ant-menu-submenu > .ant-menu-submenu-title {
+    color: @primary-color !important;
+}
+
+.ant-menu:not(.ant-menu-horizontal) > .ant-menu-item-selected, .ant-menu-item-active {
+    background-color: transparent !important;
+    
+    &:focus, &:hover, &:active, &:target, &:visited {
+        background-color: transparent !important;
+    }
+}
+
+.ant-menu-submenu-horizontal:hover,
+.ant-menu-submenu-open,
+.ant-menu-submenu-active,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected,
+.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active {
+    color: @primary-color !important;
+    border-bottom: 2px solid @primary-color !important;
+
+    &:hover, &:active, &:focus, &:target, &:visited {
+        color: @primary-color !important;
+        border-bottom: 2px solid @primary-color !important;
+    }
+}
+
+.ant-menu-item,
+.ant-menu-item-active,
+.ant-menu-item-only-child {
+    a {
+        color: @primary-color !important;
+
+        &:hover, &:active, &:focus {
+            color: @primary-color !important;
+        }
+    }
+}
+
+::selection {
+    background: @primary-5 !important;
+}
