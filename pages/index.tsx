@@ -77,28 +77,33 @@ const BoxMain = styled.img`
     }
 `;
 
-const getApy = async (pid: string, setState: React.Dispatch<React.SetStateAction<string>>, minter: Contract, bundleToken: Contract) => {
+const getApy = async (
+    pid: string,
+    setState: React.Dispatch<React.SetStateAction<string>>,
+    minter: Contract,
+    bundleToken: Contract
+) => {
     const pInfo = await minter.poolInfo(pid);
     const totalAllocPoint = await minter.totalAllocPoint();
     const tokenAddress = pInfo.stakeToken;
     const allocPoints = pInfo.allocPoint;
     const staked = await bundleToken.balanceOf(tokenAddress);
-    const rewardsPerDay = await minter.blockRewards() * 28800;
-    const dpr = rewardsPerDay / staked * allocPoints / totalAllocPoint + 1;
+    const rewardsPerDay = (await minter.blockRewards()) * 28800;
+    const dpr = ((rewardsPerDay / staked) * allocPoints) / totalAllocPoint + 1;
     let apy = dpr ** 365;
-    
+
     setState('' + (apy * 100).toPrecision(2) + '%');
-}
+};
 
 const Landing: React.FC = (): React.ReactElement => {
-    const minterAddress = getNamedAddress(CHAINID, "Minter");
-    const bundleTokenAddress = getNamedAddress(CHAINID, "BundleToken");
+    const minterAddress = getNamedAddress(CHAINID, 'Minter');
+    const bundleTokenAddress = getNamedAddress(CHAINID, 'BundleToken');
     const minter = useContract(minterAddress!, MinterABI);
     const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI);
-    const [bdlApy, setBdlApy] = useState("...");
+    const [bdlApy, setBdlApy] = useState('...');
 
     if (minter != undefined && bundleToken != undefined) {
-        getApy("1", setBdlApy, minter, bundleToken);
+        getApy('1', setBdlApy, minter, bundleToken);
     }
 
     return (
@@ -146,10 +151,10 @@ const Landing: React.FC = (): React.ReactElement => {
                             </p>
                         </div>
                     </LandingCol>
-                    <LandingCol xs={0} sm={0} md={1}/>
+                    <LandingCol xs={0} sm={0} md={1} />
                     <LandingCol xs={24} sm={24} md={11}>
                         <Link href="/staking">
-                            <a style={{width: "85%"}}>
+                            <a style={{ width: '85%' }}>
                                 <RewardCard
                                     image="/assets/logo.svg"
                                     name="Bundle"

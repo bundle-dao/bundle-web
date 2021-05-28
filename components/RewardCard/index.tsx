@@ -31,7 +31,7 @@ const Card = styled.div<CardProps>`
         font-size: 12px;
         margin: 0px !important;
         transition: 0.25s font-size;
-        color: ${props => props.theme.darkGrey};
+        color: ${(props) => props.theme.darkGrey};
     }
 
     &:hover {

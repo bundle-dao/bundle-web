@@ -6,7 +6,7 @@ import { useWeb3React } from '@web3-react/core';
 
 function getApproved(token: Contract) {
     return async (owner: any, spender: any, _: any) => {
-        return token.allowance(owner, spender).then((allowance: BigNumberish) => allowance > 0 ? true : false);
+        return token.allowance(owner, spender).then((allowance: BigNumberish) => (allowance > 0 ? true : false));
     };
 }
 

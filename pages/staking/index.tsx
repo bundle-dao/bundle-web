@@ -70,7 +70,7 @@ const RewardCard = styled.div`
     flex-direction: row;
     justify-content: space-between;
     box-shadow: 0px 1px 8px #29292921;
-    background-color: ${props => props.theme.white};
+    background-color: ${(props) => props.theme.white};
     z-index: 2;
     border-radius: 3px;
 
@@ -79,7 +79,7 @@ const RewardCard = styled.div`
     p {
         margin: 0px 15px 0px 0px;
         font-size: 17px;
-        font-family: 'Visuelt'
+        font-family: 'Visuelt';
     }
 `;
 
@@ -104,14 +104,14 @@ const ClaimButton = styled.div<ClaimButtonProps>`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${props => props.enabled ? props.theme.white : 'default'};
-    background-color: ${props => props.enabled ? props.theme.primary : props.theme.white};
+    color: ${(props) => (props.enabled ? props.theme.white : 'default')};
+    background-color: ${(props) => (props.enabled ? props.theme.primary : props.theme.white)};
     z-index: 1;
     margin-top: -3px;
     border-radius: 3px;
 
     &:hover {
-        background-color: ${props => props.enabled ? props.theme.primaryDark : props.theme.white};
+        background-color: ${(props) => (props.enabled ? props.theme.primaryDark : props.theme.white)};
     }
 
     p {
@@ -136,7 +136,7 @@ const StakingContainer = styled.div`
 
 const Landing: React.FC = (): React.ReactElement => {
     const { account, chainId } = useWeb3React();
-    const bundleTokenAddress = getNamedAddress(chainId, "BundleToken");
+    const bundleTokenAddress = getNamedAddress(chainId, 'BundleToken');
     const bundleToken = useContract(bundleTokenAddress, BundleTokenABI, true);
 
     const balance = useBalance(bundleToken).data;
@@ -155,67 +155,68 @@ const Landing: React.FC = (): React.ReactElement => {
                             <h1>Rewards</h1>
                             <RewardCard>
                                 <RewardRow>
-                                    <img height="100%" src="/assets/wallet.png"/>
+                                    <img height="100%" src="/assets/wallet.png" />
                                     <p>
                                         Bundle <br /> Balance
                                     </p>
                                 </RewardRow>
-                                <div style={{display: "flex", alignItems: "center"}}>
-                                    <p>
-                                        {`${!!balance ? balance : '0.0'} BDL`}
-                                    </p>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <p>{`${!!balance ? balance : '0.0'} BDL`}</p>
                                 </div>
                             </RewardCard>
                             <RewardCard>
                                 <RewardRow>
-                                    <img height="100%" src="/assets/lock-closed.png"/>
+                                    <img height="100%" src="/assets/lock-closed.png" />
                                     <p>
                                         Locked <br /> Rewards
                                     </p>
                                 </RewardRow>
-                                <div style={{display: "flex", alignItems: "center"}}>
-                                    <p>
-                                        {`${!!lockedBalance ? lockedBalance : '0.0'} BDL`}
-                                    </p>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <p>{`${!!lockedBalance ? lockedBalance : '0.0'} BDL`}</p>
                                 </div>
                             </RewardCard>
-                            <RewardCard style={{marginBottom: "0px"}}>
+                            <RewardCard style={{ marginBottom: '0px' }}>
                                 <RewardRow>
-                                    <img height="100%" src="/assets/lock-open.png"/>
+                                    <img height="100%" src="/assets/lock-open.png" />
                                     <p>
                                         Unlocked <br /> Rewards
                                     </p>
                                 </RewardRow>
-                                <div style={{display: "flex", alignItems: "center"}}>
-                                    <p>
-                                        {`${!!unlockedBalance ? unlockedBalance : '0.0'} BDL`}
-                                    </p>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <p>{`${!!unlockedBalance ? unlockedBalance : '0.0'} BDL`}</p>
                                 </div>
                             </RewardCard>
-                            <ClaimButton enabled={unlockedBalance > 0} onClick={() => {
-                                if (unlockedBalance > 0) {
-                                    bundleToken?.unlock().then((tx: TransactionResponse) => {
-                                        txMessage(tx);
-                                        return tx.wait(1);
-                                    }).then((tx: TransactionResponse) => {
-                                        unlockMessage(tx);
-                                    }).catch((e: any) => {
-                                        errorMessage(e.data.message);
-                                    });
-                                }
-                            }}><p>Claim</p></ClaimButton>
+                            <ClaimButton
+                                enabled={unlockedBalance > 0}
+                                onClick={() => {
+                                    if (unlockedBalance > 0) {
+                                        bundleToken
+                                            ?.unlock()
+                                            .then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionResponse) => {
+                                                unlockMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.data.message);
+                                            });
+                                    }
+                                }}
+                            >
+                                <p>Claim</p>
+                            </ClaimButton>
                         </RewardsContainer>
                     </StakingCol>
                 </StakingRow>
             </RowContainer>
-            <RowContainer style={{paddingTop: "50px"}}>
+            <RowContainer style={{ paddingTop: '50px' }}>
                 <StakingRow>
                     <StakingCol span={24}>
                         <StakingContainer>
-                            <h1>
-                                Available Staking Options
-                            </h1>
-                            <StakingCard 
+                            <h1>Available Staking Options</h1>
+                            <StakingCard
                                 image="/assets/logo.svg"
                                 name="BDL-BNB"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px' }}

@@ -106,8 +106,8 @@ const Navbar: React.FC = (): React.ReactElement => {
     const triedToEagerConnect = useEagerConnect();
 
     const activeStyle = {
-        borderColor: '#E7694C'
-    }
+        borderColor: '#E7694C',
+    };
 
     return (
         <Nav>
@@ -124,17 +124,17 @@ const Navbar: React.FC = (): React.ReactElement => {
                         <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
                         </NavMenuItem>
-                        <NavMenuItem key="/staking" style={"/staking" == router.pathname ? activeStyle : {}}>
-                            <Link href="/staking"><a>Staking</a></Link>
+                        <NavMenuItem key="/staking" style={'/staking' == router.pathname ? activeStyle : {}}>
+                            <Link href="/staking">
+                                <a>Staking</a>
+                            </Link>
                         </NavMenuItem>
                         <NavMenuItem key="wallet">
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
                     </NavMenu>
                     <a href="" target="_blank" rel="noopener noreferrer">
-                        <OutlineButton style={{marginLeft: "20px"}}>
-                            Buy BDL
-                        </OutlineButton>
+                        <OutlineButton style={{ marginLeft: '20px' }}>Buy BDL</OutlineButton>
                     </a>
                 </MenuCol>
                 <NavMenuCol xs={14} sm={14} md={0} style={{ height: '100%' }}>
@@ -142,15 +142,19 @@ const Navbar: React.FC = (): React.ReactElement => {
                         <SubMenu key="SubMenu" icon={<MenuOutlined />} title="Menu">
                             <Menu.ItemGroup title="Bundle">
                                 <Menu.Item key="bdl">
-                                    <Link href="/staking"><a>Buy BDL</a></Link>
+                                    <Link href="/staking">
+                                        <a>Buy BDL</a>
+                                    </Link>
                                 </Menu.Item>
                             </Menu.ItemGroup>
                             <Menu.ItemGroup title="Navigation">
                                 <Menu.Item key="whitepaper">
                                     <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
                                 </Menu.Item>
-                                <Menu.Item key="/staking" style={"/staking" == router.pathname ? activeStyle : {}}>
-                                    <Link href="/staking"><a>Staking</a></Link>
+                                <Menu.Item key="/staking" style={'/staking' == router.pathname ? activeStyle : {}}>
+                                    <Link href="/staking">
+                                        <a>Staking</a>
+                                    </Link>
                                 </Menu.Item>
                             </Menu.ItemGroup>
                             <Menu.ItemGroup title="Wallet">

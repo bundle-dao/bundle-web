@@ -15,11 +15,11 @@ const ETHERSCAN_PREFIXES: { [index: number]: string } = {
 
 const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
     97: {
-        "BundleToken": "0xc6648498bd95cE55915fC514311D75150fFac132",
-        "Minter": "0xC4838BB05bA7f6a435d7677BeF615C4dAe2Ecc82"
+        BundleToken: '0xc6648498bd95cE55915fC514311D75150fFac132',
+        Minter: '0xC4838BB05bA7f6a435d7677BeF615C4dAe2Ecc82',
     },
-    56: {}
-}
+    56: {},
+};
 
 export function getNamedAddress(chainId: number | undefined, name: string): string | undefined {
     if (!!chainId) {

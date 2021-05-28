@@ -1,7 +1,7 @@
 @import '~antd/lib/style/themes/default.less';
 
-@primary-color: #E7694C;
-@processing-color: #E7694C;
+@primary-color: #e7694c;
+@processing-color: #e7694c;
 
 // Color used by default to control hover and active backgrounds and for
 // alert info backgrounds.
@@ -10,7 +10,7 @@
 @primary-3: color(~`colorPalette('@{primary-color}', 3) `); // unused
 @primary-4: color(~`colorPalette('@{primary-color}', 4) `); // unused
 @primary-5: color(
-  ~`colorPalette('@{primary-color}', 5) `
+    ~`colorPalette('@{primary-color}', 5) `
 ); // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
 @primary-6: @primary-color; // color used to control the text color of active buttons, don't use, use @primary-color
 @primary-7: color(~`colorPalette('@{primary-color}', 7) `); // replace shade(@primary-color, 5%)
@@ -22,10 +22,15 @@
     color: @primary-color !important;
 }
 
-.ant-menu:not(.ant-menu-horizontal) > .ant-menu-item-selected, .ant-menu-item-active {
+.ant-menu:not(.ant-menu-horizontal) > .ant-menu-item-selected,
+.ant-menu-item-active {
     background-color: transparent !important;
-    
-    &:focus, &:hover, &:active, &:target, &:visited {
+
+    &:focus,
+    &:hover,
+    &:active,
+    &:target,
+    &:visited {
         background-color: transparent !important;
     }
 }
@@ -38,7 +43,11 @@
     color: @primary-color !important;
     border-bottom: 2px solid @primary-color !important;
 
-    &:hover, &:active, &:focus, &:target, &:visited {
+    &:hover,
+    &:active,
+    &:focus,
+    &:target,
+    &:visited {
         color: @primary-color !important;
         border-bottom: 2px solid @primary-color !important;
     }
@@ -50,7 +59,9 @@
     a {
         color: @primary-color !important;
 
-        &:hover, &:active, &:focus {
+        &:hover,
+        &:active,
+        &:focus {
             color: @primary-color !important;
         }
     }

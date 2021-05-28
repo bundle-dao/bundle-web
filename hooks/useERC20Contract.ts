@@ -1,5 +1,4 @@
-
-import useContract from "./useContract";
+import useContract from './useContract';
 import ERC20ABI from '../contracts/ERC20.json';
 
 export default function useERC20Contract(tokenAddress: string, withSigner = false) {
