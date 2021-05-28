@@ -103,7 +103,7 @@ const Landing: React.FC = (): React.ReactElement => {
     const [bdlApy, setBdlApy] = useState('...');
 
     if (minter != undefined && bundleToken != undefined) {
-        getApy('1', setBdlApy, minter, bundleToken);
+        getApy('0', setBdlApy, minter, bundleToken);
     }
 
     return (

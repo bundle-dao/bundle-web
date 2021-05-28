@@ -220,7 +220,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 image="/assets/logo.svg"
                                 name="BDL-BNB"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px' }}
-                                pid="1"
+                                pid="0"
                                 stakeToken="0x0000000000000000000000000000000000000000"
                                 disabled={true}
                                 account={account!}
