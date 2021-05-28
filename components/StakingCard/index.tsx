@@ -27,10 +27,15 @@ interface Props {
     pid: string;
     stakeToken: string;
     account: string | undefined;
+    disabled?: boolean;
 }
 
 interface StakingDisplayProps {
     expanded: boolean;
+}
+
+interface Disableable {
+    disabled?: boolean;
 }
 
 const StakingCardContainer = styled.div`
@@ -66,10 +71,10 @@ const TextBold = styled.div`
     margin: 3px 10px 0px 10px;
 `;
 
-const PrimaryContainer = styled.div`
+const PrimaryContainer = styled.div<Disableable>`
     height: 100%;
-    background-color: ${(props) => props.theme.primary};
-    color: ${(props) => props.theme.white};
+    background-color: ${(props) => props.disabled ? props.theme.spaceGrey : props.theme.primary};
+    color: ${(props) => props.disabled ? 'default' : props.theme.white};
     border-radius: 3px;
     margin: 0px 10px;
 `;
@@ -190,10 +195,10 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <Divider type="vertical" style={{ height: '55px' }} />
                 </HideOnMobile>
                 <InfoBlock xs={24} sm={24} md={24} lg={8} style={{ justifyContent: 'center', flexGrow: 1 }}>
-                    <PrimaryContainer>
+                    <PrimaryContainer disabled={props.disabled}>
                         <TextBold>{`APY: ${apy}`}</TextBold>
                     </PrimaryContainer>
-                    <PrimaryContainer>
+                    <PrimaryContainer disabled={props.disabled}>
                         <TextBold>{`APR: ${apr}`}</TextBold>
                     </PrimaryContainer>
                 </InfoBlock>
@@ -216,13 +221,13 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                 <Divider style={{ margin: '5px 0px' }} />
                 <Row justify="center" style={{ padding: '10px 20px' }}>
                     <Col xs={24} sm={24} md={5} flex="">
-                        <Text style={{ margin: '0px' }}>Available: {`${unstakedBalance}`}</Text>
+                        <Text style={{ margin: '0px' }}>Available: {`${unstakedBalance || '0.00'}`}</Text>
                         <InputNumber
                             min={0}
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
                             value={toStake}
                             onChange={setToStake}
-                            disabled={unstakedBalance <= 0 && typeof props.account === 'string'}
+                            disabled={props.disabled || (unstakedBalance <= 0 && typeof props.account === 'string')}
                             size="large"
                         />
                     </Col>
@@ -252,7 +257,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
+                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
                             onClick={() => {
                                 if (approved) {
                                     minter
@@ -296,13 +301,13 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         </OutlinedButton>
                     </Col>
                     <Col xs={24} sm={24} md={5}>
-                        <Text style={{ margin: '0px' }}>Available: {`${stakedBalance}`}</Text>
+                        <Text style={{ margin: '0px' }}>Available: {`${stakedBalance || '0.00'}`}</Text>
                         <InputNumber
                             min={0}
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
                             value={toUnstake}
                             onChange={setToUnstake}
-                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
+                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
                             size="large"
                         />
                     </Col>
@@ -332,7 +337,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={stakedBalance <= 0 && typeof props.account === 'string'}
+                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
                             onClick={() => {
                                 if (approved) {
                                     minter
@@ -385,7 +390,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 display: 'block',
                                 minHeight: '38px',
                             }}
-                            disabled={pendingRewards <= 0}
+                            disabled={props.disabled || pendingRewards <= 0}
                             onClick={() => {
                                 minter
                                     ?.harvest(props.pid)

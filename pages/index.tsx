@@ -10,7 +10,7 @@ import BundleTokenABI from '../contracts/BundleToken.json';
 import { Contract } from '@ethersproject/contracts';
 import Link from 'next/link';
 
-const CHAINID = 97;
+const CHAINID = 56;
 
 interface RowContainerProps {
     dark?: boolean;

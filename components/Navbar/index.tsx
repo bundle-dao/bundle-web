@@ -133,7 +133,7 @@ const Navbar: React.FC = (): React.ReactElement => {
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
                     </NavMenu>
-                    <a href="" target="_blank" rel="noopener noreferrer">
+                    <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0xF2cf0682C416D64CBADACD9B017dc115D53BD06e" target="_blank" rel="noopener noreferrer">
                         <OutlineButton style={{ marginLeft: '20px' }}>Buy BDL</OutlineButton>
                     </a>
                 </MenuCol>

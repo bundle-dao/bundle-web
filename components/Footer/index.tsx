@@ -63,7 +63,7 @@ const Footer: React.FC = (): React.ReactElement => {
                         <FooterLink href="https://github.com/bundle-dao">Github</FooterLink>
                     </Row>
                 </FlexCol>
-                <FlexCol sm={0} align="center">
+                <FlexCol sm={0} md={4} align="center">
                     <Logo height="46px" width="55px" src="/assets/dark_logo.svg" preview={false} />
                 </FlexCol>
                 <FlexCol sm={0} md={10} align="flex-end" style={{ height: '69px' }}>
