@@ -121,7 +121,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 We are a dao.
                             </h1>
                             <p style={{ maxWidth: '600px' }}>
-                                Bundle is redefining passive asset management within the space. We're a
+                                Bundle is redefining passive asset management. We're a
                                 community-governed project offering full exposure to crypto risk-management and the DeFi
                                 ecosystem through passively managed, non-custodial funds and indices.
                             </p>
