@@ -8,10 +8,15 @@ import useContract from '../hooks/useContract';
 import MinterABI from '../contracts/Minter.json';
 import BundleTokenABI from '../contracts/BundleToken.json';
 import { Contract } from '@ethersproject/contracts';
+import Link from 'next/link';
 
 const CHAINID = 97;
 
-const RowContainer = styled.div`
+interface RowContainerProps {
+    dark?: boolean;
+}
+
+const RowContainer = styled.div<RowContainerProps>`
     width: 100vw;
     background: ${(props) => props.theme.white + ' 0% 0% no-repeat padding-box'};
 
@@ -98,7 +103,7 @@ const Landing: React.FC = (): React.ReactElement => {
 
     return (
         <Layout.Content>
-            <RowContainer>
+            <RowContainer dark={true}>
                 <LandingRow>
                     <LandingCol xs={24} sm={24} md={12}>
                         <div>
@@ -143,14 +148,19 @@ const Landing: React.FC = (): React.ReactElement => {
                     </LandingCol>
                     <LandingCol xs={0} sm={0} md={1}/>
                     <LandingCol xs={24} sm={24} md={11}>
-                        <RewardCard
-                            image="/assets/logo.svg"
-                            name="Bundle"
-                            ticker="BDL-BNB"
-                            apy={bdlApy}
-                            imgStyle={{ marginTop: '3px', marginLeft: '2px' }}
-                            cardStyle={{ maxWidth: '550px' }}
-                        />
+                        <Link href="/staking">
+                            <a style={{width: "85%"}}>
+                                <RewardCard
+                                    image="/assets/logo.svg"
+                                    name="Bundle"
+                                    ticker="BDL-BNB"
+                                    apy={bdlApy}
+                                    width="100%"
+                                    imgStyle={{ marginTop: '3px', marginLeft: '2px' }}
+                                    cardStyle={{ maxWidth: '550px' }}
+                                />
+                            </a>
+                        </Link>
                     </LandingCol>
                 </LandingRow>
             </RowContainer>

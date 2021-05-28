@@ -1,12 +1,13 @@
 import { Col, Image, Row, Menu, Layout } from 'antd';
 import Link from 'next/link';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React from 'react';
 import Account from '../Account';
 import useEagerConnect from '../../hooks/useEagerConnect';
 import { useRouter } from 'next/router';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import { MenuOutlined } from '@ant-design/icons';
+import OutlineButton from '../Button/Outline';
 
 const Nav = styled(Layout.Header)`
     width: 100vw;
@@ -38,6 +39,17 @@ const MenuCol = styled(Col)`
     justify-content: flex-end;
     align-items: center;
     height: 100%;
+    padding-bottom: 3px;
+
+    @media (max-width: 768px) {
+        visibility: hidden;
+        width: 0px;
+    }
+
+    @media (min-width: 768px) {
+        visibility: visible;
+        width: auto;
+    }
 `;
 
 const NavMenu = styled(Menu)`
@@ -51,8 +63,8 @@ const NavMenu = styled(Menu)`
 
 const NavMenuItem = styled(Menu.Item)`
     height: 100%;
-    padding: 0px 0px 1px 0px !important;
-    margin: 0px 35px 0px 35px !important;
+    padding: 3px 0px 1px 0px !important;
+    margin: 0px 20px 0px 20px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -70,20 +82,22 @@ const NavMenuItem = styled(Menu.Item)`
     }
 `;
 
-const NavMenuMobile = styled(Menu)`
+const NavMenuCol = styled(Col)`
     display: flex;
-
-    @media (min-width: 768px) {
-        visibility: hidden;
-        width: 0px;
-    }
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
 
     @media (max-width: 768px) {
         visibility: visible;
         width: auto;
     }
 
-    color: ${(props) => props.theme.primary} !important;
+    @media (min-width: 768px) {
+        visibility: hidden;
+        width: 0px;
+    }
 `;
 
 const Navbar: React.FC = (): React.ReactElement => {
@@ -105,7 +119,7 @@ const Navbar: React.FC = (): React.ReactElement => {
                         </a>
                     </Link>
                 </Col>
-                <MenuCol xs={14} sm={14} md={20} style={{ height: '100%' }}>
+                <MenuCol xs={0} sm={0} md={20} style={{ height: '100%' }}>
                     <NavMenu mode="horizontal" selectedKeys={[router.pathname]}>
                         <NavMenuItem key="whitepaper">
                             <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
@@ -117,8 +131,20 @@ const Navbar: React.FC = (): React.ReactElement => {
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
                     </NavMenu>
-                    <NavMenuMobile mode="horizontal">
+                    <a href="" target="_blank" rel="noopener noreferrer">
+                        <OutlineButton style={{marginLeft: "20px"}}>
+                            Buy BDL
+                        </OutlineButton>
+                    </a>
+                </MenuCol>
+                <NavMenuCol xs={14} sm={14} md={0} style={{ height: '100%' }}>
+                    <Menu mode="horizontal">
                         <SubMenu key="SubMenu" icon={<MenuOutlined />} title="Menu">
+                            <Menu.ItemGroup title="Bundle">
+                                <Menu.Item key="bdl">
+                                    <Link href="/staking"><a>Buy BDL</a></Link>
+                                </Menu.Item>
+                            </Menu.ItemGroup>
                             <Menu.ItemGroup title="Navigation">
                                 <Menu.Item key="whitepaper">
                                     <a href="/assets/bundle_whitepaper.pdf">Whitepaper</a>
@@ -133,8 +159,8 @@ const Navbar: React.FC = (): React.ReactElement => {
                                 </Menu.Item>
                             </Menu.ItemGroup>
                         </SubMenu>
-                    </NavMenuMobile>
-                </MenuCol>
+                    </Menu>
+                </NavMenuCol>
             </NavContainer>
         </Nav>
     );
