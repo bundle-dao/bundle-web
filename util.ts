@@ -11,8 +11,8 @@ const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
         Minter: '0x8435DF5A52D6Fc955d5e1F4ff28b77e67149C2eB',
     },
     56: {
-        BundleToken: '0xF2cf0682C416D64CBADACD9B017dc115D53BD06e',
-        Minter: '0x26E39affCb4CA333f732D64B10c46589dbD59889',
+        BundleToken: '0x7fF78E1cab9A2710Eb6486Ecbf3D94D125039364',
+        Minter: '0xA54D10C6666172824Da54C0d90BcdE36B6dAbd85',
     },
 };
 

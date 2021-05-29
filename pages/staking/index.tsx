@@ -221,7 +221,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 name="BDL-BNB"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px' }}
                                 pid="0"
-                                stakeToken="0xbe995d96a27234284a2bda3b2f3738b29ea163c3"
+                                stakeToken="0x693e745700D278Bf7e180D3fD94FA1A740807926"
                                 disabled={false}
                                 account={account!}
                             />
