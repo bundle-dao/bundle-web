@@ -315,15 +315,15 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     </Col>
                     <Col xs={24} sm={24} md={5}>
                         <PercentageContainer>
-                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.25))}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.div(4))}>
                                 <div>25%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.5))}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.div(2))}>
                                 <div>50%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.75))}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(3).div(4))}>
                                 <div>75%</div>
                             </Percentage>
                             <PercentageDivider />
