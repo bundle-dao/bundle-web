@@ -1,12 +1,11 @@
 import useSWR from 'swr';
-import { parseBalance } from '../util';
 import useKeepSWRDataLiveAsBlocksArrive from './useKeepSWRDataLiveAsBlocksArrive';
 import { Contract } from '@ethersproject/contracts';
 import { useWeb3React } from '@web3-react/core';
 
 function getStakedBalance(minter: Contract) {
     return async (address: any, pid: string, _: any) => {
-        return minter.userInfo(pid, address).then((data: any) => parseBalance(data.amount));
+        return minter.userInfo(pid, address).then((data: any) => data.amount);
     };
 }
 

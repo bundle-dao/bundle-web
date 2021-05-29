@@ -3,7 +3,7 @@ import Divider from 'antd/lib/divider';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import useContract from '../../hooks/useContract';
-import { getNamedAddress } from '../../util';
+import { getNamedAddress, parseBalance } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
 import MinterABI from '../../contracts/Minter.json';
 import useStakedBalance from '../../hooks/useStakedBalance';
@@ -19,6 +19,7 @@ import useApproved from '../../hooks/useApproved';
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
+import { formatUnits, parseEther } from '@ethersproject/units';
 
 interface Props {
     image: string;
@@ -165,8 +166,8 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const [expanded, setExpanded] = useState(false);
     const [apy, setApy] = useState('...');
     const [apr, setApr] = useState('...');
-    const [toStake, setToStake] = useState(0);
-    const [toUnstake, setToUnstake] = useState(0);
+    const [toStake, setToStake] = useState(BigNumber.from(0));
+    const [toUnstake, setToUnstake] = useState(BigNumber.from(0));
 
     const { chainId } = useWeb3React();
     const minterAddress = getNamedAddress(chainId, 'Minter');
@@ -206,7 +207,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <Divider type="vertical" style={{ height: '55px' }} />
                 </HideOnMobile>
                 <InfoBlock xs={23} sm={23} md={23} lg={9} style={{ justifyContent: 'center', flexGrow: 2 }}>
-                    <Text>{`Staked: ${stakedBalance ? stakedBalance : '0.00'} ${props.name}`}</Text>
+                    <Text>{`Staked: ${stakedBalance ? parseBalance(stakedBalance) : '0.00'} ${props.name}`}</Text>
                     <Text>{`Rewards: ${pendingRewards ? pendingRewards : '0.00'} BDL`}</Text>
                 </InfoBlock>
                 <InfoBlock xs={1} sm={1} md={1} lg={1}>
@@ -221,27 +222,28 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                 <Divider style={{ margin: '5px 0px' }} />
                 <Row justify="center" style={{ padding: '10px 20px' }}>
                     <Col xs={24} sm={24} md={5} flex="">
-                        <Text style={{ margin: '0px' }}>Available: {`${unstakedBalance || '0.00'}`}</Text>
+                        <Text style={{ margin: '0px' }}>Available: {`${parseBalance(unstakedBalance) || '0.00'}`}</Text>
                         <InputNumber
-                            min={0}
+                            stringMode={true}
+                            min={'0'}
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
-                            value={toStake}
-                            onChange={setToStake}
-                            disabled={props.disabled || (unstakedBalance <= 0 && typeof props.account === 'string')}
+                            value={formatUnits(toStake, 18)}
+                            onChange={(newValue) => setToStake(parseEther(newValue))}
+                            disabled={props.disabled || !unstakedBalance || (unstakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
                             size="large"
                         />
                     </Col>
                     <Col xs={24} sm={24} md={5}>
                         <PercentageContainer>
-                            <Percentage onClick={() => setToStake(unstakedBalance * 0.25)}>
+                            <Percentage onClick={() => setToStake(unstakedBalance.div(4))}>
                                 <div>25%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToStake(unstakedBalance * 0.5)}>
+                            <Percentage onClick={() => setToStake(unstakedBalance.div(2))}>
                                 <div>50%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToStake(unstakedBalance * 0.75)}>
+                            <Percentage onClick={() => setToStake(unstakedBalance.mul(3).div(4))}>
                                 <div>75%</div>
                             </Percentage>
                             <PercentageDivider />
@@ -257,14 +259,13 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
+                            disabled={props.disabled || !unstakedBalance || (unstakedBalance <= 0 && typeof props.account === 'string')}
                             onClick={() => {
                                 if (approved) {
                                     minter
                                         ?.deposit(
-                                            props.account,
                                             props.pid,
-                                            BigNumber.from('1000000000000000000').mul(toStake)
+                                            toStake
                                         )
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
@@ -301,27 +302,28 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         </OutlinedButton>
                     </Col>
                     <Col xs={24} sm={24} md={5}>
-                        <Text style={{ margin: '0px' }}>Available: {`${stakedBalance || '0.00'}`}</Text>
+                        <Text style={{ margin: '0px' }}>Available: {`${parseBalance(stakedBalance) || '0.00'}`}</Text>
                         <InputNumber
-                            min={0}
+                            stringMode={true}
+                            min={'0'}
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
-                            value={toUnstake}
-                            onChange={setToUnstake}
-                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
+                            value={formatUnits(toUnstake, 18)}
+                            onChange={(newValue) => setToUnstake(parseEther(newValue))}
+                            disabled={props.disabled || !stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
                             size="large"
                         />
                     </Col>
                     <Col xs={24} sm={24} md={5}>
                         <PercentageContainer>
-                            <Percentage onClick={() => setToUnstake(stakedBalance * 0.25)}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.25))}>
                                 <div>25%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToUnstake(stakedBalance * 0.5)}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.5))}>
                                 <div>50%</div>
                             </Percentage>
                             <PercentageDivider />
-                            <Percentage onClick={() => setToUnstake(stakedBalance * 0.75)}>
+                            <Percentage onClick={() => setToUnstake(stakedBalance.mul(0.75))}>
                                 <div>75%</div>
                             </Percentage>
                             <PercentageDivider />
@@ -337,14 +339,13 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || (stakedBalance <= 0 && typeof props.account === 'string')}
+                            disabled={props.disabled || !stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
                             onClick={() => {
                                 if (approved) {
                                     minter
                                         ?.withdraw(
-                                            props.account,
                                             props.pid,
-                                            BigNumber.from('1000000000000000000').mul(toUnstake)
+                                            toUnstake
                                         )
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
@@ -390,7 +391,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 display: 'block',
                                 minHeight: '38px',
                             }}
-                            disabled={props.disabled || pendingRewards <= 0}
+                            disabled={props.disabled || !pendingRewards || pendingRewards <= 0}
                             onClick={() => {
                                 minter
                                     ?.harvest(props.pid)

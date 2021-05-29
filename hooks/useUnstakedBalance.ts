@@ -1,13 +1,11 @@
-import { BigNumberish } from '@ethersproject/bignumber';
 import useSWR from 'swr';
-import { parseBalance } from '../util';
 import useKeepSWRDataLiveAsBlocksArrive from './useKeepSWRDataLiveAsBlocksArrive';
 import { Contract } from '@ethersproject/contracts';
 import { useWeb3React } from '@web3-react/core';
 
 function getPendingBalance(token: Contract) {
     return async (address: any, _: any) => {
-        return token.balanceOf(address).then((balance: BigNumberish) => parseBalance(balance));
+        return token.balanceOf(address);
     };
 }
 
