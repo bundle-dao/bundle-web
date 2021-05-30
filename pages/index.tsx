@@ -9,6 +9,7 @@ import MinterABI from '../contracts/Minter.json';
 import BundleTokenABI from '../contracts/BundleToken.json';
 import { Contract } from '@ethersproject/contracts';
 import Link from 'next/link';
+import useERC20Contract from '../hooks/useERC20Contract';
 
 const CHAINID = 56;
 
@@ -80,19 +81,23 @@ const BoxMain = styled.img`
 const getApy = async (
     pid: string,
     setState: React.Dispatch<React.SetStateAction<string>>,
-    minter: Contract,
-    bundleToken: Contract
+    minter: Contract | undefined,
+    bundleToken: Contract | undefined,
+    stakeToken: Contract | undefined
 ) => {
-    const pInfo = await minter.poolInfo(pid);
-    const totalAllocPoint = await minter.totalAllocPoint();
-    const tokenAddress = pInfo.stakeToken;
-    const allocPoints = pInfo.allocPoint;
-    const staked = await bundleToken.balanceOf(tokenAddress);
-    const rewardsPerDay = (await minter.blockRewards()) * 28800;
-    const dpr = ((rewardsPerDay / staked) * allocPoints) / totalAllocPoint + 1;
-    let apy = dpr ** 365;
+    if (!!minter && !!bundleToken && !!stakeToken) {
+        const minterAddress = getNamedAddress(CHAINID, 'Minter');
+        const pInfo = await minter.poolInfo(pid);
+        const totalAllocPoint = await minter.totalAllocPoint();
 
-    setState('' + (apy * 100).toPrecision(2) + '%');
+        const ratio = (await stakeToken.balanceOf(minterAddress)) / (await stakeToken.totalSupply());
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)) * ratio * 2;
+        const rewardsPerDay = (await minter.blockRewards()) * 28800;
+        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint;
+        const apy = dpr ** 365;
+
+        setState('' + (apy * 100).toPrecision(2) + '%');
+    }
 };
 
 const Landing: React.FC = (): React.ReactElement => {
@@ -100,10 +105,11 @@ const Landing: React.FC = (): React.ReactElement => {
     const bundleTokenAddress = getNamedAddress(CHAINID, 'BundleToken');
     const minter = useContract(minterAddress!, MinterABI);
     const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI);
+    const stakeToken = useERC20Contract('0x693e745700D278Bf7e180D3fD94FA1A740807926', false);
     const [bdlApy, setBdlApy] = useState('...');
 
     if (minter != undefined && bundleToken != undefined) {
-        getApy('0', setBdlApy, minter, bundleToken);
+        getApy('0', setBdlApy, minter, bundleToken, stakeToken);
     }
 
     return (

@@ -146,14 +146,19 @@ const getApyApr = async (
     setApy: React.Dispatch<React.SetStateAction<string>>,
     setApr: React.Dispatch<React.SetStateAction<string>>,
     minter: Contract | undefined,
-    bundleToken: Contract | undefined
+    bundleToken: Contract | undefined,
+    stakeToken: Contract | undefined,
+    chainId: number | undefined
 ) => {
-    if (!!minter && !!bundleToken) {
+    if (!!minter && !!bundleToken && !!stakeToken && !!chainId) {
+        const minterAddress = getNamedAddress(chainId, 'Minter');
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
-        const staked = await bundleToken.balanceOf(pInfo.stakeToken);
+
+        const ratio = (await stakeToken.balanceOf(minterAddress)) / (await stakeToken.totalSupply());
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)) * ratio * 2;
         const rewardsPerDay = (await minter.blockRewards()) * 28800;
-        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint + 1;
+        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint;
         const apy = dpr ** 365;
         const apr = dpr * 365;
 
@@ -173,10 +178,10 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const minterAddress = getNamedAddress(chainId, 'Minter');
     const bundleTokenAddress = getNamedAddress(chainId, 'BundleToken');
     const minter = useContract(minterAddress!, MinterABI, true);
-    const bundleToken = useContract(bundleTokenAddress, BundleTokenABI, true);
+    const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI, true);
     const stakeToken = useERC20Contract(props.stakeToken, true);
 
-    getApyApr(props.pid, setApy, setApr, minter, bundleToken);
+    getApyApr(props.pid, setApy, setApr, minter, bundleToken, stakeToken, chainId);
 
     const stakedBalance = useStakedBalance(minter, props.pid).data;
     const pendingRewards = usePendingRewards(minter, props.pid).data;

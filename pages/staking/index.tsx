@@ -137,7 +137,7 @@ const StakingContainer = styled.div`
 const Landing: React.FC = (): React.ReactElement => {
     const { account, chainId } = useWeb3React();
     const bundleTokenAddress = getNamedAddress(chainId, 'BundleToken');
-    const bundleToken = useContract(bundleTokenAddress, BundleTokenABI, true);
+    const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI, true);
 
     const balance = useBalance(bundleToken).data;
     const lockedBalance = useLockedBalance(bundleToken).data;
