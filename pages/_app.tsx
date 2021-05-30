@@ -18,6 +18,7 @@ const theme = {
     grey: '#AAAAAA',
     spaceGrey: '#EFEFEF',
     white: '#FFFFFF',
+    primaryDark: '#d15e43',
 };
 
 export default function NextWeb3App({ Component, pageProps }: AppProps) {
@@ -85,6 +86,14 @@ export default function NextWeb3App({ Component, pageProps }: AppProps) {
                 h6,
                 a {
                     font-family: 'Visuelt';
+                }
+
+                img {
+                    -webkit-user-drag: none;
+                    -khtml-user-drag: none;
+                    -moz-user-drag: none;
+                    -o-user-drag: none;
+                    user-drag: none;
                 }
             `}</style>
             <ThemeProvider theme={theme}>

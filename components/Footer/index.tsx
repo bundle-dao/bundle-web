@@ -1,4 +1,4 @@
-import { Col, Image, Row, Menu, Layout } from 'antd';
+import { Col, Image, Row, Layout } from 'antd';
 import styled from 'styled-components';
 import React from 'react';
 
@@ -55,7 +55,7 @@ const Footer: React.FC = (): React.ReactElement => {
     return (
         <Foot>
             <FootContainer align="middle">
-                <FlexCol xs={20} sm={20} md={10} align="flex-start">
+                <FlexCol xs={24} sm={24} md={10} align="flex-start">
                     <Row>
                         <FooterLink href="https://discord.gg/QAenj3DHyc">Discord</FooterLink>
                         <FooterLink href="https://twitter.com/bundledao">Twitter</FooterLink>
@@ -63,7 +63,7 @@ const Footer: React.FC = (): React.ReactElement => {
                         <FooterLink href="https://github.com/bundle-dao">Github</FooterLink>
                     </Row>
                 </FlexCol>
-                <FlexCol span={4} align="center">
+                <FlexCol sm={0} md={4} align="center">
                     <Logo height="46px" width="55px" src="/assets/dark_logo.svg" preview={false} />
                 </FlexCol>
                 <FlexCol sm={0} md={10} align="flex-end" style={{ height: '69px' }}>
