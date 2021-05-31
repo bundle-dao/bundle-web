@@ -23,6 +23,7 @@ import { formatUnits, parseEther } from '@ethersproject/units';
 
 interface Props {
     image: string;
+    imageSecondary?: string;
     name: string;
     imageStyle: React.CSSProperties;
     pid: string;
@@ -87,11 +88,13 @@ const Text = styled.div`
 `;
 
 const ImageContainer = styled.div`
-    width: 60px;
+    width: 55px;
     height: 55px;
     border-radius: 50%;
     box-shadow: 2px 2px 5px #00000012;
     margin-right: 10px;
+    z-index: 2;
+    background-color: ${props => props.theme.white};
 `;
 
 const StakingDisplay = styled.div<StakingDisplayProps>`
@@ -158,7 +161,7 @@ const getApyApr = async (
         const ratio = (await stakeToken.balanceOf(minterAddress)) / (await stakeToken.totalSupply());
         const staked = (await bundleToken.balanceOf(pInfo.stakeToken)) * ratio * 2;
         const rewardsPerDay = (await minter.blockRewards()) * 28800;
-        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint;
+        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint - 1;
         const apy = dpr ** 365;
         const apr = dpr * 365;
 
@@ -193,9 +196,14 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
             <StakingInfoRow onClick={() => setExpanded(!expanded)} align="middle" gutter={[0, 10]}>
                 <InfoBlock xs={24} sm={24} md={24} lg={5} style={{ flexGrow: 1 }}>
                     <ImageContainer>
-                        <img src={props.image} width="100%" height="100%" style={props.imageStyle} />
+                        <img src={props.image} width="55px" height="55px" style={props.imageStyle} />
                     </ImageContainer>
-                    <TextBold>{props.name}</TextBold>
+                    {
+                        props.imageSecondary ? <ImageContainer style={{position: "absolute", left: "30px", zIndex: 1}}>
+                            <img src={props.imageSecondary} height="55px" />
+                        </ImageContainer> : <></>
+                    }
+                    <TextBold style={props.imageSecondary ? {marginLeft: "30px"} : {}}>{props.name}</TextBold>
                 </InfoBlock>
                 <HideOnMobile>
                     <Divider type="vertical" style={{ height: '55px' }} />

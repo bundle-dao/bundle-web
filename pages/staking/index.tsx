@@ -218,8 +218,9 @@ const Landing: React.FC = (): React.ReactElement => {
                             <h1>Available Staking Options</h1>
                             <StakingCard
                                 image="/assets/logo.svg"
+                                imageSecondary="/assets/bnb_icon.png"
                                 name="BDL-BNB"
-                                imageStyle={{ marginTop: '3px', marginLeft: '2px' }}
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
                                 pid="0"
                                 stakeToken="0x693e745700D278Bf7e180D3fD94FA1A740807926"
                                 disabled={false}

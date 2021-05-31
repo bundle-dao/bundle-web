@@ -163,11 +163,12 @@ const Landing: React.FC = (): React.ReactElement => {
                             <a style={{ width: '85%' }}>
                                 <RewardCard
                                     image="/assets/logo.svg"
+                                    imageSecondary="/assets/bnb_icon.png"
                                     name="Bundle"
                                     ticker="BDL-BNB"
                                     apy={bdlApy}
                                     width="100%"
-                                    imgStyle={{ marginTop: '3px', marginLeft: '2px' }}
+                                    imgStyle={{ marginTop: '2px', marginLeft: '2px' }}
                                     cardStyle={{ maxWidth: '550px' }}
                                 />
                             </a>

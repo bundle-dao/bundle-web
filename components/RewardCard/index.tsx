@@ -4,6 +4,7 @@ import React from 'react';
 
 interface Props {
     image: string;
+    imageSecondary?: string;
     name: string;
     ticker: string;
     apy: string;
@@ -73,6 +74,8 @@ const ImageContainer = styled.div`
     height: 50px;
     border-radius: 50%;
     box-shadow: 2px 2px 5px #00000012;
+    z-index: 2;
+    background-color: ${props => props.theme.white};
 `;
 
 const PrimaryHeader = styled.h1`
@@ -85,14 +88,20 @@ const RewardCard: React.FC<Props> = (props: Props): React.ReactElement => {
             <InternalCard>
                 <div style={{ display: 'flex' }}>
                     <ImageContainer>
-                        <img src={props.image} width="100%" height="100%" style={props.imgStyle} />
+                        <img src={props.image} width="50px" height="50px" style={props.imgStyle} />
                     </ImageContainer>
+                    {
+                        props.imageSecondary ? <ImageContainer style={{position: "relative", right: "20px", zIndex: 1}}>
+                            <img src={props.imageSecondary} height="50px" width="50px" />
+                        </ImageContainer> : <></>
+                    }
                     <div
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
                             paddingLeft: '15px',
+                            marginLeft: props.imageSecondary ? '-20px' : '0px',
                             marginTop: '7px',
                         }}
                     >
