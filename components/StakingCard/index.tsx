@@ -203,7 +203,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             <img src={props.imageSecondary} height="55px" />
                         </ImageContainer> : <></>
                     }
-                    <TextBold style={props.imageSecondary ? {marginLeft: "30px"} : {}}>{props.name}</TextBold>
+                    <TextBold style={props.imageSecondary ? {marginLeft: "40px"} : {}}>{props.name}</TextBold>
                 </InfoBlock>
                 <HideOnMobile>
                     <Divider type="vertical" style={{ height: '55px' }} />
