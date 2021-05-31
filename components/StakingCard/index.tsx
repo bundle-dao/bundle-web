@@ -272,7 +272,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || !unstakedBalance || (unstakedBalance <= 0 && typeof props.account === 'string')}
+                            disabled={props.disabled || (approved && (!unstakedBalance || (unstakedBalance <= 0 && typeof props.account === 'string')))}
                             onClick={() => {
                                 if (approved) {
                                     minter
@@ -352,7 +352,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || !stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
+                            disabled={props.disabled || (approved && (!stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')))}
                             onClick={() => {
                                 if (approved) {
                                     minter
