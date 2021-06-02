@@ -3,7 +3,7 @@ import Divider from 'antd/lib/divider';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import useContract from '../../hooks/useContract';
-import { getNamedAddress, parseBalance } from '../../util';
+import { formatNumber, getNamedAddress, parseBalance } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
 import MinterABI from '../../contracts/Minter.json';
 import useStakedBalance from '../../hooks/useStakedBalance';
@@ -158,15 +158,18 @@ const getApyApr = async (
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
 
-        const ratio = (await stakeToken.balanceOf(minterAddress)) / (await stakeToken.totalSupply());
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)) * ratio * 2;
-        const rewardsPerDay = (await minter.blockRewards()) * 28800;
-        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint - 1;
-        const apy = dpr ** 365;
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)).mul(await stakeToken.balanceOf(minterAddress)).mul(2).div(await stakeToken.totalSupply());
+        const rewardsPerDay = (await minter.blockRewards()).mul(28800);
+
+        const stakedFormatted = parseFloat(formatUnits(staked));
+        const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
+
+        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint;
+        const apy = (1 + dpr) ** 365 - 1;
         const apr = dpr * 365;
 
-        setApy(`${(apy * 100).toPrecision(2)}%`);
-        setApr(`${(apr * 100).toPrecision(2)}%`);
+        setApy(`${formatNumber(apy * 100)}%`);
+        setApr(`${formatNumber(apr * 100)}%`);
     }
 };
 

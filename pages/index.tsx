@@ -3,13 +3,14 @@ import styled from 'styled-components';
 import React, { useState } from 'react';
 import OutlinedButton from '../components/Button/Outline';
 import RewardCard from '../components/RewardCard';
-import { getNamedAddress } from '../util';
+import { formatNumber, getNamedAddress } from '../util';
 import useContract from '../hooks/useContract';
 import MinterABI from '../contracts/Minter.json';
 import BundleTokenABI from '../contracts/BundleToken.json';
 import { Contract } from '@ethersproject/contracts';
 import Link from 'next/link';
 import useERC20Contract from '../hooks/useERC20Contract';
+import { formatUnits } from '@ethersproject/units';
 
 const CHAINID = 56;
 
@@ -90,13 +91,16 @@ const getApy = async (
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
 
-        const ratio = (await stakeToken.balanceOf(minterAddress)) / (await stakeToken.totalSupply());
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)) * ratio * 2;
-        const rewardsPerDay = (await minter.blockRewards()) * 28800;
-        const dpr = ((rewardsPerDay / staked) * pInfo.allocPoint) / totalAllocPoint;
-        const apy = dpr ** 365;
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)).mul(await stakeToken.balanceOf(minterAddress)).mul(2).div(await stakeToken.totalSupply());
+        const rewardsPerDay = (await minter.blockRewards()).mul(28800);
 
-        setState('' + (apy * 100).toPrecision(2) + '%');
+        const stakedFormatted = parseFloat(formatUnits(staked));
+        const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
+
+        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
+        const apy = dpr ** 365 - 1;
+
+        setState(`${formatNumber(apy * 100)}%`);
     }
 };
 

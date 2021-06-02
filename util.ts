@@ -16,6 +16,13 @@ const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
     },
 };
 
+const NUMERIC_UNITS: { [index: number]: string } = {
+    1: 'K',
+    2: 'M',
+    3: 'B',
+    4: 'T'
+};
+
 export function getNamedAddress(chainId: number | undefined, name: string): string | undefined {
     if (!!chainId) {
         return NAMED_ADDRESSES[chainId][name];
@@ -27,5 +34,24 @@ export const parseBalance = (balance: BigNumberish, decimals: number = 18, decim
         return Number(formatUnits(balance, decimals)).toFixed(decimalsToDisplay);
     } else {
         return '0.00'
+    }
+}
+
+export const formatNumber = (input: number, precision = 2): string => {
+    let tempInput = input;
+    let count = 0;
+
+    while (tempInput >= 1000 && count < 4) {
+        console.log(tempInput);
+        tempInput /= 1000;
+        count++;
+    }
+
+    console.log(tempInput);
+
+    if (count == 0 || tempInput >= 1000) {
+        return `${parseFloat(input.toPrecision(4)).toFixed(precision)}`;
+    } else {
+        return `${parseFloat(tempInput.toPrecision(4)).toFixed(precision)}${NUMERIC_UNITS[count]}`;
     }
 }
