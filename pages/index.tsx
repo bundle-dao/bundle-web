@@ -97,7 +97,7 @@ const getApy = async (
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
+        const dpr = (rewardsFormatted * 3 / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
         const apy = dpr ** 365 - 1;
 
         setState(`${formatNumber(apy * 100)}%`);
