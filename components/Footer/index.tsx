@@ -61,6 +61,7 @@ const Footer: React.FC = (): React.ReactElement => {
                         <FooterLink href="https://twitter.com/bundledao">Twitter</FooterLink>
                         <FooterLink href="https://bundledao.medium.com/">Medium</FooterLink>
                         <FooterLink href="https://github.com/bundle-dao">Github</FooterLink>
+                        <FooterLink href="/assets/bundle_whitepaper.pdf">Whitepaper</FooterLink>
                     </Row>
                 </FlexCol>
                 <FlexCol sm={0} md={4} align="center">
