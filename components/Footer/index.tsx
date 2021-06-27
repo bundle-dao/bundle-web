@@ -1,4 +1,4 @@
-import { Col, Image, Row, Layout } from 'antd';
+import { Col, Row, Layout } from 'antd';
 import styled from 'styled-components';
 import React from 'react';
 
@@ -25,11 +25,14 @@ const FootContainer = styled(Row)`
     width: 100%;
     height: 60px;
     overflow: hidden;
+    position: relative;
 `;
 
-const Logo = styled(Image)`
+const Logo = styled.img`
     opacity: 0.3;
-    margin-top: -3px;
+    left: 50%;
+    bottom: 7px;
+    position: absolute;
 `;
 
 const FlexCol = styled<any>(Col)`
@@ -40,10 +43,12 @@ const FlexCol = styled<any>(Col)`
     justify-content: center;
 `;
 
-const Dots = styled(Image)`
+const Dots = styled.img`
     transform: matrix(0.84, -0.54, 0.54, 0.84, 0, 0);
     opacity: 0.3;
     margin-right: 55px;
+    position: absolute;
+    right: 25px;
 `;
 
 const FooterLink = styled.a`
@@ -55,7 +60,7 @@ const Footer: React.FC = (): React.ReactElement => {
     return (
         <Foot>
             <FootContainer align="middle">
-                <FlexCol xs={24} sm={24} md={10} align="flex-start">
+                <FlexCol xs={24} sm={24} md={24} align="flex-start">
                     <Row>
                         <FooterLink href="https://discord.gg/QAenj3DHyc">Discord</FooterLink>
                         <FooterLink href="https://twitter.com/bundledao">Twitter</FooterLink>
@@ -64,12 +69,8 @@ const Footer: React.FC = (): React.ReactElement => {
                         <FooterLink href="/assets/bundle_whitepaper.pdf">Whitepaper</FooterLink>
                     </Row>
                 </FlexCol>
-                <FlexCol sm={0} md={4} align="center">
-                    <Logo height="46px" width="55px" src="/assets/dark_logo.svg" preview={false} />
-                </FlexCol>
-                <FlexCol sm={0} md={10} align="flex-end" style={{ height: '69px' }}>
-                    <Dots height="172px" width="162px" src="/assets/footer_dots.svg" preview={false} />
-                </FlexCol>
+                <Logo height="46px" width="55px" src="/assets/dark_logo.svg" />
+                <Dots height="172px" width="162px" src="/assets/footer_dots.svg" />
             </FootContainer>
         </Foot>
     );

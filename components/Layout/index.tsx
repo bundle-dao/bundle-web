@@ -23,13 +23,19 @@ export const Row = styled(ARow)`
     width: 100%;
 `;
 
-export const Col = styled(ACol)`
+interface ColProps {
+    mobilePadding?: string;
+    justify?: string;
+}
+
+export const Col = styled(ACol)<ColProps>`
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: ${ props => props.justify ? props.justify : 'center'};
     align-items: center;
 
     @media (max-width: 768px) {
-        padding-top: 50px;
+        padding: ${ props => props.mobilePadding ? props.mobilePadding : '50px 0px 0px 0px'};
+        justify-content: center;
     }
 `;

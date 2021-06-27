@@ -164,7 +164,7 @@ const getApyApr = async (
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted * 3 / stakedFormatted) * pInfo.allocPoint / totalAllocPoint;
+        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint;
         const apy = (1 + dpr) ** 365 - 1;
         const apr = dpr * 365;
 

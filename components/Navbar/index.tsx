@@ -121,7 +121,7 @@ const Navbar: React.FC = (): React.ReactElement => {
                 </Col>
                 <MenuCol xs={0} sm={0} md={20} style={{ height: '100%' }}>
                     <NavMenu mode="horizontal" selectedKeys={[router.pathname]}>
-                        <NavMenuItem key="funds">
+                        <NavMenuItem key="funds" style={'/funds' == router.pathname ? activeStyle : {}}>
                             <Link href="/funds">
                                 <a>Funds</a>
                             </Link>
@@ -144,13 +144,13 @@ const Navbar: React.FC = (): React.ReactElement => {
                         <SubMenu key="SubMenu" icon={<MenuOutlined />} title="Menu">
                             <Menu.ItemGroup title="Bundle">
                                 <Menu.Item key="bdl">
-                                    <Link href="/staking">
+                                    <Link href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x7ff78e1cab9a2710eb6486ecbf3d94d125039364">
                                         <a>Buy BDL</a>
                                     </Link>
                                 </Menu.Item>
                             </Menu.ItemGroup>
                             <Menu.ItemGroup title="Navigation">
-                                <Menu.Item key="funds">
+                                <Menu.Item key="/funds">
                                     <Link href="/funds">
                                         <a>Funds</a>
                                     </Link>

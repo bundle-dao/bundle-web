@@ -97,7 +97,7 @@ const getApy = async (
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted * 3 / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
+        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
         const apy = dpr ** 365 - 1;
 
         setState(`${formatNumber(apy * 100)}%`);
@@ -167,7 +167,7 @@ const Landing: React.FC = (): React.ReactElement => {
                             <a style={{ width: '85%' }}>
                                 <RewardCard
                                     image="/assets/logo.svg"
-                                    imageSecondary="/assets/bnb_icon.png"
+                                    imageSecondary="/assets/BNB.png"
                                     name="Bundle"
                                     ticker="BDL-BNB"
                                     apy={bdlApy}
