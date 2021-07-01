@@ -72,8 +72,8 @@ const RewardCard = styled.div`
     box-shadow: 0px 1px 8px #29292921;
     background-color: ${(props) => props.theme.white};
     z-index: 2;
-    border-radius: 3px;
-
+    border-radius: 15px;
+    overflow: hidden;
     margin: 10px 0px;
 
     p {
@@ -100,15 +100,15 @@ interface ClaimButtonProps {
 const ClaimButton = styled.div<ClaimButtonProps>`
     cursor: pointer;
     width: 100%;
-    padding: 15px 0px 5px 0px;
+    padding: 35px 0px 5px 0px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: ${(props) => (props.enabled ? props.theme.white : 'default')};
     background-color: ${(props) => (props.enabled ? props.theme.primary : props.theme.white)};
     z-index: 1;
-    margin-top: -3px;
-    border-radius: 3px;
+    margin-top: -23px;
+    border-radius: 15px;
 
     &:hover {
         background-color: ${(props) => (props.enabled ? props.theme.primaryDark : props.theme.white)};

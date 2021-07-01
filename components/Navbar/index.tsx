@@ -135,8 +135,10 @@ const Navbar: React.FC = (): React.ReactElement => {
                             <Account triedToEagerConnect={triedToEagerConnect} />
                         </NavMenuItem>
                     </NavMenu>
-                    <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x7ff78e1cab9a2710eb6486ecbf3d94d125039364" target="_blank" rel="noopener noreferrer">
-                        <OutlineButton style={{ marginLeft: '20px' }}>Buy BDL</OutlineButton>
+                    <a 
+                        href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x7ff78e1cab9a2710eb6486ecbf3d94d125039364" 
+                        target="_blank" rel="noopener noreferrer" style={{height: '100%', display: 'flex', alignItems: 'center'}}>
+                        <OutlineButton style={{ marginLeft: '20px', paddingTop: '13px' }}>Buy BDL</OutlineButton>
                     </a>
                 </MenuCol>
                 <NavMenuCol xs={14} sm={14} md={0} style={{ height: '100%' }}>

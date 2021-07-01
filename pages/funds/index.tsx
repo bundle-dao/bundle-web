@@ -7,10 +7,11 @@ import { getFundByName } from '../../lib/fund';
 
 const FundContainer = styled.div`
     width: 100%;
-    border-radius: 3px;
+    border-radius: 15px;
     background-color: ${(props) => props.theme.white};
     box-shadow: 0px 2px 4px #0000004d;
     margin: 10px 0px;
+    overflow: hidden;
 `;
 
 const Field = styled.span`
@@ -31,7 +32,7 @@ const Landing: React.FC = (): React.ReactElement => {
                         </span>
                     </Col>
                 </Row>
-                <Row>
+                <Row hideOnMobile={true}>
                     <Col xs={5} md={5} style={{alignItems: "flex-start"}}>
                         <Field style={{ paddingLeft: '10px'}}>
                             Name
@@ -59,26 +60,26 @@ const Landing: React.FC = (): React.ReactElement => {
                     </Col>
                 </Row>
                 <Row>
-                    <Col span={24}>
+                    <Col span={24} mobilePadding="0px">
                         <FundContainer>
                             <FundCard
                                 index={0}
                                 price={'1.25'}
-                                fund={getFundByName('TST')}
+                                fund={getFundByName('TEST')!}
                                 priceChange={'+3.65%'}
                                 marketCap={'39,227,502'}
                             />
                             <FundCard
                                 index={1}
                                 price={'1.25'}
-                                fund={getFundByName('TST2')}
+                                fund={getFundByName('TST2')!}
                                 priceChange={'-3.65%'}
                                 marketCap={'39,227,502'}
                             />
                             <FundCard
                                 index={2}
                                 price={'1.25'}
-                                fund={getFundByName('TST3')}
+                                fund={getFundByName('TST3')!}
                                 priceChange={'-3.65%'}
                                 marketCap={'39,227,502'}
                             />

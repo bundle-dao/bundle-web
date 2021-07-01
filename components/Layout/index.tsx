@@ -18,14 +18,22 @@ export const RowContainer = styled.div`
     }
 `;
 
-export const Row = styled(ARow)`
+interface RowProps {
+    hideOnMobile?: boolean;
+}
+
+export const Row = styled(ARow)<RowProps>`
     max-width: ${(props) => props.theme.maxWidth};
     width: 100%;
+    @media (max-width: 768px) {
+        display: ${ props => props.hideOnMobile ? 'none' : 'default'};
+    }
 `;
 
 interface ColProps {
     mobilePadding?: string;
     justify?: string;
+    hideOnMobile?: boolean;
 }
 
 export const Col = styled(ACol)<ColProps>`
@@ -35,7 +43,8 @@ export const Col = styled(ACol)<ColProps>`
     align-items: center;
 
     @media (max-width: 768px) {
-        padding: ${ props => props.mobilePadding ? props.mobilePadding : '50px 0px 0px 0px'};
+        padding: ${ props => props.mobilePadding ? props.mobilePadding : '0px'};
         justify-content: center;
+        display: ${ props => props.hideOnMobile ? 'none' : 'default'};
     }
 `;

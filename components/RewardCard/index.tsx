@@ -51,7 +51,7 @@ const Card = styled.div<CardProps>`
 
     cursor: pointer;
 
-    border-radius: 5px;
+    border-radius: 15px;
     box-shadow: 2px 2px 4px #00000012;
     overflow: hidden;
     transition: 0.25s padding-left;
@@ -61,7 +61,7 @@ const InternalCard = styled.div`
     width: 100%;
     height: 100%;
     background-color: ${(props) => props.theme.white};
-    border-radius: 5px;
+    border-radius: 15px;
     padding: 10px 20px;
     display: flex;
     flex-direction: row;

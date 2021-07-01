@@ -43,7 +43,7 @@ interface Disableable {
 const StakingCardContainer = styled.div`
     width: 100%;
     height: auto;
-    border-radius: 3px;
+    border-radius: 15px;
     background-color: ${(props) => props.theme.white};
     box-shadow: 0px 2px 4px #0000004d;
     margin: 15px 0px;
@@ -77,7 +77,7 @@ const PrimaryContainer = styled.div<Disableable>`
     height: 100%;
     background-color: ${(props) => props.disabled ? props.theme.spaceGrey : props.theme.primary};
     color: ${(props) => props.disabled ? 'default' : props.theme.white};
-    border-radius: 3px;
+    border-radius: 15px;
     margin: 0px 10px;
 `;
 
@@ -108,7 +108,7 @@ const PercentageContainer = styled.div`
     display: flex;
     flex-direction: row;
     border: ${(props) => `1px solid ${props.theme.grey}`};
-    border-radius: 6px;
+    border-radius: 15px;
     height: 26px;
     width: 80%;
     overflow: hidden;

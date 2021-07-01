@@ -62,6 +62,14 @@ const TextBold = styled.div`
     margin: 3px 10px 0px 10px;
 `;
 
+const Field = styled.span`
+    color: ${(props) => props.theme.grey};
+    font-size: 0px;
+    @media (max-width: 768px) {
+        font-size: 12px;
+    }
+`;
+
 const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const assets = [];
     
@@ -84,28 +92,31 @@ const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
         <Link href={`/funds/${props.fund.symbol}`}>
             <CardRow index={props.index}>
-                <Col sm={24} md={5} justify="flex-start" mobilePadding="20px 0px 20px 0px" style={{flexDirection: "row"}}>
+                <Col xs={24} md={5} justify="flex-start" mobilePadding="20px 0px 20px 0px" style={{flexDirection: "row"}}>
                     <img src="/assets/logo.svg" width="40px" height="40px" style={{margin: "0px 5px 0px 20px"}} />
                     <TextBold>
                         {props.fund.name}
                     </TextBold>
                 </Col>
-                <Col sm={24} md={9} mobilePadding="0px 0px 20px 0px" style={{flexDirection: "row"}}>
+                <Col xs={24} md={9} mobilePadding="0px 0px 20px 0px" style={{flexDirection: "row"}} hideOnMobile={true}>
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         { assets }
                     </div>
                 </Col>
-                <Col sm={24} md={3} mobilePadding="0px 0px 20px 0px">
+                <Col xs={8} md={3} mobilePadding="0px 0px 20px 0px">
+                    <Field>24H</Field>
                     <Text style={{color: props.priceChange.startsWith('+') ? "green" : "red"}}>
                         {props.priceChange}
                     </Text>
                 </Col>
-                <Col sm={24} md={4} mobilePadding="0px 0px 20px 0px">
+                <Col xs={8} md={4} mobilePadding="0px 0px 20px 0px">
+                    <Field>Market Cap</Field> 
                     <Text>
                         {`$${props.marketCap}`}
                     </Text>
                 </Col>
-                <Col sm={24} md={3} mobilePadding="0px 0px 20px 0px">
+                <Col xs={8} md={3} mobilePadding="0px 0px 20px 0px">
+                    <Field>Price</Field>
                     <Text>
                         {`$${props.price}`}
                     </Text>
