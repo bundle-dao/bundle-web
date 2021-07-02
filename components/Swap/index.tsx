@@ -3,18 +3,21 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { TransactionResponse } from "@ethersproject/providers";
 import { formatUnits, parseEther } from "@ethersproject/units";
 import { InputNumber } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import useApproved from "../../hooks/useApproved";
 import useERC20Contract from "../../hooks/useERC20Contract";
 import useRawBalance from "../../hooks/useRawBalance";
-import { Asset, ROUTER } from "../../lib/asset";
+import { Asset, getPairAmounts, ROUTER } from "../../lib/asset";
 import { Fund } from "../../lib/fund";
 import { parseBalance } from "../../util";
 import Outline from "../Button/Outline";
 import Card from "../Card";
 import { Col, Row } from "../Layout";
 import { approveMessage, errorMessage, txMessage } from "../Messages";
+import { TradeOptions, Percent, Token, Pair, TokenAmount, InsufficientReservesError, InsufficientInputAmount } from '@pancakeswap/sdk';
+import { useWeb3React } from "@web3-react/core";
+import useToken from "../../hooks/pcs";
 
 interface Props {
     fund: Fund | undefined;
@@ -71,6 +74,7 @@ const BUY = 'BUY';
 const SELL = 'SELL';
 
 const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
+    const { account, chainId, library } = useWeb3React();
     const [selected, setSelected] = useState(BUY);
     const [asset, setAsset] = useState(props.assets[0]);
     const [assetAmount, setAssetAmount] = useState(BigNumber.from(0));
@@ -84,7 +88,27 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const assetApproved = useApproved(assetContract, ROUTER).data;
     const fundApproved = useApproved(fundContract, ROUTER).data;
 
-    const approved = (selected == BUY) ? assetApproved : fundApproved;
+    // PCS data
+    const OPTS: TradeOptions = {
+        allowedSlippage: new Percent('2', '100'),
+        ttl: 10000,
+        recipient: account ? account : '',
+    };
+
+    const token: Token | undefined = useToken(chainId, asset);
+    const fundToken: Token | undefined = useToken(chainId, props.fund);
+    const [pair, setPair] = useState<Pair>();
+    const [basePair, setBasePair] = useState<Pair>();
+
+    useEffect(() => {
+        getPairAmounts(token, fundToken, library, chainId).then((amounts: TokenAmount[]) => {
+            if (token && fundToken && amounts.length == 2) {
+                const pair = new Pair(amounts[0], amounts[1]);
+                setBasePair(new Pair(amounts[0], amounts[1]));
+                setPair(new Pair(amounts[0], amounts[1]));
+            }
+        });
+    }, [token, fundToken, library]);
 
     return (
         <Col span={24} style={{width: '100%', flexGrow: 1}}>
@@ -102,8 +126,29 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                     stringMode={true}
                                     min={'0'}
                                     value={formatUnits(assetAmount, 18)}
-                                    onChange={(value) => setAssetAmount(parseEther(value))}
-                                    disabled={props.disabled || !assetBalance || (assetBalance <= BigNumber.from(0) || !props.account || !props.fund)}
+                                    onChange={(value) => {
+                                        try {
+                                            value = value ? value : '0';
+                                            setAssetAmount(parseEther(value));
+
+                                            if (basePair && selected == BUY) {
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(new TokenAmount(token!, parseEther(value).toString()));
+                                                setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
+                                                setPair(pairOut);
+                                            } else if (basePair && selected == SELL) {
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(new TokenAmount(token!, parseEther(value).toString()));
+                                                setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
+                                                setPair(pairOut);
+                                            } else {
+                                                setFundAmount(parseEther('0'));
+                                            }
+
+                                            setAssetAmount(parseEther(value));
+                                        } catch (e) {
+                                            setFundAmount(parseEther('0'));
+                                        }
+                                    }}
+                                    disabled={props.disabled || !assetBalance || (assetBalance <= BigNumber.from(0) || !props.account || !pair)}
                                     size="large"
                                 />
                                 <Field style={{position: 'absolute', top: '20px', left: '20px'}}>
@@ -127,7 +172,26 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                     stringMode={true}
                                     min={'0'}
                                     value={formatUnits(fundAmount, 18)}
-                                    onChange={(value) => setFundAmount(parseEther(value))}
+                                    onChange={(value) => {
+                                        try {
+                                            value = value ? value : '0';
+                                            setFundAmount(parseEther(value));
+
+                                            if (basePair && selected == SELL) {
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(new TokenAmount(fundToken!, parseEther(value).toString()));
+                                                setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
+                                                setPair(pairOut);
+                                            } else if (basePair && selected == BUY) {
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(new TokenAmount(fundToken!, parseEther(value).toString()));
+                                                setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
+                                                setPair(pairOut);
+                                            } else {
+                                                setAssetAmount(parseEther('0'));
+                                            }
+                                        } catch (e) {
+                                            setAssetAmount(parseEther('0'));
+                                        }
+                                    }}
                                     disabled={props.disabled || !fundBalance || (fundBalance <= BigNumber.from(0) || !props.account || !props.fund)}
                                     size="large"
                                 />
