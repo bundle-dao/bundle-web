@@ -11,7 +11,7 @@ import usePendingRewards from '../../hooks/usePendingRewards';
 import { Contract } from '@ethersproject/contracts';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Col, Row, InputNumber } from 'antd';
-import useUnstakedBalance from '../../hooks/useUnstakedBalance';
+import useRawBalance from '../../hooks/useRawBalance';
 import useERC20Contract from '../../hooks/useERC20Contract';
 import OutlinedButton from '../Button/Outline';
 import FilledButton from '../Button/Filled';
@@ -191,7 +191,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const stakedBalance = useStakedBalance(minter, props.pid).data;
     const pendingRewards = usePendingRewards(minter, props.pid).data;
-    const unstakedBalance = useUnstakedBalance(stakeToken).data;
+    const unstakedBalance = useRawBalance(stakeToken).data;
     const approved = useApproved(stakeToken, minterAddress).data;
 
     return (

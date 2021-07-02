@@ -1,9 +1,13 @@
+import { parseEther } from '@ethersproject/units';
+import { useWeb3React } from '@web3-react/core';
 import { Layout } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import FundCard from '../../components/FundCard';
 import { RowContainer, Row, Col } from '../../components/Layout';
-import { getFundByName } from '../../lib/fund';
+import { Asset, getAsset } from '../../lib/asset';
+import { Fund, getFundByName } from '../../lib/fund';
+import { parseBalance } from '../../util';
 
 const FundContainer = styled.div`
     width: 100%;
@@ -18,7 +22,41 @@ const Field = styled.span`
     color: ${(props) => props.theme.grey};
 `;
 
+const FUNDS = ['TEST', 'TST2', 'TST3'];
+
 const Landing: React.FC = (): React.ReactElement => {
+    const { library } = useWeb3React();
+
+    const funds: Fund[] = [];
+    const [fundAssets, setFundAssets] = useState<Record<string, Asset>>({});
+
+    const setFundAsset = (asset: Asset) => {
+        setFundAssets({...fundAssets, [asset.symbol]: asset})
+    }
+
+    FUNDS.forEach(fund => {
+        funds.push(getFundByName(fund)!);
+    })
+
+    useEffect(() => {
+        funds.forEach(fund => {
+            getAsset(fund.address, library, setFundAsset, true);
+        });
+    }, [library]);
+
+    const fundCards: React.ReactElement[] = [];
+    funds.forEach((fund, index) => {
+        fundCards.push(
+            <FundCard
+                index={index}
+                price={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!) : '0.00'}
+                fund={fund}
+                priceChange={'N/A'}
+                marketCap={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!.mul(fundAssets[fund.symbol].cap!).div(parseEther('1'))) : '0.00'}
+            />
+        );
+    });
+
     return (
         <Layout.Content>
             <RowContainer style={{flexDirection: "column"}}>
@@ -62,27 +100,7 @@ const Landing: React.FC = (): React.ReactElement => {
                 <Row>
                     <Col span={24} mobilePadding="0px">
                         <FundContainer>
-                            <FundCard
-                                index={0}
-                                price={'1.25'}
-                                fund={getFundByName('TEST')!}
-                                priceChange={'+3.65%'}
-                                marketCap={'39,227,502'}
-                            />
-                            <FundCard
-                                index={1}
-                                price={'1.25'}
-                                fund={getFundByName('TST2')!}
-                                priceChange={'-3.65%'}
-                                marketCap={'39,227,502'}
-                            />
-                            <FundCard
-                                index={2}
-                                price={'1.25'}
-                                fund={getFundByName('TST3')!}
-                                priceChange={'-3.65%'}
-                                marketCap={'39,227,502'}
-                            />
+                            { fundCards }
                         </FundContainer>
                     </Col>
                 </Row>

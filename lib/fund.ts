@@ -1,6 +1,7 @@
 import Bundle from '../contracts/Bundle.json';
 import { getAsset, Asset } from "./asset";
 import { Contract } from '@ethersproject/contracts';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export interface Fund {
     name: string;

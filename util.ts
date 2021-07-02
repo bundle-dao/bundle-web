@@ -18,6 +18,10 @@ const NAMED_ADDRESSES: { [index: number]: { [index: string]: string } } = {
     },
 };
 
+export const CHAIN_IDS: (number|undefined)[] = [
+    97, 56
+];
+
 const NUMERIC_UNITS: { [index: number]: string } = {
     1: 'K',
     2: 'M',

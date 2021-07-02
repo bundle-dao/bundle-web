@@ -76,3 +76,7 @@ export const approveMessage = (tx: TransactionResponse) => {
 export const errorMessage = (reason: string) => {
     message.error(<>The submitted transaction has failed for reason: "{reason}"</>, 5);
 };
+
+export const chainErrorMessage = (chainId: number | undefined) => {
+    message.error(<>Chain ID "{chainId ? chainId : 0}" not supported</>, 5)
+};

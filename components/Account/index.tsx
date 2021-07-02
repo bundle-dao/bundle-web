@@ -4,7 +4,8 @@ import { UserRejectedRequestError } from '@web3-react/injected-connector';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { injected } from '../../connectors';
 import useENSName from '../../hooks/useENSName';
-import { shortenHex } from '../../util';
+import { CHAIN_IDS, shortenHex } from '../../util';
+import { chainErrorMessage } from '../Messages';
 
 interface Props {
     triedToEagerConnect: boolean;
@@ -39,7 +40,7 @@ const Account = (props: Props) => {
         return null;
     }
 
-    if (typeof account !== 'string') {
+    if (typeof account !== 'string' || !CHAIN_IDS.includes(chainId)) {
         const hasMetaMaskOrWeb3Available = MetaMaskOnboarding.isMetaMaskInstalled() || window?.ethereum || window?.web3;
 
         return hasMetaMaskOrWeb3Available ? (
@@ -47,7 +48,11 @@ const Account = (props: Props) => {
                 onClick={() => {
                     setConnecting(true);
 
-                    activate(injected, undefined, true).catch((error) => {
+                    activate(injected, undefined, true).then(() => {
+                        if (!CHAIN_IDS.includes(chainId)) {
+                            chainErrorMessage(chainId);
+                        }
+                    }).catch((error) => {
                         // ignore the error if it's a user rejected request
                         if (error instanceof UserRejectedRequestError) {
                             setConnecting(false);

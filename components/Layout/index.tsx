@@ -34,6 +34,7 @@ interface ColProps {
     mobilePadding?: string;
     justify?: string;
     hideOnMobile?: boolean;
+    padding?: string;
 }
 
 export const Col = styled(ACol)<ColProps>`
@@ -41,6 +42,7 @@ export const Col = styled(ACol)<ColProps>`
     flex-direction: column;
     justify-content: ${ props => props.justify ? props.justify : 'center'};
     align-items: center;
+    padding: ${ props => props.padding ? props.padding : '0px'};
 
     @media (max-width: 768px) {
         padding: ${ props => props.mobilePadding ? props.mobilePadding : '0px'};

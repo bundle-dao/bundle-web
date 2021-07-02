@@ -105,7 +105,7 @@ const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
                 </Col>
                 <Col xs={8} md={3} mobilePadding="0px 0px 20px 0px">
                     <Field>24H</Field>
-                    <Text style={{color: props.priceChange.startsWith('+') ? "green" : "red"}}>
+                    <Text>
                         {props.priceChange}
                     </Text>
                 </Col>

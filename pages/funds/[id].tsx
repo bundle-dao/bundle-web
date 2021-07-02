@@ -10,7 +10,7 @@ import Card from '../../components/Card';
 import { useWeb3React } from '@web3-react/core';
 import AssetCard from '../../components/AssetCard';
 import { BigNumber } from '@ethersproject/bignumber';
-import { Asset } from '../../lib/asset';
+import { Asset, getAsset, SWAP_ASSETS } from '../../lib/asset';
 import { parseBalance } from '../../util';
 import { parseEther } from '@ethersproject/units';
 import Swap from '../../components/Swap';
@@ -56,10 +56,11 @@ const MINT = 'MINT';
 const BURN = 'BURN';
 
 const Landing: React.FC = (): React.ReactElement => {
-    const { library } = useWeb3React();
+    const { library, account } = useWeb3React();
     const router = useRouter();
     const [fund, setFund] = useState<Fund>();
     const [assets, setAssets] = useState<Asset[]>([]);
+    const [fundAsset, setFundAsset] = useState<Asset>();
     const [selected, setSelected] = useState(TRADE);
     const selectorOnClick = (target: string) => {
         return () => {
@@ -67,9 +68,6 @@ const Landing: React.FC = (): React.ReactElement => {
         }
     }
 
-    const price = '1.25';
-    const priceChange = '+3.65%';
-    const marketCap = '39,227,502';
     const nav = assets.reduce((a: BigNumber, b: Asset) => a.add(b.amount!.mul(b.price!).div(parseEther('1'))), BigNumber.from(0));
 
     useEffect(() => {
@@ -80,6 +78,7 @@ const Landing: React.FC = (): React.ReactElement => {
 
     useEffect(() => {
         getAssets(fund, library, setAssets);
+        getAsset(fund?.address, library, setFundAsset, true);
     }, [fund, library]);
 
     const assetCards = assets.map(asset => 
@@ -108,15 +107,15 @@ const Landing: React.FC = (): React.ReactElement => {
                             Price
                         </Field>
                         <Text>
-                            { `$${price}` }
+                            { `$${fundAsset ? parseBalance(fundAsset.price!) : '0.00'}` }
                         </Text>
                     </Col>
                     <Col xs={12} md={3} style={{justifyContent: 'flex-end'}} mobilePadding='15px 0px 0px 0px'>
                         <Field>
                             24H
                         </Field>
-                        <Text style={{color: priceChange.startsWith('+') ? "green" : "red"}}>
-                            {priceChange}
+                        <Text>
+                            N/A
                         </Text>
                     </Col>
                     <Col xs={12} md={4} style={{justifyContent: 'flex-end'}} mobilePadding='15px 0px 0px 0px'>
@@ -124,7 +123,7 @@ const Landing: React.FC = (): React.ReactElement => {
                             Market Cap
                         </Field>
                         <Text>
-                            { `$${marketCap}` }
+                            { `$${fundAsset ? parseBalance(fundAsset.price!.mul(fundAsset.cap!).div(parseEther('1'))) : '0.00'}` }
                         </Text>
                     </Col>
                     <Col xs={12} md={3} style={{justifyContent: 'flex-end'}} mobilePadding='15px 0px 0px 0px'>
@@ -139,7 +138,7 @@ const Landing: React.FC = (): React.ReactElement => {
                 <Row>
                     <Col xs={{order: 2, span: 24}} lg={{order: 1, span: 16}} style={{justifyContent: 'flex-start'}}>
                         <Row>
-                            <Col span={24} style={{paddingRight: '15px'}}>
+                            <Col span={24} padding='0px 15px 0px 0px' mobilePadding='0px'>
                                 <Card style={{height: '500px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                                     <RocketOutlined style={{fontSize: '50px', paddingBottom: '25px'}} />
                                     <h2>
@@ -161,7 +160,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                     <Selector onClick={selectorOnClick(BURN)} selected={selected == BURN}>Burn</Selector>
                                 </Card>
                             </Col>
-                            <Swap />
+                            <Swap fund={fund} assets={SWAP_ASSETS} account={account} />
                         </Row>
                     </Col>
                 </Row>

@@ -14,7 +14,7 @@ export default function useApproved(token: Contract | undefined, spender: string
     const { account } = useWeb3React();
     const shouldFetch = typeof account === 'string' && !!token && typeof spender === 'string';
 
-    const result = useSWR(shouldFetch ? [account, spender, 'Approved'] : null, getApproved(token!), {
+    const result = useSWR(shouldFetch ? [account, spender, token, 'Approved'] : null, getApproved(token!), {
         suspense,
     });
 
