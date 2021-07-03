@@ -1,6 +1,6 @@
 import { ArrowDownOutlined } from '@ant-design/icons';
 import { BigNumber } from '@ethersproject/bignumber';
-import { TransactionResponse } from '@ethersproject/providers';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { formatUnits, parseEther } from '@ethersproject/units';
 import { InputNumber } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -292,7 +292,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -311,7 +311,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -330,7 +330,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 txMessage(tx);
                                                 return tx.wait(1);
                                             })
-                                            .then((tx: TransactionResponse) => {
+                                            .then((tx: TransactionReceipt) => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {
@@ -348,7 +348,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 txMessage(tx);
                                                 return tx.wait(1);
                                             })
-                                            .then((tx: TransactionResponse) => {
+                                            .then((tx: TransactionReceipt) => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {

@@ -1,5 +1,5 @@
 import { message } from 'antd';
-import { TransactionResponse } from '@ethersproject/abstract-provider';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
 
 export const txMessage = (tx: TransactionResponse) => {
     const hide = message.loading(
@@ -13,11 +13,11 @@ export const txMessage = (tx: TransactionResponse) => {
     setTimeout(hide, 5000);
 };
 
-export const withdrawMessage = (tx: TransactionResponse) => {
+export const withdrawMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Withdrawal successful, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,
@@ -25,11 +25,11 @@ export const withdrawMessage = (tx: TransactionResponse) => {
     );
 };
 
-export const harvestMessage = (tx: TransactionResponse) => {
+export const harvestMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Rewards have been successfuly harvested, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,
@@ -37,11 +37,11 @@ export const harvestMessage = (tx: TransactionResponse) => {
     );
 };
 
-export const unlockMessage = (tx: TransactionResponse) => {
+export const unlockMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Rewards have been successfully unlocked, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,
@@ -49,11 +49,11 @@ export const unlockMessage = (tx: TransactionResponse) => {
     );
 };
 
-export const depositMessage = (tx: TransactionResponse) => {
+export const depositMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Deposit successful, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,
@@ -61,11 +61,11 @@ export const depositMessage = (tx: TransactionResponse) => {
     );
 };
 
-export const approveMessage = (tx: TransactionResponse) => {
+export const approveMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Token successfully approved, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,
@@ -73,11 +73,11 @@ export const approveMessage = (tx: TransactionResponse) => {
     );
 };
 
-export const swapMessage = (tx: TransactionResponse) => {
+export const swapMessage = (tx: TransactionReceipt) => {
     message.success(
         <>
             Swap completed successfuly, your transaction can be verified{' '}
-            <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
                 here
             </a>
         </>,

@@ -20,6 +20,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
 import { formatUnits, parseEther } from '@ethersproject/units';
+import { TransactionReceipt } from '@ethersproject/providers';
 
 interface Props {
     image: string;
@@ -298,7 +299,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             depositMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -316,7 +317,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -385,7 +386,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             withdrawMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -403,7 +404,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -433,7 +434,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                         txMessage(tx);
                                         return tx.wait(1);
                                     })
-                                    .then((tx: TransactionResponse) => {
+                                    .then((tx: TransactionReceipt) => {
                                         harvestMessage(tx);
                                     })
                                     .catch((e: any) => {
