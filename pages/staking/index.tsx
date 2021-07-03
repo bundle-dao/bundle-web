@@ -9,7 +9,7 @@ import BundleTokenABI from '../../contracts/BundleToken.json';
 import { useWeb3React } from '@web3-react/core';
 import useContract from '../../hooks/useContract';
 import StakingCard from '../../components/StakingCard';
-import { TransactionResponse } from '@ethersproject/providers';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { errorMessage, txMessage, unlockMessage } from '../../components/Messages';
 
 const RowContainer = styled.div`
@@ -196,7 +196,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                                 txMessage(tx);
                                                 return tx.wait(1);
                                             })
-                                            .then((tx: TransactionResponse) => {
+                                            .then((tx: TransactionReceipt) => {
                                                 unlockMessage(tx);
                                             })
                                             .catch((e: any) => {
