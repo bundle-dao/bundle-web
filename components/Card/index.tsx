@@ -9,4 +9,4 @@ const Card = styled.div`
     overflow: hidden;
 `;
 
-export default Card
+export default Card;

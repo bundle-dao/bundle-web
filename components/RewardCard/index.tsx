@@ -75,7 +75,7 @@ const ImageContainer = styled.div`
     border-radius: 50%;
     box-shadow: 2px 2px 5px #00000012;
     z-index: 2;
-    background-color: ${props => props.theme.white};
+    background-color: ${(props) => props.theme.white};
 `;
 
 const PrimaryHeader = styled.h1`
@@ -90,11 +90,13 @@ const RewardCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <ImageContainer>
                         <img src={props.image} width="50px" height="50px" style={props.imgStyle} />
                     </ImageContainer>
-                    {
-                        props.imageSecondary ? <ImageContainer style={{position: "relative", right: "20px", zIndex: 1}}>
+                    {props.imageSecondary ? (
+                        <ImageContainer style={{ position: 'relative', right: '20px', zIndex: 1 }}>
                             <img src={props.imageSecondary} height="50px" width="50px" />
-                        </ImageContainer> : <></>
-                    }
+                        </ImageContainer>
+                    ) : (
+                        <></>
+                    )}
                     <div
                         style={{
                             display: 'flex',

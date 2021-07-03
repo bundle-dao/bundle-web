@@ -31,15 +31,15 @@ const Landing: React.FC = (): React.ReactElement => {
     const [fundAssets, setFundAssets] = useState<Record<string, Asset>>({});
 
     const setFundAsset = (asset: Asset) => {
-        setFundAssets({...fundAssets, [asset.symbol]: asset})
-    }
+        setFundAssets({ ...fundAssets, [asset.symbol]: asset });
+    };
 
-    FUNDS.forEach(fund => {
+    FUNDS.forEach((fund) => {
         funds.push(getFundByName(fund)!);
-    })
+    });
 
     useEffect(() => {
-        funds.forEach(fund => {
+        funds.forEach((fund) => {
             getAsset(fund.address, library, setFundAsset, true);
         });
     }, [library]);
@@ -52,56 +52,46 @@ const Landing: React.FC = (): React.ReactElement => {
                 price={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!) : '0.00'}
                 fund={fund}
                 priceChange={'N/A'}
-                marketCap={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!.mul(fundAssets[fund.symbol].cap!).div(parseEther('1'))) : '0.00'}
+                marketCap={
+                    fundAssets[fund.symbol]
+                        ? parseBalance(
+                              fundAssets[fund.symbol].price!.mul(fundAssets[fund.symbol].cap!).div(parseEther('1'))
+                          )
+                        : '0.00'
+                }
             />
         );
     });
 
     return (
         <Layout.Content>
-            <RowContainer style={{flexDirection: "column"}}>
+            <RowContainer style={{ flexDirection: 'column' }}>
                 <Row>
-                    <Col span={24} style={{alignItems: "flex-start"}}>
-                        <h2 style={{marginBottom: "0px"}}>
-                            Available Bundles
-                        </h2>
-                        <span style={{marginBottom: "30px"}}>
-                            Passively managed, non-custodial crypto-funds.
-                        </span>
+                    <Col span={24} style={{ alignItems: 'flex-start' }}>
+                        <h2 style={{ marginBottom: '0px' }}>Available Bundles</h2>
+                        <span style={{ marginBottom: '30px' }}>Passively managed, non-custodial crypto-funds.</span>
                     </Col>
                 </Row>
                 <Row hideOnMobile={true}>
-                    <Col xs={5} md={5} style={{alignItems: "flex-start"}}>
-                        <Field style={{ paddingLeft: '10px'}}>
-                            Name
-                        </Field>
+                    <Col xs={5} md={5} style={{ alignItems: 'flex-start' }}>
+                        <Field style={{ paddingLeft: '10px' }}>Name</Field>
                     </Col>
                     <Col xs={9} md={9}>
-                        <Field>
-                            Assets
-                        </Field>
+                        <Field>Assets</Field>
                     </Col>
                     <Col xs={3} md={3}>
-                        <Field>
-                            24H
-                        </Field>
+                        <Field>24H</Field>
                     </Col>
                     <Col xs={4} md={4}>
-                        <Field>
-                            Market Cap
-                        </Field>
+                        <Field>Market Cap</Field>
                     </Col>
                     <Col xs={3} md={3}>
-                        <Field>
-                            Price
-                        </Field>
+                        <Field>Price</Field>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={24} mobilePadding="0px">
-                        <FundContainer>
-                            { fundCards }
-                        </FundContainer>
+                        <FundContainer>{fundCards}</FundContainer>
                     </Col>
                 </Row>
             </RowContainer>

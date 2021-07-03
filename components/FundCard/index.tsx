@@ -14,7 +14,7 @@ interface Props {
 
 interface CardProps {
     index: number;
-};
+}
 
 interface AssetProps {
     index: number;
@@ -25,14 +25,14 @@ const ImageContainer = styled.div<AssetProps>`
     height: 40px;
     border-radius: 50%;
     box-shadow: 2px 2px 4px #00000025;
-    margin-left: ${props => props.index == 0 ? '0px' : '-15px'};
-    z-index: ${props => 10 - props.index};
-    background-color: ${props => props.theme.white};
+    margin-left: ${(props) => (props.index == 0 ? '0px' : '-15px')};
+    z-index: ${(props) => 10 - props.index};
+    background-color: ${(props) => props.theme.white};
     overflow: hidden;
 `;
 
 const CardRow = styled(Row)<CardProps>`
-    background-color: ${(props) => props.index % 2 == 0 ? props.theme.white : props.theme.spaceGrey};
+    background-color: ${(props) => (props.index % 2 == 0 ? props.theme.white : props.theme.spaceGrey)};
     min-height: 70px;
     overflow: hidden;
 
@@ -45,7 +45,7 @@ const CardRow = styled(Row)<CardProps>`
     }
 
     * {
-        transition: transform .2s;
+        transition: transform 0.2s;
     }
 `;
 
@@ -72,8 +72,8 @@ const Field = styled.span`
 
 const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const assets = [];
-    
-    for(let i = 0; i < Math.min(props.fund.assets.length, 6); i++) {
+
+    for (let i = 0; i < Math.min(props.fund.assets.length, 6); i++) {
         if (i == 5 && props.fund.assets.length > 6) {
             assets.push(
                 <ImageContainer key={i} index={i}>
@@ -92,34 +92,36 @@ const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
         <Link href={`/funds/${props.fund.symbol}`}>
             <CardRow index={props.index}>
-                <Col xs={24} md={5} justify="flex-start" mobilePadding="20px 0px 20px 0px" style={{flexDirection: "row"}}>
-                    <img src="/assets/logo.svg" width="40px" height="40px" style={{margin: "0px 5px 0px 20px"}} />
-                    <TextBold>
-                        {props.fund.name}
-                    </TextBold>
+                <Col
+                    xs={24}
+                    md={5}
+                    justify="flex-start"
+                    mobilePadding="20px 0px 20px 0px"
+                    style={{ flexDirection: 'row' }}
+                >
+                    <img src="/assets/logo.svg" width="40px" height="40px" style={{ margin: '0px 5px 0px 20px' }} />
+                    <TextBold>{props.fund.name}</TextBold>
                 </Col>
-                <Col xs={24} md={9} mobilePadding="0px 0px 20px 0px" style={{flexDirection: "row"}} hideOnMobile={true}>
-                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        { assets }
-                    </div>
+                <Col
+                    xs={24}
+                    md={9}
+                    mobilePadding="0px 0px 20px 0px"
+                    style={{ flexDirection: 'row' }}
+                    hideOnMobile={true}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{assets}</div>
                 </Col>
                 <Col xs={8} md={3} mobilePadding="0px 0px 20px 0px">
                     <Field>24H</Field>
-                    <Text>
-                        {props.priceChange}
-                    </Text>
+                    <Text>{props.priceChange}</Text>
                 </Col>
                 <Col xs={8} md={4} mobilePadding="0px 0px 20px 0px">
-                    <Field>Market Cap</Field> 
-                    <Text>
-                        {`$${props.marketCap}`}
-                    </Text>
+                    <Field>Market Cap</Field>
+                    <Text>{`$${props.marketCap}`}</Text>
                 </Col>
                 <Col xs={8} md={3} mobilePadding="0px 0px 20px 0px">
                     <Field>Price</Field>
-                    <Text>
-                        {`$${props.price}`}
-                    </Text>
+                    <Text>{`$${props.price}`}</Text>
                 </Col>
             </CardRow>
         </Link>

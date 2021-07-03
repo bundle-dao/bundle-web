@@ -26,7 +26,7 @@ export const Row = styled(ARow)<RowProps>`
     max-width: ${(props) => props.theme.maxWidth};
     width: 100%;
     @media (max-width: 768px) {
-        display: ${ props => props.hideOnMobile ? 'none' : 'default'};
+        display: ${(props) => (props.hideOnMobile ? 'none' : 'default')};
     }
 `;
 
@@ -40,13 +40,13 @@ interface ColProps {
 export const Col = styled(ACol)<ColProps>`
     display: flex;
     flex-direction: column;
-    justify-content: ${ props => props.justify ? props.justify : 'center'};
+    justify-content: ${(props) => (props.justify ? props.justify : 'center')};
     align-items: center;
-    padding: ${ props => props.padding ? props.padding : '0px'};
+    padding: ${(props) => (props.padding ? props.padding : '0px')};
 
     @media (max-width: 768px) {
-        padding: ${ props => props.mobilePadding ? props.mobilePadding : '0px'};
+        padding: ${(props) => (props.mobilePadding ? props.mobilePadding : '0px')};
         justify-content: center;
-        display: ${ props => props.hideOnMobile ? 'none' : 'default'};
+        display: ${(props) => (props.hideOnMobile ? 'none' : 'default')};
     }
 `;

@@ -91,13 +91,16 @@ const getApy = async (
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
 
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)).mul(await stakeToken.balanceOf(minterAddress)).mul(2).div(await stakeToken.totalSupply());
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken))
+            .mul(await stakeToken.balanceOf(minterAddress))
+            .mul(2)
+            .div(await stakeToken.totalSupply());
         const rewardsPerDay = (await minter.blockRewards()).mul(28800);
 
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
+        const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint + 1;
         const apy = dpr ** 365 - 1;
 
         setState(`${formatNumber(apy * 100)}%`);
@@ -131,9 +134,9 @@ const Landing: React.FC = (): React.ReactElement => {
                                 We are a dao.
                             </h1>
                             <p style={{ maxWidth: '600px' }}>
-                                Bundle is redefining passive asset management. We're a
-                                community-governed project offering full exposure to crypto risk-management and the DeFi
-                                ecosystem through passively managed, non-custodial funds and indices.
+                                Bundle is redefining passive asset management. We're a community-governed project
+                                offering full exposure to crypto risk-management and the DeFi ecosystem through
+                                passively managed, non-custodial funds and indices.
                             </p>
                             <div style={{ margin: '30px 0px' }}>
                                 <a href="/assets/bundle_whitepaper.pdf">

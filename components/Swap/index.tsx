@@ -1,23 +1,25 @@
-import { ArrowDownOutlined } from "@ant-design/icons";
-import { BigNumber } from "@ethersproject/bignumber";
-import { TransactionResponse } from "@ethersproject/providers";
-import { formatUnits, parseEther } from "@ethersproject/units";
-import { InputNumber } from "antd";
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import useApproved from "../../hooks/useApproved";
-import useERC20Contract from "../../hooks/useERC20Contract";
-import useRawBalance from "../../hooks/useRawBalance";
-import { Asset, getPairAmounts, ROUTER } from "../../lib/asset";
-import { Fund } from "../../lib/fund";
-import { parseBalance } from "../../util";
-import Outline from "../Button/Outline";
-import Card from "../Card";
-import { Col, Row } from "../Layout";
-import { approveMessage, errorMessage, txMessage } from "../Messages";
+import { ArrowDownOutlined } from '@ant-design/icons';
+import { BigNumber } from '@ethersproject/bignumber';
+import { TransactionResponse } from '@ethersproject/providers';
+import { formatUnits, parseEther } from '@ethersproject/units';
+import { InputNumber } from 'antd';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import useApproved from '../../hooks/useApproved';
+import useERC20Contract from '../../hooks/useERC20Contract';
+import useRawBalance from '../../hooks/useRawBalance';
+import { Asset, getPairAmounts, ROUTER } from '../../lib/asset';
+import { Fund } from '../../lib/fund';
+import { parseBalance } from '../../util';
+import Outline from '../Button/Outline';
+import Card from '../Card';
+import { Col, Row } from '../Layout';
+import { approveMessage, errorMessage, swapMessage, txMessage } from '../Messages';
 import { TradeOptions, Percent, Token, Pair, TokenAmount } from '@pancakeswap/sdk';
-import { useWeb3React } from "@web3-react/core";
-import useToken from "../../hooks/pcs";
+import { useWeb3React } from '@web3-react/core';
+import useToken from '../../hooks/pcs';
+import useContract from '../../hooks/useContract';
+import PancakeRouter from '../../contracts/PancakeRouter.json';
 
 interface Props {
     fund: Fund | undefined;
@@ -52,7 +54,7 @@ const Selector = styled.div<SelectorProps>`
     &:hover {
         cursor: pointer;
         border: ${(props) => '2px solid ' + props.theme.primary};
-        color: ${props => props.theme.primary};
+        color: ${(props) => props.theme.primary};
     }
 
     transition: color 100ms linear, border 100ms linear;
@@ -80,6 +82,8 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const [assetAmount, setAssetAmount] = useState(BigNumber.from(0));
     const [fundAmount, setFundAmount] = useState(BigNumber.from(0));
 
+    const router = useContract(ROUTER, PancakeRouter, true);
+
     const assetContract = useERC20Contract(asset.address, true);
     const assetBalance = useRawBalance(assetContract).data;
 
@@ -89,12 +93,6 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const fundApproved = useApproved(fundContract, ROUTER).data;
 
     // PCS data
-    const OPTS: TradeOptions = {
-        allowedSlippage: new Percent('2', '100'),
-        ttl: 10000,
-        recipient: account ? account : '',
-    };
-
     const token: Token | undefined = useToken(chainId, asset);
     const fundToken: Token | undefined = useToken(chainId, props.fund);
     const [pair, setPair] = useState<Pair>();
@@ -111,18 +109,48 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     }, [token, fundToken, library]);
 
     return (
-        <Col span={24} style={{width: '100%', flexGrow: 1}}>
-            <Card style={{minHeight: '480px', height: '100%', display: 'flex', justifyContent: 'space-evenly', alignItems: 'flex-start', padding: '20px 30px'}}>
+        <Col span={24} style={{ width: '100%', flexGrow: 1 }}>
+            <Card
+                style={{
+                    minHeight: '480px',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'flex-start',
+                    padding: '20px 30px',
+                }}
+            >
                 <Col span={24}>
-                    <Row style={{display: 'flex', justifyContent: 'center'}}>
-                        <Selector onClick={() => { setSelected(BUY) }} selected={selected == BUY}>Buy</Selector>
-                        <Selector onClick={() => { setSelected(SELL) }} selected={selected == SELL}>Sell</Selector>
+                    <Row style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Selector
+                            onClick={() => {
+                                setSelected(BUY);
+                            }}
+                            selected={selected == BUY}
+                        >
+                            Buy
+                        </Selector>
+                        <Selector
+                            onClick={() => {
+                                setSelected(SELL);
+                            }}
+                            selected={selected == SELL}
+                        >
+                            Sell
+                        </Selector>
                     </Row>
                     <Row>
                         <Col span={24} order={selected == BUY ? 0 : 4}>
                             <InputContainer>
                                 <InputNumber
-                                    style={{padding: '40px 0px 0px 8px', width: '100%', height: '100%', borderRadius: '15px', overflow: 'hidden', boxShadow: 'none'}}
+                                    style={{
+                                        padding: '40px 0px 0px 8px',
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: '15px',
+                                        overflow: 'hidden',
+                                        boxShadow: 'none',
+                                    }}
                                     stringMode={true}
                                     min={'0'}
                                     value={formatUnits(assetAmount, 18)}
@@ -132,11 +160,15 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             setAssetAmount(parseEther(value));
 
                                             if (basePair && selected == BUY) {
-                                                const [tokenOut, pairOut] = basePair.getOutputAmount(new TokenAmount(token!, parseEther(value).toString()));
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(
+                                                    new TokenAmount(token!, parseEther(value).toString())
+                                                );
                                                 setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                             } else if (basePair && selected == SELL) {
-                                                const [tokenOut, pairOut] = basePair.getInputAmount(new TokenAmount(token!, parseEther(value).toString()));
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(
+                                                    new TokenAmount(token!, parseEther(value).toString())
+                                                );
                                                 setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                             } else {
@@ -148,19 +180,31 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             setFundAmount(parseEther('0'));
                                         }
                                     }}
-                                    disabled={props.disabled || !assetBalance || (assetBalance <= BigNumber.from(0) || !props.account || !pair)}
+                                    disabled={
+                                        props.disabled ||
+                                        !assetBalance ||
+                                        assetBalance <= BigNumber.from(0) ||
+                                        !props.account ||
+                                        !pair
+                                    }
                                     size="large"
                                 />
-                                <Field style={{position: 'absolute', top: '20px', left: '20px'}}>
+                                <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
                                     {selected == BUY ? 'From' : 'To'}
                                 </Field>
-                                <TextBold style={{position: 'absolute', bottom: '20px', right: '20px'}}>
-                                    { asset ? asset.symbol : '...' }
+                                <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
+                                    {asset ? asset.symbol : '...'}
                                 </TextBold>
                             </InputContainer>
                         </Col>
-                        <Col span={24} order={selected == BUY ? 1 : 4} style={{alignItems: 'flex-start', paddingLeft: '15px', marginBottom: '5px'}}>
-                            <Field>{`Balance: ${assetBalance ? parseBalance(assetBalance) : '0.00'} ${asset.symbol}`}</Field>
+                        <Col
+                            span={24}
+                            order={selected == BUY ? 1 : 4}
+                            style={{ alignItems: 'flex-start', paddingLeft: '15px', marginBottom: '5px' }}
+                        >
+                            <Field>{`Balance: ${assetBalance ? parseBalance(assetBalance) : '0.00'} ${
+                                asset.symbol
+                            }`}</Field>
                         </Col>
                         <Col span={24} order={2}>
                             <ArrowDownOutlined style={{ fontSize: '25px' }} />
@@ -168,7 +212,14 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Col span={24} order={selected == BUY ? 3 : 0}>
                             <InputContainer>
                                 <InputNumber
-                                    style={{padding: '40px 0px 0px 8px', width: '100%', height: '100%', borderRadius: '15px', overflow: 'hidden', boxShadow: 'none'}}
+                                    style={{
+                                        padding: '40px 0px 0px 8px',
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: '15px',
+                                        overflow: 'hidden',
+                                        boxShadow: 'none',
+                                    }}
                                     stringMode={true}
                                     min={'0'}
                                     value={formatUnits(fundAmount, 18)}
@@ -178,11 +229,15 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             setFundAmount(parseEther(value));
 
                                             if (basePair && selected == SELL) {
-                                                const [tokenOut, pairOut] = basePair.getOutputAmount(new TokenAmount(fundToken!, parseEther(value).toString()));
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(
+                                                    new TokenAmount(fundToken!, parseEther(value).toString())
+                                                );
                                                 setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                             } else if (basePair && selected == BUY) {
-                                                const [tokenOut, pairOut] = basePair.getInputAmount(new TokenAmount(fundToken!, parseEther(value).toString()));
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(
+                                                    new TokenAmount(fundToken!, parseEther(value).toString())
+                                                );
                                                 setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                             } else {
@@ -192,74 +247,128 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             setAssetAmount(parseEther('0'));
                                         }
                                     }}
-                                    disabled={props.disabled || !fundBalance || (fundBalance <= BigNumber.from(0) || !props.account || !props.fund)}
+                                    disabled={
+                                        props.disabled ||
+                                        !fundBalance ||
+                                        fundBalance <= BigNumber.from(0) ||
+                                        !props.account ||
+                                        !props.fund
+                                    }
                                     size="large"
                                 />
-                                <Field style={{position: 'absolute', top: '20px', left: '20px'}}>
+                                <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
                                     {selected == BUY ? 'To' : 'From'}
                                 </Field>
-                                <TextBold style={{position: 'absolute', bottom: '20px', right: '20px'}}>
-                                    { props.fund ? props.fund.symbol : '...' }
+                                <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
+                                    {props.fund ? props.fund.symbol : '...'}
                                 </TextBold>
                             </InputContainer>
                         </Col>
-                        <Col span={24} order={selected == BUY ? 4 : 1} style={{alignItems: 'flex-start', paddingLeft: '15px', marginBottom: '5px'}}>
-                            <Field>{`Balance: ${fundBalance ? parseBalance(fundBalance) : '0.00'} ${props.fund ? props.fund.symbol : '...'}`}</Field>
+                        <Col
+                            span={24}
+                            order={selected == BUY ? 4 : 1}
+                            style={{ alignItems: 'flex-start', paddingLeft: '15px', marginBottom: '5px' }}
+                        >
+                            <Field>{`Balance: ${fundBalance ? parseBalance(fundBalance) : '0.00'} ${
+                                props.fund ? props.fund.symbol : '...'
+                            }`}</Field>
                         </Col>
                     </Row>
-                    <Row style={{paddingTop: '15px', display: 'flex', justifyContent: 'center'}}>
-                        <Outline style={{width: '100%'}} onClick={() => {
-                            if (selected == BUY && assetApproved) {
-                                
-                            } else if (selected == SELL && fundApproved) {
-
-                            } else {
-                                if (selected == BUY) {
-                                    assetContract
-                                        ?.approve(
-                                            ROUTER,
-                                            BigNumber.from(
-                                                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-                                            )
+                    <Row style={{ paddingTop: '15px', display: 'flex', justifyContent: 'center' }}>
+                        <Outline
+                            style={{ width: '100%' }}
+                            disabled={!fundToken || !router || !token || !account}
+                            onClick={() => {
+                                if (selected == BUY && assetApproved) {
+                                    router
+                                        ?.swapExactTokensForTokens(
+                                            assetAmount,
+                                            fundAmount.mul(98).div(100),
+                                            [token?.address, fundToken?.address],
+                                            account,
+                                            `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`
                                         )
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
                                         .then((tx: TransactionResponse) => {
-                                            approveMessage(tx);
+                                            swapMessage(tx);
+                                        })
+                                        .catch((e: any) => {
+                                            errorMessage(e.data.message);
+                                        });
+                                } else if (selected == SELL && fundApproved) {
+                                    router
+                                        ?.swapExactTokensForTokens(
+                                            fundAmount,
+                                            assetAmount.mul(98).div(100),
+                                            [fundToken?.address, token?.address],
+                                            account,
+                                            `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`
+                                        )
+                                        .then((tx: TransactionResponse) => {
+                                            txMessage(tx);
+                                            return tx.wait(1);
+                                        })
+                                        .then((tx: TransactionResponse) => {
+                                            swapMessage(tx);
                                         })
                                         .catch((e: any) => {
                                             errorMessage(e.data.message);
                                         });
                                 } else {
-                                    fundContract
-                                        ?.approve(
-                                            ROUTER,
-                                            BigNumber.from(
-                                                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                    if (selected == BUY) {
+                                        assetContract
+                                            ?.approve(
+                                                ROUTER,
+                                                BigNumber.from(
+                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                )
                                             )
-                                        )
-                                        .then((tx: TransactionResponse) => {
-                                            txMessage(tx);
-                                            return tx.wait(1);
-                                        })
-                                        .then((tx: TransactionResponse) => {
-                                            approveMessage(tx);
-                                        })
-                                        .catch((e: any) => {
-                                            errorMessage(e.data.message);
-                                        });
+                                            .then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionResponse) => {
+                                                approveMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.data.message);
+                                            });
+                                    } else {
+                                        fundContract
+                                            ?.approve(
+                                                ROUTER,
+                                                BigNumber.from(
+                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                )
+                                            )
+                                            .then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionResponse) => {
+                                                approveMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.data.message);
+                                            });
+                                    }
                                 }
-                            }
-                        }}>
-                            {(selected == BUY && assetApproved) ? 'Swap' : (selected == SELL && fundApproved) ? 'Swap' : 'Approve'}
+                            }}
+                        >
+                            {selected == BUY && assetApproved
+                                ? 'Swap'
+                                : selected == SELL && fundApproved
+                                ? 'Swap'
+                                : 'Approve'}
                         </Outline>
                     </Row>
                 </Col>
             </Card>
         </Col>
     );
-}
+};
 
 export default Swap;
