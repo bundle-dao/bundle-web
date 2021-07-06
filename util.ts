@@ -46,12 +46,9 @@ export const formatNumber = (input: number, precision = 2): string => {
     let count = 0;
 
     while (tempInput >= 1000 && count < 4) {
-        console.log(tempInput);
         tempInput /= 1000;
         count++;
     }
-
-    console.log(tempInput);
 
     if (count == 0 || tempInput >= 1000) {
         return `${parseFloat(input.toPrecision(4)).toFixed(precision)}`;

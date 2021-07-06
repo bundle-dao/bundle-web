@@ -14,6 +14,7 @@ import { Asset, getAsset, SWAP_ASSETS } from '../../lib/asset';
 import { parseBalance } from '../../util';
 import { parseEther } from '@ethersproject/units';
 import Swap from '../../components/Swap';
+import Flow from '../../components/Flow';
 
 interface SelectorProps {
     selected: boolean;
@@ -61,17 +62,13 @@ const Landing: React.FC = (): React.ReactElement => {
     const [fund, setFund] = useState<Fund>();
     const [assets, setAssets] = useState<Asset[]>([]);
     const [fundAsset, setFundAsset] = useState<Asset>();
+    const [nav, setNav] = useState<BigNumber>(BigNumber.from('0'));
     const [selected, setSelected] = useState(TRADE);
     const selectorOnClick = (target: string) => {
         return () => {
             setSelected(target);
         };
     };
-
-    const nav = assets.reduce(
-        (a: BigNumber, b: Asset) => a.add(b.amount!.mul(b.price!).div(parseEther('1'))),
-        BigNumber.from(0)
-    );
 
     useEffect(() => {
         if (router.isReady) {
@@ -83,6 +80,17 @@ const Landing: React.FC = (): React.ReactElement => {
         getAssets(fund, library, setAssets);
         getAsset(fund?.address, library, setFundAsset, true);
     }, [fund, library]);
+
+    useEffect(() => {
+        if (fundAsset) {
+            setNav(
+                assets.reduce(
+                    (a: BigNumber, b: Asset) => a.add(b.amount!.mul(b.price!).div(parseEther('1'))),
+                    BigNumber.from(0)
+                )
+            );
+        }
+    }, [fundAsset, assets]);
 
     const assetCards = assets.map((asset) => <AssetCard asset={asset} nav={nav} />);
 
@@ -119,7 +127,9 @@ const Landing: React.FC = (): React.ReactElement => {
                     </Col>
                     <Col xs={12} md={3} style={{ justifyContent: 'flex-end' }} mobilePadding="15px 0px 0px 0px">
                         <Field>NAV</Field>
-                        <Text>{`$${parseBalance(nav)}`}</Text>
+                        <Text>
+                            {fundAsset ? `$${parseBalance(nav.mul(parseEther('1')).div(fundAsset.cap!))}` : '0.00'}
+                        </Text>
                     </Col>
                 </Row>
                 <Row>
@@ -168,11 +178,21 @@ const Landing: React.FC = (): React.ReactElement => {
                                         Mint
                                     </Selector>
                                     <Selector onClick={selectorOnClick(BURN)} selected={selected == BURN}>
-                                        Burn
+                                        Redeem
                                     </Selector>
                                 </Card>
                             </Col>
-                            <Swap fund={fund} assets={SWAP_ASSETS} account={account} />
+                            {selected == TRADE ? (
+                                <Swap fund={fund} assets={SWAP_ASSETS} account={account} />
+                            ) : (
+                                <Flow
+                                    fund={fund}
+                                    assets={assets}
+                                    isMinting={selected == MINT}
+                                    nav={nav}
+                                    fundAsset={fundAsset}
+                                />
+                            )}
                         </Row>
                     </Col>
                 </Row>

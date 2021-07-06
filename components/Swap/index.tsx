@@ -15,7 +15,7 @@ import Outline from '../Button/Outline';
 import Card from '../Card';
 import { Col, Row } from '../Layout';
 import { approveMessage, errorMessage, swapMessage, txMessage } from '../Messages';
-import { TradeOptions, Percent, Token, Pair, TokenAmount } from '@pancakeswap/sdk';
+import { Token, Pair, TokenAmount } from '@pancakeswap/sdk';
 import { useWeb3React } from '@web3-react/core';
 import useToken from '../../hooks/pcs';
 import useContract from '../../hooks/useContract';

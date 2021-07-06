@@ -85,6 +85,30 @@ export const swapMessage = (tx: TransactionReceipt) => {
     );
 };
 
+export const mintMessage = (tx: TransactionReceipt) => {
+    message.success(
+        <>
+            Bundle minted successfuly, your transaction can be verified{' '}
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
+                here
+            </a>
+        </>,
+        5
+    );
+};
+
+export const burnMessage = (tx: TransactionReceipt) => {
+    message.success(
+        <>
+            Bundle redeemed successfuly, your transaction can be verified{' '}
+            <a href={`https://bscscan.com/tx/${tx.transactionHash}`} target="_blank" rel="noopener noreferrer">
+                here
+            </a>
+        </>,
+        5
+    );
+};
+
 export const errorMessage = (reason: string) => {
     message.error(<>The submitted transaction has failed for reason: "{reason}"</>, 5);
 };
