@@ -127,11 +127,17 @@ const Landing: React.FC = (): React.ReactElement => {
                         <div>
                             <h1 style={{ position: 'relative' }}>
                                 <img
-                                    src="/assets/bundle.svg"
+                                    src="/assets/bundle.png"
                                     width="275px"
-                                    style={{ position: 'absolute', bottom: '0px', left: '50px' }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '-15px',
+                                        left: '50px',
+                                        zIndex: 0,
+                                        opacity: '0.25',
+                                    }}
                                 />
-                                We are a dao.
+                                <span style={{ zIndex: 2 }}>We are a dao.</span>
                             </h1>
                             <p style={{ maxWidth: '600px' }}>
                                 Bundle is redefining passive asset management. We're a community-governed project
@@ -139,14 +145,14 @@ const Landing: React.FC = (): React.ReactElement => {
                                 passively managed, non-custodial funds and indices.
                             </p>
                             <div style={{ margin: '30px 0px' }}>
-                                <a href="/assets/bundle_whitepaper.pdf">
+                                <a href="https://docs.bundledao.org">
                                     <OutlinedButton>Discover</OutlinedButton>
                                 </a>
                             </div>
                         </div>
                     </LandingCol>
                     <LandingCol xs={24} sm={24} md={12}>
-                        <BoxMain height="100%" width="100%" src="/assets/box_main.svg" />
+                        <BoxMain height="100%" width="100%" src="/assets/box_main.png" />
                     </LandingCol>
                 </LandingRow>
             </RowContainer>

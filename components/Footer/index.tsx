@@ -66,7 +66,7 @@ const Footer: React.FC = (): React.ReactElement => {
                         <FooterLink href="https://twitter.com/bundledao">Twitter</FooterLink>
                         <FooterLink href="https://bundledao.medium.com/">Medium</FooterLink>
                         <FooterLink href="https://github.com/bundle-dao">Github</FooterLink>
-                        <FooterLink href="/assets/bundle_whitepaper.pdf">Whitepaper</FooterLink>
+                        <FooterLink href="https://docs.bundledao.org">Docs</FooterLink>
                     </Row>
                 </FlexCol>
                 <Logo height="46px" width="55px" src="/assets/dark_logo.svg" />

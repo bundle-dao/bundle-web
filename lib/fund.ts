@@ -13,32 +13,7 @@ export interface Fund {
 
 type NamedFunds = { [key: string]: Fund };
 
-const FUNDS: NamedFunds = {
-    TEST: {
-        name: 'Test',
-        symbol: 'TEST',
-        address: '0x596ff52ceaa85785d1c40ed7a7a5bdee4fcaaa9b',
-        assets: ['USDC', 'BNB', 'BTC', 'UNI', 'BNB', 'BNB', 'BNB'],
-        description:
-            'A hyper-focused index of the most successful large-cap decentralized finance protocols across Ethereum.',
-    },
-    TST2: {
-        name: 'Test 2',
-        symbol: 'TST2',
-        address: '0xde59e2b0089354d2274a1af48c923367b76d0253',
-        assets: ['USDC', 'BNB', 'BTC', 'UNI'],
-        description:
-            'A hyper-focused index of the most successful large-cap decentralized finance protocols across Ethereum.',
-    },
-    TST3: {
-        name: 'Test 3',
-        symbol: 'TST3',
-        address: '',
-        assets: ['BNB', 'BTC'],
-        description:
-            'A hyper-focused index of the most successful large-cap decentralized finance protocols across Ethereum.',
-    },
-};
+const FUNDS: NamedFunds = {};
 
 export const getFundByName = (name: string | undefined): Fund | undefined => {
     if (name) {

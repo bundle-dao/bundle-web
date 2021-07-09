@@ -48,20 +48,14 @@ const Account = (props: Props) => {
                 onClick={() => {
                     setConnecting(true);
 
-                    activate(injected, undefined, true)
-                        .then(() => {
-                            if (!CHAIN_IDS.includes(chainId)) {
-                                chainErrorMessage(chainId);
-                            }
-                        })
-                        .catch((error) => {
-                            // ignore the error if it's a user rejected request
-                            if (error instanceof UserRejectedRequestError) {
-                                setConnecting(false);
-                            } else {
-                                setError(error);
-                            }
-                        });
+                    activate(injected, undefined, true).catch((error) => {
+                        // ignore the error if it's a user rejected request
+                        if (error instanceof UserRejectedRequestError) {
+                            setConnecting(false);
+                        } else {
+                            setError(error);
+                        }
+                    });
                 }}
             >
                 {MetaMaskOnboarding.isMetaMaskInstalled() ? 'Connect to MetaMask' : 'Connect to Wallet'}

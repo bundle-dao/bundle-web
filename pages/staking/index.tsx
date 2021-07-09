@@ -222,7 +222,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 name="BDL-BNB"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
                                 pid="0"
-                                stakeToken={getNamedAddress(chainId, 'BDLBND')!}
+                                stakeToken={getNamedAddress(chainId, 'BDLBNB')!}
                                 disabled={false}
                                 account={account!}
                             />

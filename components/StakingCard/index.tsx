@@ -50,8 +50,10 @@ const StakingCardContainer = styled.div`
     margin: 15px 0px;
 
     &:hover {
-        box-shadow: 0px 3px 6px #0000004d;
+        box-shadow: 0px 3px 4px #0000004d;
     }
+
+    transition: box-shadow 0.1s linear;
 `;
 
 const StakingInfoRow = styled(Row)`

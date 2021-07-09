@@ -39,7 +39,7 @@ const MenuCol = styled(Col)`
     justify-content: flex-end;
     align-items: center;
     height: 100%;
-    padding-bottom: 3px;
+    width: 100%;
 
     @media (max-width: 768px) {
         visibility: hidden;
@@ -52,33 +52,26 @@ const MenuCol = styled(Col)`
     }
 `;
 
-const NavMenu = styled(Menu)`
-    display: flex;
-    flex-direction: row;
-
-    @media (max-width: 768px) {
-        visibility: hidden;
-    }
-`;
-
-const NavMenuItem = styled(Menu.Item)`
+const NavMenuItem = styled.div`
     height: 100%;
-    padding: 3px 0px 1px 0px !important;
-    margin: 0px 20px 0px 20px !important;
+    width: auto;
+    padding: 3px 0px 1px 0px;
+    margin: 0px 20px 0px 20px;
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    justify-content: center;
+    align-items: center;
     color: ${(props) => props.theme.primary};
     font-size: 16px;
     flex-grow: 0;
 
     &:hover {
-        color: ${(props) => props.theme.primary} !important;
-        border-bottom: 2px solid ${(props) => props.theme.primary} !important;
+        color: ${(props) => props.theme.primary};
+        border-bottom: 2px solid ${(props) => props.theme.primary};
+        padding: 5px 0px 1px 0px;
     }
 
     a {
-        color: ${(props) => props.theme.primary} !important;
+        color: ${(props) => props.theme.primary};
     }
 `;
 
@@ -102,11 +95,13 @@ const NavMenuCol = styled(Col)`
 
 const Navbar: React.FC = (): React.ReactElement => {
     const router = useRouter();
+    console.log(router.pathname);
 
     const triedToEagerConnect = useEagerConnect();
 
     const activeStyle = {
-        borderColor: '#E7694C',
+        borderBottom: '2px solid #E7694C',
+        padding: '5px 0px 1px 0px',
     };
 
     return (
@@ -120,28 +115,26 @@ const Navbar: React.FC = (): React.ReactElement => {
                     </Link>
                 </Col>
                 <MenuCol xs={0} sm={0} md={20} style={{ height: '100%' }}>
-                    <NavMenu mode="horizontal" selectedKeys={[router.pathname]}>
-                        <NavMenuItem key="funds" style={'/funds' == router.pathname ? activeStyle : {}}>
-                            <Link href="/funds">
-                                <a>Funds</a>
-                            </Link>
-                        </NavMenuItem>
-                        <NavMenuItem key="/staking" style={'/staking' == router.pathname ? activeStyle : {}}>
-                            <Link href="/staking">
-                                <a>Staking</a>
-                            </Link>
-                        </NavMenuItem>
-                        <NavMenuItem key="wallet">
-                            <Account triedToEagerConnect={triedToEagerConnect} />
-                        </NavMenuItem>
-                    </NavMenu>
+                    <NavMenuItem style={'/funds' == router.pathname ? activeStyle : {}}>
+                        <Link href="/funds">
+                            <a>Funds</a>
+                        </Link>
+                    </NavMenuItem>
+                    <NavMenuItem style={'/staking' == router.pathname ? activeStyle : {}}>
+                        <Link href="/staking">
+                            <a>Staking</a>
+                        </Link>
+                    </NavMenuItem>
+                    <NavMenuItem>
+                        <Account triedToEagerConnect={triedToEagerConnect} />
+                    </NavMenuItem>
                     <a
                         href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x7ff78e1cab9a2710eb6486ecbf3d94d125039364"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ height: '100%', display: 'flex', alignItems: 'center' }}
                     >
-                        <OutlineButton style={{ marginLeft: '20px', paddingTop: '13px' }}>Buy BDL</OutlineButton>
+                        <OutlineButton style={{ marginLeft: '20px', paddingTop: '11px' }}>Buy BDL</OutlineButton>
                     </a>
                 </MenuCol>
                 <NavMenuCol xs={14} sm={14} md={0} style={{ height: '100%' }}>
@@ -163,6 +156,11 @@ const Navbar: React.FC = (): React.ReactElement => {
                                 <Menu.Item key="/staking" style={'/staking' == router.pathname ? activeStyle : {}}>
                                     <Link href="/staking">
                                         <a>Staking</a>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="/staking" style={'/staking' == router.pathname ? activeStyle : {}}>
+                                    <Link href="https://docs.bundledao.org">
+                                        <a>Docs</a>
                                     </Link>
                                 </Menu.Item>
                             </Menu.ItemGroup>
