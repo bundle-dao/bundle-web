@@ -91,13 +91,16 @@ const getApy = async (
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
 
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)).mul(await stakeToken.balanceOf(minterAddress)).mul(2).div(await stakeToken.totalSupply());
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken))
+            .mul(await stakeToken.balanceOf(minterAddress))
+            .mul(2)
+            .div(await stakeToken.totalSupply());
         const rewardsPerDay = (await minter.blockRewards()).mul(28800);
 
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted * 3 / stakedFormatted) * pInfo.allocPoint / totalAllocPoint + 1;
+        const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint + 1;
         const apy = dpr ** 365 - 1;
 
         setState(`${formatNumber(apy * 100)}%`);
@@ -124,26 +127,32 @@ const Landing: React.FC = (): React.ReactElement => {
                         <div>
                             <h1 style={{ position: 'relative' }}>
                                 <img
-                                    src="/assets/bundle.svg"
+                                    src="/assets/bundle.png"
                                     width="275px"
-                                    style={{ position: 'absolute', bottom: '0px', left: '50px' }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '-15px',
+                                        left: '50px',
+                                        zIndex: 0,
+                                        opacity: '0.25',
+                                    }}
                                 />
-                                We are a dao.
+                                <span style={{ zIndex: 2 }}>We are a dao.</span>
                             </h1>
                             <p style={{ maxWidth: '600px' }}>
-                                Bundle is redefining passive asset management. We're a
-                                community-governed project offering full exposure to crypto risk-management and the DeFi
-                                ecosystem through passively managed, non-custodial funds and indices.
+                                Bundle is redefining passive asset management. We're a community-governed project
+                                offering full exposure to crypto risk-management and the DeFi ecosystem through
+                                passively managed, non-custodial funds and indices.
                             </p>
                             <div style={{ margin: '30px 0px' }}>
-                                <a href="/assets/bundle_whitepaper.pdf">
+                                <a href="https://docs.bundledao.org">
                                     <OutlinedButton>Discover</OutlinedButton>
                                 </a>
                             </div>
                         </div>
                     </LandingCol>
                     <LandingCol xs={24} sm={24} md={12}>
-                        <BoxMain height="100%" width="100%" src="/assets/box_main.svg" />
+                        <BoxMain height="100%" width="100%" src="/assets/box_main.png" />
                     </LandingCol>
                 </LandingRow>
             </RowContainer>
@@ -167,7 +176,7 @@ const Landing: React.FC = (): React.ReactElement => {
                             <a style={{ width: '85%' }}>
                                 <RewardCard
                                     image="/assets/logo.svg"
-                                    imageSecondary="/assets/bnb_icon.png"
+                                    imageSecondary="/assets/BNB.png"
                                     name="Bundle"
                                     ticker="BDL-BNB"
                                     apy={bdlApy}

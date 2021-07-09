@@ -9,11 +9,11 @@ function getPendingBalance(token: Contract) {
     };
 }
 
-export default function useUnstakedBalance(token: Contract | undefined, suspense = false) {
+export default function useRawBalance(token: Contract | undefined, suspense = false) {
     const { account } = useWeb3React();
     const shouldFetch = typeof account === 'string' && !!token;
 
-    const result = useSWR(shouldFetch ? [account, 'UnstakedBalance'] : null, getPendingBalance(token!), {
+    const result = useSWR(shouldFetch ? [account, 'UnstakedBalance', token] : null, getPendingBalance(token!), {
         suspense,
     });
 

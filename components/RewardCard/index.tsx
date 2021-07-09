@@ -51,7 +51,7 @@ const Card = styled.div<CardProps>`
 
     cursor: pointer;
 
-    border-radius: 5px;
+    border-radius: 15px;
     box-shadow: 2px 2px 4px #00000012;
     overflow: hidden;
     transition: 0.25s padding-left;
@@ -61,7 +61,7 @@ const InternalCard = styled.div`
     width: 100%;
     height: 100%;
     background-color: ${(props) => props.theme.white};
-    border-radius: 5px;
+    border-radius: 15px;
     padding: 10px 20px;
     display: flex;
     flex-direction: row;
@@ -75,7 +75,7 @@ const ImageContainer = styled.div`
     border-radius: 50%;
     box-shadow: 2px 2px 5px #00000012;
     z-index: 2;
-    background-color: ${props => props.theme.white};
+    background-color: ${(props) => props.theme.white};
 `;
 
 const PrimaryHeader = styled.h1`
@@ -90,11 +90,13 @@ const RewardCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <ImageContainer>
                         <img src={props.image} width="50px" height="50px" style={props.imgStyle} />
                     </ImageContainer>
-                    {
-                        props.imageSecondary ? <ImageContainer style={{position: "relative", right: "20px", zIndex: 1}}>
+                    {props.imageSecondary ? (
+                        <ImageContainer style={{ position: 'relative', right: '20px', zIndex: 1 }}>
                             <img src={props.imageSecondary} height="50px" width="50px" />
-                        </ImageContainer> : <></>
-                    }
+                        </ImageContainer>
+                    ) : (
+                        <></>
+                    )}
                     <div
                         style={{
                             display: 'flex',

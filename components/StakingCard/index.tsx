@@ -11,7 +11,7 @@ import usePendingRewards from '../../hooks/usePendingRewards';
 import { Contract } from '@ethersproject/contracts';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Col, Row, InputNumber } from 'antd';
-import useUnstakedBalance from '../../hooks/useUnstakedBalance';
+import useRawBalance from '../../hooks/useRawBalance';
 import useERC20Contract from '../../hooks/useERC20Contract';
 import OutlinedButton from '../Button/Outline';
 import FilledButton from '../Button/Filled';
@@ -20,6 +20,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
 import { formatUnits, parseEther } from '@ethersproject/units';
+import { TransactionReceipt } from '@ethersproject/providers';
 
 interface Props {
     image: string;
@@ -43,14 +44,16 @@ interface Disableable {
 const StakingCardContainer = styled.div`
     width: 100%;
     height: auto;
-    border-radius: 3px;
+    border-radius: 15px;
     background-color: ${(props) => props.theme.white};
     box-shadow: 0px 2px 4px #0000004d;
     margin: 15px 0px;
 
     &:hover {
-        box-shadow: 0px 3px 6px #0000004d;
+        box-shadow: 0px 3px 4px #0000004d;
     }
+
+    transition: box-shadow 0.1s linear;
 `;
 
 const StakingInfoRow = styled(Row)`
@@ -75,9 +78,9 @@ const TextBold = styled.div`
 
 const PrimaryContainer = styled.div<Disableable>`
     height: 100%;
-    background-color: ${(props) => props.disabled ? props.theme.spaceGrey : props.theme.primary};
-    color: ${(props) => props.disabled ? 'default' : props.theme.white};
-    border-radius: 3px;
+    background-color: ${(props) => (props.disabled ? props.theme.spaceGrey : props.theme.primary)};
+    color: ${(props) => (props.disabled ? 'default' : props.theme.white)};
+    border-radius: 15px;
     margin: 0px 10px;
 `;
 
@@ -94,7 +97,7 @@ const ImageContainer = styled.div`
     box-shadow: 2px 2px 5px #00000012;
     margin-right: 10px;
     z-index: 2;
-    background-color: ${props => props.theme.white};
+    background-color: ${(props) => props.theme.white};
 `;
 
 const StakingDisplay = styled.div<StakingDisplayProps>`
@@ -108,7 +111,7 @@ const PercentageContainer = styled.div`
     display: flex;
     flex-direction: row;
     border: ${(props) => `1px solid ${props.theme.grey}`};
-    border-radius: 6px;
+    border-radius: 15px;
     height: 26px;
     width: 80%;
     overflow: hidden;
@@ -158,13 +161,16 @@ const getApyApr = async (
         const pInfo = await minter.poolInfo(pid);
         const totalAllocPoint = await minter.totalAllocPoint();
 
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken)).mul(await stakeToken.balanceOf(minterAddress)).mul(2).div(await stakeToken.totalSupply());
+        const staked = (await bundleToken.balanceOf(pInfo.stakeToken))
+            .mul(await stakeToken.balanceOf(minterAddress))
+            .mul(2)
+            .div(await stakeToken.totalSupply());
         const rewardsPerDay = (await minter.blockRewards()).mul(28800);
 
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
 
-        const dpr = (rewardsFormatted * 3 / stakedFormatted) * pInfo.allocPoint / totalAllocPoint;
+        const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint;
         const apy = (1 + dpr) ** 365 - 1;
         const apr = dpr * 365;
 
@@ -191,7 +197,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const stakedBalance = useStakedBalance(minter, props.pid).data;
     const pendingRewards = usePendingRewards(minter, props.pid).data;
-    const unstakedBalance = useUnstakedBalance(stakeToken).data;
+    const unstakedBalance = useRawBalance(stakeToken).data;
     const approved = useApproved(stakeToken, minterAddress).data;
 
     return (
@@ -201,12 +207,14 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <ImageContainer>
                         <img src={props.image} width="55px" height="55px" style={props.imageStyle} />
                     </ImageContainer>
-                    {
-                        props.imageSecondary ? <ImageContainer style={{position: "absolute", left: "30px", zIndex: 1}}>
+                    {props.imageSecondary ? (
+                        <ImageContainer style={{ position: 'absolute', left: '30px', zIndex: 1 }}>
                             <img src={props.imageSecondary} height="55px" />
-                        </ImageContainer> : <></>
-                    }
-                    <TextBold style={props.imageSecondary ? {marginLeft: "40px"} : {}}>{props.name}</TextBold>
+                        </ImageContainer>
+                    ) : (
+                        <></>
+                    )}
+                    <TextBold style={props.imageSecondary ? { marginLeft: '40px' } : {}}>{props.name}</TextBold>
                 </InfoBlock>
                 <HideOnMobile>
                     <Divider type="vertical" style={{ height: '55px' }} />
@@ -245,7 +253,11 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
                             value={formatUnits(toStake, 18)}
                             onChange={(newValue) => setToStake(parseEther(newValue))}
-                            disabled={props.disabled || !unstakedBalance || (unstakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
+                            disabled={
+                                props.disabled ||
+                                !unstakedBalance ||
+                                (unstakedBalance <= BigNumber.from(0) && typeof props.account === 'string')
+                            }
                             size="large"
                         />
                     </Col>
@@ -275,19 +287,21 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || !props.account || (approved && (!unstakedBalance || (unstakedBalance <= 0 && typeof props.account === 'string')))}
+                            disabled={
+                                props.disabled ||
+                                !props.account ||
+                                (approved &&
+                                    (!unstakedBalance || (unstakedBalance <= 0 && typeof props.account === 'string')))
+                            }
                             onClick={() => {
                                 if (approved) {
                                     minter
-                                        ?.deposit(
-                                            props.pid,
-                                            toStake
-                                        )
+                                        ?.deposit(props.pid, toStake)
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             depositMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -305,7 +319,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -325,7 +339,11 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             style={{ width: '100%', margin: '10px 0px 10px 0px' }}
                             value={formatUnits(toUnstake, 18)}
                             onChange={(newValue) => setToUnstake(parseEther(newValue))}
-                            disabled={props.disabled || !stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')}
+                            disabled={
+                                props.disabled ||
+                                !stakedBalance ||
+                                (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')
+                            }
                             size="large"
                         />
                     </Col>
@@ -355,19 +373,22 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                 padding: '0px',
                                 display: 'block',
                             }}
-                            disabled={props.disabled || !props.account || (approved && (!stakedBalance || (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')))}
+                            disabled={
+                                props.disabled ||
+                                !props.account ||
+                                (approved &&
+                                    (!stakedBalance ||
+                                        (stakedBalance <= BigNumber.from(0) && typeof props.account === 'string')))
+                            }
                             onClick={() => {
                                 if (approved) {
                                     minter
-                                        ?.withdraw(
-                                            props.pid,
-                                            toUnstake
-                                        )
+                                        ?.withdraw(props.pid, toUnstake)
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             withdrawMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -385,7 +406,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             txMessage(tx);
                                             return tx.wait(1);
                                         })
-                                        .then((tx: TransactionResponse) => {
+                                        .then((tx: TransactionReceipt) => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
@@ -415,7 +436,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                         txMessage(tx);
                                         return tx.wait(1);
                                     })
-                                    .then((tx: TransactionResponse) => {
+                                    .then((tx: TransactionReceipt) => {
                                         harvestMessage(tx);
                                     })
                                     .catch((e: any) => {

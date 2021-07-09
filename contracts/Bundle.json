@@ -1,0 +1,479 @@
+[
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "src", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "dst", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "Approval",
+        "type": "event"
+    },
+    {
+        "anonymous": true,
+        "inputs": [
+            { "indexed": true, "internalType": "bytes4", "name": "sig", "type": "bytes4" },
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": false, "internalType": "bytes", "name": "data", "type": "bytes" }
+        ],
+        "name": "LogCall",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "tokenOut", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "tokenAmountOut", "type": "uint256" }
+        ],
+        "name": "LogExit",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "tokenAmountIn", "type": "uint256" }
+        ],
+        "name": "LogJoin",
+        "type": "event"
+    },
+    { "anonymous": false, "inputs": [], "name": "LogPublicSwapEnabled", "type": "event" },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": false, "internalType": "bool", "name": "rebalancable", "type": "bool" }
+        ],
+        "name": "LogRebalancable",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": true, "internalType": "address", "name": "caller", "type": "address" }],
+        "name": "LogStreamingFee",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "tokenOut", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "tokenAmountIn", "type": "uint256" },
+            { "indexed": false, "internalType": "uint256", "name": "tokenAmountOut", "type": "uint256" }
+        ],
+        "name": "LogSwap",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "swapFee", "type": "uint256" }
+        ],
+        "name": "LogSwapFeeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": true, "internalType": "address", "name": "token", "type": "address" }],
+        "name": "LogTokenBound",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": true, "internalType": "address", "name": "token", "type": "address" }],
+        "name": "LogTokenReady",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": true, "internalType": "address", "name": "token", "type": "address" }],
+        "name": "LogTokenUnbound",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "src", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "dst", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "Transfer",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "src", "type": "address" },
+            { "internalType": "address", "name": "dst", "type": "address" }
+        ],
+        "name": "allowance",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "dst", "type": "address" },
+            { "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "approve",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "whom", "type": "address" }],
+        "name": "balanceOf",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    { "inputs": [], "name": "collectStreamingFee", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    {
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "dst", "type": "address" },
+            { "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "decreaseApproval",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "poolAmountIn", "type": "uint256" },
+            { "internalType": "uint256[]", "name": "minAmountsOut", "type": "uint256[]" }
+        ],
+        "name": "exitPool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+        "name": "getBalance",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getController",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getCurrentTokens",
+        "outputs": [{ "internalType": "address[]", "name": "tokens", "type": "address[]" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+        "name": "getDenormalizedWeight",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getExitFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getNumTokens",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getRebalancable",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getRebalancer",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "internalType": "address", "name": "tokenOut", "type": "address" }
+        ],
+        "name": "getSpotPrice",
+        "outputs": [{ "internalType": "uint256", "name": "spotPrice", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "internalType": "address", "name": "tokenOut", "type": "address" }
+        ],
+        "name": "getSpotPriceSansFee",
+        "outputs": [{ "internalType": "uint256", "name": "spotPrice", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getStreamingFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSwapFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTotalDenormalizedWeight",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getUnbinder",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+        "name": "gulp",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "dst", "type": "address" },
+            { "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "increaseApproval",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "controller", "type": "address" },
+            { "internalType": "address", "name": "rebalancer", "type": "address" },
+            { "internalType": "address", "name": "unbinder", "type": "address" },
+            { "internalType": "string", "name": "name", "type": "string" },
+            { "internalType": "string", "name": "symbol", "type": "string" }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "t", "type": "address" }],
+        "name": "isBound",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "isPublicSwap",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "t", "type": "address" }],
+        "name": "isReady",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "poolAmountOut", "type": "uint256" },
+            { "internalType": "uint256[]", "name": "maxAmountsIn", "type": "uint256[]" }
+        ],
+        "name": "joinPool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "name",
+        "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address[]", "name": "tokens", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "targetDenorms", "type": "uint256[]" },
+            { "internalType": "uint256[]", "name": "minBalances", "type": "uint256[]" }
+        ],
+        "name": "reindexTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address[]", "name": "tokens", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "targetDenorms", "type": "uint256[]" }
+        ],
+        "name": "reweighTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "exitFee", "type": "uint256" }],
+        "name": "setExitFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "token", "type": "address" },
+            { "internalType": "uint256", "name": "minBalance", "type": "uint256" }
+        ],
+        "name": "setMinBalance",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "bool", "name": "rebalancable", "type": "bool" }],
+        "name": "setRebalancable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "streamingFee", "type": "uint256" }],
+        "name": "setStreamingFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "swapFee", "type": "uint256" }],
+        "name": "setSwapFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "targetDelta", "type": "uint256" }],
+        "name": "setTargetDelta",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address[]", "name": "tokens", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "balances", "type": "uint256[]" },
+            { "internalType": "uint256[]", "name": "denorms", "type": "uint256[]" },
+            { "internalType": "address", "name": "tokenProvider", "type": "address" }
+        ],
+        "name": "setup",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "internalType": "uint256", "name": "tokenAmountIn", "type": "uint256" },
+            { "internalType": "address", "name": "tokenOut", "type": "address" },
+            { "internalType": "uint256", "name": "minAmountOut", "type": "uint256" },
+            { "internalType": "uint256", "name": "maxPrice", "type": "uint256" }
+        ],
+        "name": "swapExactAmountIn",
+        "outputs": [
+            { "internalType": "uint256", "name": "tokenAmountOut", "type": "uint256" },
+            { "internalType": "uint256", "name": "spotPriceAfter", "type": "uint256" }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "tokenIn", "type": "address" },
+            { "internalType": "uint256", "name": "maxAmountIn", "type": "uint256" },
+            { "internalType": "address", "name": "tokenOut", "type": "address" },
+            { "internalType": "uint256", "name": "tokenAmountOut", "type": "uint256" },
+            { "internalType": "uint256", "name": "maxPrice", "type": "uint256" }
+        ],
+        "name": "swapExactAmountOut",
+        "outputs": [
+            { "internalType": "uint256", "name": "tokenAmountIn", "type": "uint256" },
+            { "internalType": "uint256", "name": "spotPriceAfter", "type": "uint256" }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "dst", "type": "address" },
+            { "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "transfer",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "src", "type": "address" },
+            { "internalType": "address", "name": "dst", "type": "address" },
+            { "internalType": "uint256", "name": "amt", "type": "uint256" }
+        ],
+        "name": "transferFrom",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

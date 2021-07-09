@@ -9,7 +9,7 @@ import BundleTokenABI from '../../contracts/BundleToken.json';
 import { useWeb3React } from '@web3-react/core';
 import useContract from '../../hooks/useContract';
 import StakingCard from '../../components/StakingCard';
-import { TransactionResponse } from '@ethersproject/providers';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { errorMessage, txMessage, unlockMessage } from '../../components/Messages';
 
 const RowContainer = styled.div`
@@ -72,8 +72,8 @@ const RewardCard = styled.div`
     box-shadow: 0px 1px 8px #29292921;
     background-color: ${(props) => props.theme.white};
     z-index: 2;
-    border-radius: 3px;
-
+    border-radius: 15px;
+    overflow: hidden;
     margin: 10px 0px;
 
     p {
@@ -100,15 +100,15 @@ interface ClaimButtonProps {
 const ClaimButton = styled.div<ClaimButtonProps>`
     cursor: pointer;
     width: 100%;
-    padding: 15px 0px 5px 0px;
+    padding: 35px 0px 5px 0px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: ${(props) => (props.enabled ? props.theme.white : 'default')};
     background-color: ${(props) => (props.enabled ? props.theme.primary : props.theme.white)};
     z-index: 1;
-    margin-top: -3px;
-    border-radius: 3px;
+    margin-top: -23px;
+    border-radius: 15px;
 
     &:hover {
         background-color: ${(props) => (props.enabled ? props.theme.primaryDark : props.theme.white)};
@@ -196,7 +196,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                                 txMessage(tx);
                                                 return tx.wait(1);
                                             })
-                                            .then((tx: TransactionResponse) => {
+                                            .then((tx: TransactionReceipt) => {
                                                 unlockMessage(tx);
                                             })
                                             .catch((e: any) => {
@@ -218,11 +218,11 @@ const Landing: React.FC = (): React.ReactElement => {
                             <h1>Available Staking Options</h1>
                             <StakingCard
                                 image="/assets/logo.svg"
-                                imageSecondary="/assets/bnb_icon.png"
+                                imageSecondary="/assets/BNB.png"
                                 name="BDL-BNB"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
                                 pid="0"
-                                stakeToken="0x693e745700D278Bf7e180D3fD94FA1A740807926"
+                                stakeToken={getNamedAddress(chainId, 'BDLBNB')!}
                                 disabled={false}
                                 account={account!}
                             />
