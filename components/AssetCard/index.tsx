@@ -60,16 +60,16 @@ const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
                 <Row>
                     <Col xs={4} lg={3} style={{ alignItems: 'flex-start' }}>
                         <ImageContainer style={{ margin: '-5px 0px 0px -3px', alignItems: 'flex-start' }}>
-                            <img src={`/assets/${props.asset.symbol}.png`} width="50px" height="50px" />
+                            <img src={`/assets/${props.asset.symbol.toUpperCase()}.png`} width="50px" height="50px" />
                         </ImageContainer>
                     </Col>
-                    <Col xs={6} lg={4} style={{ alignItems: 'flex-start' }}>
-                        <Text>{props.asset.symbol}</Text>
+                    <Col xs={5} md={4} lg={4} style={{ alignItems: 'flex-start' }}>
+                        <Text>{props.asset.symbol.toUpperCase()}</Text>
                     </Col>
-                    <Col xs={6} md={5} lg={4} style={{ alignItems: 'flex-start' }}>
+                    <Col xs={9} md={9} lg={9} style={{ alignItems: 'flex-start' }}>
                         <Text>{`$${parseBalance(props.asset.price!)}`}</Text>
                     </Col>
-                    <Col xs={0} md={5} lg={9} style={{ alignItems: 'flex-end' }}>
+                    <Col xs={0} md={0} lg={3} style={{ alignItems: 'flex-end' }}>
                         <ProgressBar
                             progress={Math.round(
                                 props.asset.amount
@@ -80,7 +80,7 @@ const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             )}
                         />
                     </Col>
-                    <Col xs={6} md={4} lg={4} style={{ alignItems: 'center' }}>
+                    <Col xs={4} md={4} lg={5} style={{ alignItems: 'center' }}>
                         <Text style={{ color: '#E7694C' }}>{`${
                             Math.round(
                                 props.asset.amount

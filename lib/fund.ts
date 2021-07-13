@@ -13,7 +13,29 @@ export interface Fund {
 
 type NamedFunds = { [key: string]: Fund };
 
-const FUNDS: NamedFunds = {};
+const FUNDS: NamedFunds = {
+    bDEFI: {
+        name: 'bDeFi Index',
+        address: '0x9eea2a500455cb08bfdf20d1000a0b5cff63a495',
+        assets: ['UNI', 'LINK', 'SUSHI', 'COMP', 'CAKE', 'BIFI', 'ALPACA', 'MIR', 'CREAM'],
+        symbol: 'bDEFI',
+        description: 'A hyper-focused index containing market-leading cross-chain and BSC native DeFi protocols.',
+    },
+    bCHAIN: {
+        name: 'bChain Index',
+        address: '0x3e96f79a607d0d2199976c292f9cdf73991a3439',
+        assets: ['BTCB', 'ETH', 'WBNB', 'ADA', 'DOT'],
+        symbol: 'bCHAIN',
+        description: 'A hyper-focused index containing native assets of market-leading chains and high-cap protocols.',
+    },
+    bSTBL: {
+        name: 'bStable',
+        address: '0x934c7f600d6ee2fb60cdff61d1b9fc82c6b8c011',
+        assets: ['USDC', 'DAI', 'BUSD', 'USDT'],
+        symbol: 'bSTBL',
+        description: 'A risk-mitigated stable index of high-cap collateralized and algorithmic stablecoins.',
+    },
+};
 
 export const getFundByName = (name: string | undefined): Fund | undefined => {
     if (name) {
@@ -27,21 +49,37 @@ export const getAssets = async (fund: Fund | undefined, provider: any, setAssets
     }
 
     const assets: Asset[] = [];
+    const amounts: BigNumber[] = [];
     const bundle = new Contract(fund.address, Bundle, provider);
 
     const addresses = await bundle.getCurrentTokens();
 
+    const assetPromises = [];
+    const balancePromises = [];
+
     for (const address of addresses) {
-        const asset = await getAsset(address, provider);
-        asset.amount = await bundle.getBalance(address);
-        assets.push(asset);
+        assetPromises.push(getAsset(address, provider));
+        balancePromises.push(bundle.getBalance(address));
     }
 
+    await Promise.all(balancePromises).then((values) => {
+        values.forEach((a) => {
+            amounts.push(a);
+        });
+    });
+
+    await Promise.all(assetPromises).then((values) => {
+        values.forEach((a, i) => {
+            assets.push(a);
+            assets[i].amount = amounts[i];
+        });
+    });
+
     assets.sort((a: Asset, b: Asset): number => {
-        if (a.amount!.mul(a.price!) >= b.amount!.mul(b.price!)) {
+        if (a.amount!.mul(a.price!).gte(b.amount!.mul(b.price!))) {
             return -1;
         } else {
-            return 1;
+            return 0;
         }
     });
 

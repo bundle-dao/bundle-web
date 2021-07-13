@@ -6,19 +6,45 @@ import ERC20 from '../contracts/ERC20.json';
 import PancakeRouter from '../contracts/PancakeRouter.json';
 import { Token, Pair, TokenAmount } from '@pancakeswap/sdk';
 
-export const ROUTER = '0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3';
-export const PEG = '0xe25075950309995A6D18d7Dfd5B34EF02028F059';
+export const ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+export const PEG = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
+export const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+export const ETH = '0x2170ed0880ac9a755fd29b2688956bd959f933f8';
+export const UST = '0x23396cf899ca06c4472205fc903bdb4de249d6fc';
 
 export const SWAP_ASSETS: Asset[] = [
     {
         symbol: 'BUSD',
-        address: '0xe25075950309995A6D18d7Dfd5B34EF02028F059',
+        address: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
     },
     {
-        symbol: 'BNB',
-        address: '0xe25075950309995A6D18d7Dfd5B34EF02028F059',
+        symbol: 'WBNB',
+        address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
     },
 ];
+
+const SWAP_PATHS: { [key: string]: string[] } = {
+    WBNB: [PEG],
+    BTCB: [PEG],
+    ETH: [PEG],
+    DOT: [WBNB, PEG],
+    ADA: [WBNB, PEG],
+    UNI: [WBNB, PEG],
+    Cake: [PEG],
+    MIR: [UST, PEG],
+    COMP: [ETH, PEG],
+    SUSHI: [ETH, PEG],
+    LINK: [WBNB, PEG],
+    ALPACA: [PEG],
+    CREAM: [WBNB, PEG],
+    BIFI: [WBNB, PEG],
+    USDT: [ETH, PEG],
+    USDC: [PEG],
+    DAI: [PEG],
+    bDEFI: [PEG],
+    bSTBL: [PEG],
+    bCHAIN: [PEG],
+};
 
 export interface Asset {
     symbol: string;
@@ -44,7 +70,12 @@ export const getAsset = async (
     const token = new Contract(address, ERC20, provider);
     const router = new Contract(ROUTER, PancakeRouter, provider);
     const symbol = await token!.symbol();
-    const price = address == PEG ? parseEther('1') : (await router!.getAmountsOut(parseEther('1'), [address, PEG]))[1];
+    const price =
+        symbol == 'BUSD'
+            ? parseEther('1')
+            : (await router!.getAmountsOut(parseEther('1'), [address, ...SWAP_PATHS[symbol]]))[
+                  SWAP_PATHS[symbol].length
+              ];
     const asset: Asset = { symbol, price, address };
 
     if (loadCap) {

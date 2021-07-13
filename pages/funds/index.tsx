@@ -1,4 +1,3 @@
-import { RocketOutlined } from '@ant-design/icons';
 import { parseEther } from '@ethersproject/units';
 import { useWeb3React } from '@web3-react/core';
 import { Layout } from 'antd';
@@ -23,16 +22,16 @@ const Field = styled.span`
     color: ${(props) => props.theme.grey};
 `;
 
-const FUNDS: string[] = [];
+const FUNDS = ['bDEFI', 'bCHAIN', 'bSTBL'];
 
 const Landing: React.FC = (): React.ReactElement => {
     const { library } = useWeb3React();
 
     const funds: Fund[] = [];
-    const [fundAssets, setFundAssets] = useState<Record<string, Asset>>({});
+    const [fundAssets, setFundAssets] = useState<{ [key: string]: Asset }>({});
 
     const setFundAsset = (asset: Asset) => {
-        setFundAssets({ ...fundAssets, [asset.symbol]: asset });
+        setFundAssets({ ...fundAssets, [asset.address]: asset });
     };
 
     FUNDS.forEach((fund) => {
@@ -41,7 +40,7 @@ const Landing: React.FC = (): React.ReactElement => {
 
     useEffect(() => {
         funds.forEach((fund) => {
-            getAsset(fund.address, library, setFundAsset, true);
+            getAsset(fund.address, library, undefined, true).then((asset) => setFundAsset(asset));
         });
     }, [library]);
 
@@ -92,21 +91,7 @@ const Landing: React.FC = (): React.ReactElement => {
                 </Row>
                 <Row>
                     <Col span={24} mobilePadding="0px">
-                        <FundContainer>
-                            <div
-                                style={{
-                                    width: '100%',
-                                    height: '150px',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    padding: '20px 20px',
-                                }}
-                            >
-                                <RocketOutlined style={{ fontSize: '50px', paddingRight: '25px' }} />
-                                <h2 style={{ margin: '0px' }}>Coming soon, funds under construction!</h2>
-                            </div>
-                        </FundContainer>
+                        <FundContainer>{fundCards}</FundContainer>
                     </Col>
                 </Row>
             </RowContainer>
