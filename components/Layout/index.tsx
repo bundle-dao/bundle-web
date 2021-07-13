@@ -33,6 +33,7 @@ export const Row = styled(ARow)<RowProps>`
 interface ColProps {
     mobilePadding?: string;
     justify?: string;
+    align?: string;
     hideOnMobile?: boolean;
     padding?: string;
 }
@@ -41,12 +42,13 @@ export const Col = styled(ACol)<ColProps>`
     display: flex;
     flex-direction: column;
     justify-content: ${(props) => (props.justify ? props.justify : 'center')};
-    align-items: center;
+    align-items: ${(props) => (props.align ? props.align : 'center')};
     padding: ${(props) => (props.padding ? props.padding : '0px')};
 
     @media (max-width: 768px) {
         padding: ${(props) => (props.mobilePadding ? props.mobilePadding : '0px')};
         justify-content: center;
+        align-items: center;
         display: ${(props) => (props.hideOnMobile ? 'none' : 'default')};
     }
 `;

@@ -10,6 +10,7 @@ import { parseEther } from '@ethersproject/units';
 interface Props {
     asset: Asset;
     nav: BigNumber;
+    index: number;
 }
 
 interface ProgressBarProps {
@@ -55,7 +56,7 @@ const ProgressBar: React.FC<ProgressBarProps> = (props: ProgressBarProps): React
 
 const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
-        <Col xs={24} md={12} padding="0px 15px 0px 0px" mobilePadding="0px">
+        <Col xs={24} md={12} padding={props.index % 2 == 0 ? '0px 15px 0px 0px' : '0px'} mobilePadding="0px">
             <Card style={{ height: '40px' }}>
                 <Row>
                     <Col xs={4} lg={3} style={{ alignItems: 'flex-start' }}>

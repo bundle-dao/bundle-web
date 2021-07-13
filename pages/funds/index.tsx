@@ -44,10 +44,10 @@ const Landing: React.FC = (): React.ReactElement => {
         console.log(fetchPromises);
         console.log(funds);
 
-        Promise.all(fetchPromises).then(values => {
+        Promise.all(fetchPromises).then((values) => {
             const newFundAssets: { [key: string]: Asset } = {};
 
-            values.forEach(value => {
+            values.forEach((value) => {
                 newFundAssets[value.symbol] = value;
             });
 

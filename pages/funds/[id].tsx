@@ -92,7 +92,7 @@ const Landing: React.FC = (): React.ReactElement => {
         }
     }, [fundAsset, assets]);
 
-    const assetCards = assets.map((asset) => <AssetCard asset={asset} nav={nav} />);
+    const assetCards = assets.map((asset, index) => <AssetCard asset={asset} nav={nav} index={index} />);
 
     return (
         <Layout.Content>
@@ -147,14 +147,14 @@ const Landing: React.FC = (): React.ReactElement => {
                         </Text>
                     </Col>
                 </Row>
-                <Row>
+                <Row gutter={15}>
                     <Col
                         xs={{ order: 2, span: 24 }}
                         lg={{ order: 1, span: 16 }}
                         style={{ justifyContent: 'flex-start' }}
                     >
                         <Row>
-                            <Col span={24} padding="0px 15px 0px 0px" mobilePadding="0px">
+                            <Col span={24} padding="0px" mobilePadding="0px">
                                 <Card
                                     style={{
                                         height: '500px',
@@ -170,7 +170,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </Card>
                             </Col>
                         </Row>
-                        <Row>{assetCards}</Row>
+                        <Row justify="space-between">{assetCards}</Row>
                     </Col>
                     <Col
                         xs={{ order: 1, span: 24 }}

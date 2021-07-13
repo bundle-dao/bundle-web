@@ -225,6 +225,8 @@ const Landing: React.FC = (): React.ReactElement => {
                                 stakeToken={getNamedAddress(chainId, 'BDLBNB')!}
                                 disabled={false}
                                 account={account!}
+                                tokenA="0x7ff78e1cab9a2710eb6486ecbf3d94d125039364"
+                                tokenB="BNB"
                             />
                         </StakingContainer>
                     </StakingCol>

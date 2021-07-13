@@ -21,6 +21,7 @@ import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
 import { formatUnits, parseEther } from '@ethersproject/units';
 import { TransactionReceipt } from '@ethersproject/providers';
+import { Col as BdlCol } from '../Layout';
 
 interface Props {
     image: string;
@@ -31,6 +32,8 @@ interface Props {
     stakeToken: string;
     account: string | undefined;
     disabled?: boolean;
+    tokenA?: string;
+    tokenB?: string;
 }
 
 interface StakingDisplayProps {
@@ -147,6 +150,10 @@ const HideOnMobile = styled.div`
     }
 `;
 
+const LiquidityText = styled.span`
+    color: ${(props) => props.theme.primary};
+`;
+
 const getApyApr = async (
     pid: string,
     setApy: React.Dispatch<React.SetStateAction<string>>,
@@ -244,7 +251,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
             </StakingInfoRow>
             <StakingDisplay expanded={expanded}>
                 <Divider style={{ margin: '5px 0px' }} />
-                <Row justify="center" style={{ padding: '10px 20px' }}>
+                <Row justify="center" style={{ padding: '10px 20px 0px 20px' }}>
                     <Col xs={24} sm={24} md={5} flex="">
                         <Text style={{ margin: '0px' }}>Available: {`${parseBalance(unstakedBalance) || '0.00'}`}</Text>
                         <InputNumber
@@ -448,6 +455,21 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         </FilledButton>
                     </Col>
                 </Row>
+                {props.tokenA && props.tokenB ? (
+                    <Row style={{ padding: '0px 20px 10px 20px', marginTop: '-10px' }}>
+                        <BdlCol align="flex-start" span={24} padding="5px 0px 0px 0px" mobilePadding="10px 0px 0px 0px">
+                            <a
+                                href={`https://exchange.pancakeswap.finance/#/add/${props.tokenA}/${props.tokenB}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <LiquidityText>Add Liquidity</LiquidityText>
+                            </a>
+                        </BdlCol>
+                    </Row>
+                ) : (
+                    <></>
+                )}
             </StakingDisplay>
         </StakingCardContainer>
     );
