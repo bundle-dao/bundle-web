@@ -69,7 +69,7 @@ const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <Col xs={9} md={9} lg={9} style={{ alignItems: 'flex-start' }}>
                         <Text>{`$${parseBalance(props.asset.price!)}`}</Text>
                     </Col>
-                    <Col xs={0} md={0} lg={3} style={{ alignItems: 'flex-end' }}>
+                    <Col xs={0} md={0} lg={3} style={{ alignItems: 'center' }}>
                         <ProgressBar
                             progress={Math.round(
                                 props.asset.amount

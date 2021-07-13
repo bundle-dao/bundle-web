@@ -30,17 +30,28 @@ const Landing: React.FC = (): React.ReactElement => {
     const funds: Fund[] = [];
     const [fundAssets, setFundAssets] = useState<{ [key: string]: Asset }>({});
 
-    const setFundAsset = (asset: Asset) => {
-        setFundAssets({ ...fundAssets, [asset.address]: asset });
-    };
-
     FUNDS.forEach((fund) => {
         funds.push(getFundByName(fund)!);
     });
 
     useEffect(() => {
+        const fetchPromises: Promise<any>[] = [];
+
         funds.forEach((fund) => {
-            getAsset(fund.address, library, undefined, true).then((asset) => setFundAsset(asset));
+            fetchPromises.push(getAsset(fund.address, library, undefined, true));
+        });
+
+        console.log(fetchPromises);
+        console.log(funds);
+
+        Promise.all(fetchPromises).then(values => {
+            const newFundAssets: { [key: string]: Asset } = {};
+
+            values.forEach(value => {
+                newFundAssets[value.symbol] = value;
+            });
+
+            setFundAssets(newFundAssets);
         });
     }, [library]);
 
