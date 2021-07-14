@@ -26,24 +26,25 @@ export const SWAP_ASSETS: Asset[] = [
 const SWAP_PATHS: { [key: string]: string[] } = {
     WBNB: [PEG],
     BTCB: [PEG],
-    ETH: [PEG],
+    ETH: [WBNB, PEG],
     DOT: [WBNB, PEG],
     ADA: [WBNB, PEG],
     UNI: [WBNB, PEG],
     Cake: [PEG],
     MIR: [UST, PEG],
-    COMP: [ETH, PEG],
+    COMP: [ETH, WBNB, PEG],
     SUSHI: [ETH, PEG],
     LINK: [WBNB, PEG],
     ALPACA: [PEG],
     CREAM: [WBNB, PEG],
     BIFI: [WBNB, PEG],
-    USDT: [ETH, PEG],
+    USDT: [PEG],
     USDC: [PEG],
     DAI: [PEG],
     bDEFI: [PEG],
     bSTBL: [PEG],
     bCHAIN: [PEG],
+    BDL: [WBNB, PEG],
 };
 
 export interface Asset {
@@ -75,7 +76,9 @@ export const getAsset = async (
             ? parseEther('1')
             : (await router!.getAmountsOut(parseEther('1'), [address, ...SWAP_PATHS[symbol]]))[
                   SWAP_PATHS[symbol].length
-              ];
+              ]
+                  .mul(10000)
+                  .div(9975);
     const asset: Asset = { symbol, price, address };
 
     if (loadCap) {

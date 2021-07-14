@@ -81,6 +81,7 @@ export const BURN = 'BURN';
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
+    const [disabled, setDisabled] = useState(false);
 
     const approvals: (boolean | undefined)[] = [];
 
@@ -221,7 +222,15 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Col span={24}>
                             <Outline
                                 style={{ width: '100%' }}
-                                disabled={!props.fund || (props.isMinting && approvals.reduce((a, b) => a && !b, true))}
+                                disabled={
+                                    !props.fund ||
+                                    (props.isMinting && approvals.reduce((a, b) => a && !b, true)) ||
+                                    (!props.isMinting &&
+                                        (!fundBalance ||
+                                            fundAmount.lte(BigNumber.from('0')) ||
+                                            !fundAmount.lte(fundBalance))) ||
+                                    disabled
+                                }
                                 onClick={() => {
                                     if (props.isMinting) {
                                         fundContract
