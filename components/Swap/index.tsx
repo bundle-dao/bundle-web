@@ -312,7 +312,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                         <></>
                     ) : (
                         <Row style={{ paddingTop: '15px', display: 'flex', justifyContent: 'center' }}>
-                            <PriceImpact>{`Fee + Impact: ${
+                            <PriceImpact>{`Fee + Price Impact: ${
                                 priceImpact.lessThan(minThreshold) ? '<0.01' : priceImpact.toFixed(2)
                             }%`}</PriceImpact>
                         </Row>
