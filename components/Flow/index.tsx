@@ -192,7 +192,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
                                             newAmounts.forEach((_, idx) => {
                                                 newAmounts[idx] = props.isMinting
-                                                    ? portion.mul(props.assets[idx].amount!).div(parseEther('1'))
+                                                    ? portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(10001).div(10000)
                                                     : portion
                                                           .mul(props.assets[idx].amount!)
                                                           .div(parseEther('1'))
