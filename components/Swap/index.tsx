@@ -104,6 +104,8 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const assetApproved = useApproved(assetContract, ROUTER).data;
     const fundApproved = useApproved(fundContract, ROUTER).data;
 
+    const [swapCounter, setSwapCounter] = useState(0);
+
     // PCS data
     const token: Token | undefined = useToken(chainId, asset);
     const fundToken: Token | undefined = useToken(chainId, props.fund);
@@ -116,7 +118,6 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     useEffect(() => {
         getPairAmounts(token, fundToken, library, chainId).then((amounts: TokenAmount[]) => {
             if (token && fundToken && amounts.length == 2) {
-                const pair = new Pair(amounts[0], amounts[1]);
                 setBasePair(new Pair(amounts[0], amounts[1]));
                 setPair(new Pair(amounts[0], amounts[1]));
             }
@@ -175,7 +176,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             setAssetAmount(parseEther(value));
                                             const tokenAmountIn = new TokenAmount(token!, parseEther(value).toString());
 
-                                            if (basePair && selected == BUY) {
+                                            if (value != '0' && basePair && selected == BUY) {
                                                 const [tokenOut, pairOut] = basePair.getOutputAmount(tokenAmountIn);
                                                 const price =
                                                     basePair.token0.symbol == asset.symbol
@@ -184,7 +185,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                                 setPriceImpact(computePriceImpact(price, tokenAmountIn, tokenOut));
-                                            } else if (basePair && selected == SELL) {
+                                            } else if (value != '0' && basePair && selected == SELL) {
                                                 const [tokenOut, pairOut] = basePair.getInputAmount(tokenAmountIn);
                                                 const price =
                                                     basePair.token1.symbol == asset.symbol
@@ -255,7 +256,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 parseEther(value).toString()
                                             );
 
-                                            if (basePair && selected == SELL) {
+                                            if (value != '0' && basePair && selected == SELL) {
                                                 const [tokenOut, pairOut] = basePair.getOutputAmount(tokenAmountIn);
                                                 const price =
                                                     basePair.token0.symbol == fundToken?.symbol
@@ -264,7 +265,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
                                                 setPriceImpact(computePriceImpact(price, tokenAmountIn, tokenOut));
-                                            } else if (basePair && selected == BUY) {
+                                            } else if (value != '0' && basePair && selected == BUY) {
                                                 const [tokenOut, pairOut] = basePair.getInputAmount(tokenAmountIn);
                                                 const price =
                                                     basePair.token1.symbol == fundToken?.symbol
@@ -308,7 +309,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                             }`}</Field>
                         </Col>
                     </Row>
-                    {priceImpact.toFixed(2) == '0.00' || priceImpact.greaterThan(threshold) ? (
+                    {priceImpact.toFixed(2) == '0.00' ? (
                         <></>
                     ) : (
                         <Row style={{ paddingTop: '15px', display: 'flex', justifyContent: 'center' }}>
@@ -347,6 +348,10 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                         })
                                         .then((tx: TransactionReceipt) => {
                                             swapMessage(tx);
+                                            setFundAmount(BigNumber.from(0));
+                                            setAssetAmount(BigNumber.from(0));
+                                            setSwapCounter(swapCounter + 1);
+                                            setPriceImpact(new Percent('0', '100'));
                                         })
                                         .catch((e: any) => {
                                             errorMessage(e.message || e.data.message);
@@ -366,6 +371,10 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                         })
                                         .then((tx: TransactionReceipt) => {
                                             swapMessage(tx);
+                                            setFundAmount(BigNumber.from(0));
+                                            setAssetAmount(BigNumber.from(0));
+                                            setSwapCounter(swapCounter + 1);
+                                            setPriceImpact(new Percent('0', '100'));
                                         })
                                         .catch((e: any) => {
                                             errorMessage(e.message || e.data.message);

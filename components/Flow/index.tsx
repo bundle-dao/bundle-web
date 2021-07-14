@@ -75,6 +75,14 @@ const Field = styled.span`
     color: ${(props) => props.theme.grey};
 `;
 
+const Primary = styled.span`
+    color: ${(props) => props.theme.primary};
+
+    &:hover {
+        cursor: pointer;
+    }
+`;
+
 export const MINT = 'MINT';
 export const BURN = 'BURN';
 
@@ -94,6 +102,23 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const fundContract = useContract(props.fund?.address, Bundle, true);
     const fundBalance = useRawBalance(fundContract).data;
+
+    const fundAdjustAmounts = (amount: BigNumber) => {
+        setFundAmount(amount);
+
+        if (props.fundAsset && props.assets.length > 0) {
+            const newAmounts = [...amounts];
+            const portion = amount.mul(parseEther('1')).div(props.fundAsset.cap!);
+
+            newAmounts.forEach((_, idx) => {
+                newAmounts[idx] = props.isMinting
+                    ? portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(10001).div(10000)
+                    : portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(980).div(1000);
+            });
+
+            setAmounts(newAmounts);
+        }
+    };
 
     useEffect(() => {
         setAmounts(Array(props.assets.length).fill(BigNumber.from('0')));
@@ -184,24 +209,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                     value={formatUnits(fundAmount, 18)}
                                     onChange={(value) => {
                                         const parsedValue = parseEther(value ? value : '0');
-                                        setFundAmount(parsedValue);
-
-                                        if (props.fundAsset && props.assets.length > 0) {
-                                            const newAmounts = [...amounts];
-                                            const portion = parsedValue.mul(parseEther('1')).div(props.fundAsset.cap!);
-
-                                            newAmounts.forEach((_, idx) => {
-                                                newAmounts[idx] = props.isMinting
-                                                    ? portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(10001).div(10000)
-                                                    : portion
-                                                          .mul(props.assets[idx].amount!)
-                                                          .div(parseEther('1'))
-                                                          .mul(980)
-                                                          .div(1000);
-                                            });
-
-                                            setAmounts(newAmounts);
-                                        }
+                                        fundAdjustAmounts(parsedValue);
                                     }}
                                     disabled={
                                         props.assets.reduce((a: boolean, b: Asset) => {
@@ -218,10 +226,39 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                 </TextBold>
                             </InputContainer>
                         </Col>
-                        <Col span={24} style={{ alignItems: 'flex-start', paddingLeft: '10px', marginBottom: '10px' }}>
+                        <Col span={12} style={{ alignItems: 'flex-start', paddingLeft: '10px', marginBottom: '10px' }}>
                             <Field>{`Balance: ${fundBalance ? parseBalance(fundBalance) : '0.00'} ${
                                 props.fund ? props.fund.symbol : '...'
                             }`}</Field>
+                        </Col>
+                        <Col span={12} style={{ alignItems: 'flex-end', paddingRight: '10px', marginBottom: '10px' }}>
+                            <Primary
+                                onClick={() => {
+                                    if (props.isMinting && balances.length > 0 && props.fundAsset) {
+                                        let min = BigNumber.from(
+                                            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                        );
+                                        balances.forEach((bal, i) => {
+                                            if (props.assets.length > 0) {
+                                                const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
+                                                const fundAmount = portion
+                                                    .mul(props.fundAsset!.cap!)
+                                                    .div(parseEther('1'))
+                                                    .mul(10000)
+                                                    .div(10001);
+                                                if (min.gte(fundAmount)) {
+                                                    min = fundAmount;
+                                                }
+                                            }
+                                        });
+                                        fundAdjustAmounts(min);
+                                    } else {
+                                        fundAdjustAmounts(fundBalance);
+                                    }
+                                }}
+                            >
+                                Max
+                            </Primary>
                         </Col>
                         <Col span={24}>
                             <Outline
