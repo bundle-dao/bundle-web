@@ -15,7 +15,7 @@ import Outline from '../Button/Outline';
 import Card from '../Card';
 import { Col, Row } from '../Layout';
 import { approveMessage, errorMessage, swapMessage, txMessage } from '../Messages';
-import { Token, Pair, TokenAmount } from '@pancakeswap/sdk';
+import { Token, Pair, TokenAmount, Price, CurrencyAmount, Percent, Fraction } from '@pancakeswap/sdk';
 import { useWeb3React } from '@web3-react/core';
 import useToken from '../../hooks/pcs';
 import useContract from '../../hooks/useContract';
@@ -68,9 +68,20 @@ const InputContainer = styled.div`
     margin 10px 0px 5px 0px;
 `;
 
+const PriceImpact = styled.span`
+    color: ${(props) => props.theme.primary};
+`;
+
 const Field = styled.span`
     color: ${(props) => props.theme.grey};
 `;
+
+const computePriceImpact = (midPrice: Price, inputAmount: TokenAmount, outputAmount: TokenAmount): Percent => {
+    const exactQuote = midPrice.raw.multiply(inputAmount.raw);
+    // calculate slippage := (exactQuote - outputAmount) / exactQuote
+    const slippage = exactQuote.subtract(outputAmount.raw).divide(exactQuote);
+    return new Percent(slippage.numerator, slippage.denominator);
+};
 
 const BUY = 'BUY';
 const SELL = 'SELL';
@@ -81,6 +92,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const [asset, setAsset] = useState(props.assets[0]);
     const [assetAmount, setAssetAmount] = useState(BigNumber.from(0));
     const [fundAmount, setFundAmount] = useState(BigNumber.from(0));
+    const [priceImpact, setPriceImpact] = useState(new Percent('0', '100'));
 
     const router = useContract(ROUTER, PancakeRouter, true);
 
@@ -97,6 +109,9 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
     const fundToken: Token | undefined = useToken(chainId, props.fund);
     const [pair, setPair] = useState<Pair>();
     const [basePair, setBasePair] = useState<Pair>();
+
+    const threshold = new Fraction('5', '100');
+    const minThreshold = new Fraction('1', '10000');
 
     useEffect(() => {
         getPairAmounts(token, fundToken, library, chainId).then((amounts: TokenAmount[]) => {
@@ -158,32 +173,40 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                         try {
                                             value = value ? value : '0';
                                             setAssetAmount(parseEther(value));
+                                            const tokenAmountIn = new TokenAmount(token!, parseEther(value).toString());
 
                                             if (basePair && selected == BUY) {
-                                                const [tokenOut, pairOut] = basePair.getOutputAmount(
-                                                    new TokenAmount(token!, parseEther(value).toString())
-                                                );
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(tokenAmountIn);
+                                                const price =
+                                                    basePair.token0.symbol == asset.symbol
+                                                        ? basePair?.token0Price
+                                                        : basePair?.token1Price;
                                                 setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
+                                                setPriceImpact(computePriceImpact(price, tokenAmountIn, tokenOut));
                                             } else if (basePair && selected == SELL) {
-                                                const [tokenOut, pairOut] = basePair.getInputAmount(
-                                                    new TokenAmount(token!, parseEther(value).toString())
-                                                );
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(tokenAmountIn);
+                                                const price =
+                                                    basePair.token1.symbol == asset.symbol
+                                                        ? basePair?.token0Price
+                                                        : basePair?.token1Price;
                                                 setFundAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
+                                                setPriceImpact(computePriceImpact(price, tokenOut, tokenAmountIn));
                                             } else {
                                                 setFundAmount(parseEther('0'));
+                                                setPriceImpact(new Percent('0', '100'));
                                             }
 
                                             setAssetAmount(parseEther(value));
                                         } catch (e) {
                                             setFundAmount(parseEther('0'));
+                                            setPriceImpact(new Percent('0', '100'));
                                         }
                                     }}
                                     disabled={
                                         props.disabled ||
-                                        !assetBalance ||
-                                        assetBalance <= BigNumber.from(0) ||
+                                        (assetBalance <= BigNumber.from(0) && selected == BUY) ||
                                         !props.account ||
                                         !pair
                                     }
@@ -227,30 +250,41 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                         try {
                                             value = value ? value : '0';
                                             setFundAmount(parseEther(value));
+                                            const tokenAmountIn = new TokenAmount(
+                                                fundToken!,
+                                                parseEther(value).toString()
+                                            );
 
                                             if (basePair && selected == SELL) {
-                                                const [tokenOut, pairOut] = basePair.getOutputAmount(
-                                                    new TokenAmount(fundToken!, parseEther(value).toString())
-                                                );
+                                                const [tokenOut, pairOut] = basePair.getOutputAmount(tokenAmountIn);
+                                                const price =
+                                                    basePair.token0.symbol == fundToken?.symbol
+                                                        ? basePair?.token0Price
+                                                        : basePair?.token1Price;
                                                 setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
+                                                setPriceImpact(computePriceImpact(price, tokenAmountIn, tokenOut));
                                             } else if (basePair && selected == BUY) {
-                                                const [tokenOut, pairOut] = basePair.getInputAmount(
-                                                    new TokenAmount(fundToken!, parseEther(value).toString())
-                                                );
+                                                const [tokenOut, pairOut] = basePair.getInputAmount(tokenAmountIn);
+                                                const price =
+                                                    basePair.token1.symbol == fundToken?.symbol
+                                                        ? basePair?.token0Price
+                                                        : basePair?.token1Price;
                                                 setAssetAmount(BigNumber.from(tokenOut.numerator.toString()));
                                                 setPair(pairOut);
+                                                setPriceImpact(computePriceImpact(price, tokenOut, tokenAmountIn));
                                             } else {
                                                 setAssetAmount(parseEther('0'));
+                                                setPriceImpact(new Percent('0', '100'));
                                             }
                                         } catch (e) {
                                             setAssetAmount(parseEther('0'));
+                                            setPriceImpact(new Percent('0', '100'));
                                         }
                                     }}
                                     disabled={
                                         props.disabled ||
-                                        !fundBalance ||
-                                        fundBalance <= BigNumber.from(0) ||
+                                        (fundBalance <= BigNumber.from(0) && selected == SELL) ||
                                         !props.account ||
                                         !props.fund
                                     }
@@ -274,10 +308,29 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                             }`}</Field>
                         </Col>
                     </Row>
+                    {priceImpact.toFixed(2) == '0.00' || priceImpact.greaterThan(threshold) ? (
+                        <></>
+                    ) : (
+                        <Row style={{ paddingTop: '15px', display: 'flex', justifyContent: 'center' }}>
+                            <PriceImpact>{`Fee + Price Impact: ${
+                                priceImpact.lessThan(minThreshold) ? '<0.01' : priceImpact.toFixed(2)
+                            }%`}</PriceImpact>
+                        </Row>
+                    )}
                     <Row style={{ paddingTop: '15px', display: 'flex', justifyContent: 'center' }}>
                         <Outline
                             style={{ width: '100%' }}
-                            disabled={!fundToken || !router || !token || !account}
+                            disabled={
+                                !fundToken ||
+                                !router ||
+                                !token ||
+                                !account ||
+                                priceImpact.greaterThan(threshold) ||
+                                (selected == BUY && assetAmount.lte(BigNumber.from('0'))) ||
+                                (selected == SELL && fundAmount.lte(BigNumber.from('0'))) ||
+                                (selected == BUY && !assetAmount.lte(assetAmount)) ||
+                                (selected == SELL && !fundAmount.lte(fundBalance))
+                            }
                             onClick={() => {
                                 if (selected == BUY && assetApproved) {
                                     router
@@ -296,7 +349,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else if (selected == SELL && fundApproved) {
                                     router
@@ -315,7 +368,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else {
                                     if (selected == BUY) {
@@ -334,7 +387,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     } else {
                                         fundContract
@@ -352,7 +405,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     }
                                 }

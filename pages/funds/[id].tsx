@@ -92,7 +92,15 @@ const Landing: React.FC = (): React.ReactElement => {
         }
     }, [fundAsset, assets]);
 
-    const assetCards = assets.map((asset) => <AssetCard asset={asset} nav={nav} />);
+    const assetCards = [...assets]
+        .sort((a: Asset, b: Asset): number => {
+            if (a.amount!.mul(a.price!).gte(b.amount!.mul(b.price!))) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+        .map((asset, index) => <AssetCard asset={asset} nav={nav} index={index} />);
 
     return (
         <Layout.Content>
@@ -104,7 +112,22 @@ const Landing: React.FC = (): React.ReactElement => {
                         </Link>
                     </Col>
                     <Col xs={{ span: 22, push: 1 }} md={{ span: 9, push: 0 }} style={{ alignItems: 'flex-start' }}>
-                        <h2 style={{ marginBottom: '0px' }}>{fund ? fund.name : '...'}</h2>
+                        <h2 style={{ marginBottom: '0px' }}>
+                            {fund ? fund.name : '...'}
+                            <a
+                                href={`https://bscscan.com/address/${fund ? fund.address : ''}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    fontWeight: 100,
+                                    fontSize: '13px',
+                                    paddingLeft: '5px',
+                                    color: 'rgba(0, 0, 0, 0.85)',
+                                }}
+                            >
+                                {fund ? '- ' + fund.address : '...'}
+                            </a>
+                        </h2>
                         <span style={{ marginBottom: '0px' }}>{fund ? fund.description : '...'}</span>
                     </Col>
                     <Col xs={12} md={3} style={{ justifyContent: 'flex-end' }} mobilePadding="15px 0px 0px 0px">
@@ -132,14 +155,14 @@ const Landing: React.FC = (): React.ReactElement => {
                         </Text>
                     </Col>
                 </Row>
-                <Row>
+                <Row gutter={15}>
                     <Col
                         xs={{ order: 2, span: 24 }}
                         lg={{ order: 1, span: 16 }}
                         style={{ justifyContent: 'flex-start' }}
                     >
                         <Row>
-                            <Col span={24} padding="0px 15px 0px 0px" mobilePadding="0px">
+                            <Col span={24} padding="0px" mobilePadding="0px">
                                 <Card
                                     style={{
                                         height: '500px',
@@ -147,6 +170,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                         flexDirection: 'column',
                                         justifyContent: 'center',
                                         alignItems: 'center',
+                                        padding: '20px',
                                     }}
                                 >
                                     <RocketOutlined style={{ fontSize: '50px', paddingBottom: '25px' }} />
@@ -154,7 +178,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </Card>
                             </Col>
                         </Row>
-                        <Row>{assetCards}</Row>
+                        <Row justify="space-between">{assetCards}</Row>
                     </Col>
                     <Col
                         xs={{ order: 1, span: 24 }}

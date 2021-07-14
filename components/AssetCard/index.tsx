@@ -10,6 +10,7 @@ import { parseEther } from '@ethersproject/units';
 interface Props {
     asset: Asset;
     nav: BigNumber;
+    index: number;
 }
 
 interface ProgressBarProps {
@@ -55,21 +56,21 @@ const ProgressBar: React.FC<ProgressBarProps> = (props: ProgressBarProps): React
 
 const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
-        <Col xs={24} md={12} padding="0px 15px 0px 0px" mobilePadding="0px">
+        <Col xs={24} md={12} padding={props.index % 2 == 0 ? '0px 15px 0px 0px' : '0px'} mobilePadding="0px">
             <Card style={{ height: '40px' }}>
                 <Row>
                     <Col xs={4} lg={3} style={{ alignItems: 'flex-start' }}>
                         <ImageContainer style={{ margin: '-5px 0px 0px -3px', alignItems: 'flex-start' }}>
-                            <img src={`/assets/${props.asset.symbol}.png`} width="50px" height="50px" />
+                            <img src={`/assets/${props.asset.symbol.toUpperCase()}.png`} width="50px" height="50px" />
                         </ImageContainer>
                     </Col>
-                    <Col xs={6} lg={4} style={{ alignItems: 'flex-start' }}>
-                        <Text>{props.asset.symbol}</Text>
+                    <Col xs={5} md={4} lg={4} style={{ alignItems: 'flex-start' }}>
+                        <Text>{props.asset.symbol.toUpperCase()}</Text>
                     </Col>
-                    <Col xs={6} md={5} lg={4} style={{ alignItems: 'flex-start' }}>
+                    <Col xs={9} md={9} lg={9} style={{ alignItems: 'flex-start' }}>
                         <Text>{`$${parseBalance(props.asset.price!)}`}</Text>
                     </Col>
-                    <Col xs={0} md={5} lg={9} style={{ alignItems: 'flex-end' }}>
+                    <Col xs={0} md={0} lg={3} style={{ alignItems: 'center' }}>
                         <ProgressBar
                             progress={Math.round(
                                 props.asset.amount
@@ -80,7 +81,7 @@ const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             )}
                         />
                     </Col>
-                    <Col xs={6} md={4} lg={4} style={{ alignItems: 'center' }}>
+                    <Col xs={4} md={4} lg={5} style={{ alignItems: 'center' }}>
                         <Text style={{ color: '#E7694C' }}>{`${
                             Math.round(
                                 props.asset.amount

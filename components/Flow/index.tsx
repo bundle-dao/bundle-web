@@ -81,11 +81,15 @@ export const BURN = 'BURN';
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
+    const [disabled, setDisabled] = useState(false);
 
     const approvals: (boolean | undefined)[] = [];
+    const balances: (BigNumber | undefined)[] = [];
 
     props.assets.forEach((asset) => {
-        approvals.push(useApproved(useERC20Contract(asset.address, true), props.fund?.address).data);
+        const assetContract = useERC20Contract(asset.address, true);
+        approvals.push(useApproved(assetContract, props.fund?.address).data);
+        balances.push(useRawBalance(assetContract).data);
     });
 
     const fundContract = useContract(props.fund?.address, Bundle, true);
@@ -105,10 +109,13 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                 value={amounts[index]}
                 fund={props.fund}
                 approved={approvals[index]}
+                balance={balances[index]}
                 disabled={
                     props.assets.reduce((a: boolean, b: Asset) => {
                         return a || !b.amount || b.amount?.isZero();
-                    }, false) || !props.fundAsset
+                    }, false) ||
+                    !props.fundAsset ||
+                    true
                 }
                 setValue={(value: BigNumber) => {
                     const newAmounts = [...amounts];
@@ -197,11 +204,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                         }
                                     }}
                                     disabled={
-                                        props.isMinting ||
                                         props.assets.reduce((a: boolean, b: Asset) => {
                                             return a || !b.amount || b.amount?.isZero();
-                                        }, false) ||
-                                        !props.fundAsset
+                                        }, false) || !props.fundAsset
                                     }
                                     size="large"
                                 />
@@ -221,7 +226,21 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Col span={24}>
                             <Outline
                                 style={{ width: '100%' }}
-                                disabled={!props.fund || (props.isMinting && approvals.reduce((a, b) => a && !b, true))}
+                                disabled={
+                                    !props.fund ||
+                                    fundAmount.isZero() ||
+                                    (props.isMinting && approvals.reduce((a, b) => a && !b, true)) ||
+                                    (props.isMinting &&
+                                        balances.reduce(
+                                            (a: boolean, b: BigNumber | undefined, index: number) =>
+                                                a || !b || !amounts[index] || !amounts[index].lte(b),
+                                            false
+                                        )) ||
+                                    (!props.isMinting &&
+                                        (!fundBalance ||
+                                            fundAmount.lte(BigNumber.from('0')) ||
+                                            !fundAmount.lte(fundBalance)))
+                                }
                                 onClick={() => {
                                     if (props.isMinting) {
                                         fundContract
@@ -234,7 +253,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 mintMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     } else {
                                         fundContract
@@ -250,7 +269,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 burnMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     }
                                 }}

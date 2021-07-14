@@ -225,6 +225,44 @@ const Landing: React.FC = (): React.ReactElement => {
                                 stakeToken={getNamedAddress(chainId, 'BDLBNB')!}
                                 disabled={false}
                                 account={account!}
+                                tokenA="0x7ff78e1cab9a2710eb6486ecbf3d94d125039364"
+                                tokenB="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+                            />
+                            <StakingCard
+                                image="/assets/logo.svg"
+                                imageSecondary="/assets/BUSD.png"
+                                name="bDEFI-BUSD"
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
+                                pid="1"
+                                stakeToken={'0x107a78f4e90141bb4aacdb6b4c903f27baf43e58'}
+                                disabled={true}
+                                account={account!}
+                                tokenA="0x9eeA2a500455cb08BfdF20D1000a0B5CFF63A495"
+                                tokenB="0xe9e7cea3dedca5984780bafc599bd69add087d56"
+                            />
+                            <StakingCard
+                                image="/assets/logo.svg"
+                                imageSecondary="/assets/BUSD.png"
+                                name="bCHAIN-BUSD"
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
+                                pid="2"
+                                stakeToken={'0x3666d1eE816852A6BD08196243567D3945058E40'}
+                                disabled={true}
+                                account={account!}
+                                tokenA="0x3E96F79a607d0d2199976c292f9CDF73991A3439"
+                                tokenB="0xe9e7cea3dedca5984780bafc599bd69add087d56"
+                            />
+                            <StakingCard
+                                image="/assets/logo.svg"
+                                imageSecondary="/assets/BUSD.png"
+                                name="bSTBL-BUSD"
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
+                                pid="3"
+                                stakeToken={'0xaF748cE79E2c966a660A34c803e63A3e6553E670'}
+                                disabled={true}
+                                account={account!}
+                                tokenA="0x934C7F600d6eE2fb60CdFf61d1b9fC82C6b8C011"
+                                tokenB="0xe9e7cea3dedca5984780bafc599bd69add087d56"
                             />
                         </StakingContainer>
                     </StakingCol>

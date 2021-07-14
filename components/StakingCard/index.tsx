@@ -1,18 +1,18 @@
 import { useWeb3React } from '@web3-react/core';
 import Divider from 'antd/lib/divider';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useContract from '../../hooks/useContract';
 import { formatNumber, getNamedAddress, parseBalance } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
 import MinterABI from '../../contracts/Minter.json';
+import PairABI from '../../contracts/Pair.json';
 import useStakedBalance from '../../hooks/useStakedBalance';
 import usePendingRewards from '../../hooks/usePendingRewards';
 import { Contract } from '@ethersproject/contracts';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Col, Row, InputNumber } from 'antd';
 import useRawBalance from '../../hooks/useRawBalance';
-import useERC20Contract from '../../hooks/useERC20Contract';
 import OutlinedButton from '../Button/Outline';
 import FilledButton from '../Button/Filled';
 import useApproved from '../../hooks/useApproved';
@@ -21,6 +21,8 @@ import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
 import { formatUnits, parseEther } from '@ethersproject/units';
 import { TransactionReceipt } from '@ethersproject/providers';
+import { Col as BdlCol } from '../Layout';
+import { getAsset } from '../../lib/asset';
 
 interface Props {
     image: string;
@@ -31,6 +33,8 @@ interface Props {
     stakeToken: string;
     account: string | undefined;
     disabled?: boolean;
+    tokenA?: string;
+    tokenB?: string;
 }
 
 interface StakingDisplayProps {
@@ -147,6 +151,10 @@ const HideOnMobile = styled.div`
     }
 `;
 
+const LiquidityText = styled.span`
+    color: ${(props) => props.theme.primary};
+`;
+
 const getApyApr = async (
     pid: string,
     setApy: React.Dispatch<React.SetStateAction<string>>,
@@ -154,18 +162,41 @@ const getApyApr = async (
     minter: Contract | undefined,
     bundleToken: Contract | undefined,
     stakeToken: Contract | undefined,
-    chainId: number | undefined
+    chainId: number | undefined,
+    token0: string | undefined,
+    token1: string | undefined
 ) => {
     if (!!minter && !!bundleToken && !!stakeToken && !!chainId) {
         const minterAddress = getNamedAddress(chainId, 'Minter');
-        const pInfo = await minter.poolInfo(pid);
-        const totalAllocPoint = await minter.totalAllocPoint();
 
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken))
-            .mul(await stakeToken.balanceOf(minterAddress))
-            .mul(2)
-            .div(await stakeToken.totalSupply());
-        const rewardsPerDay = (await minter.blockRewards()).mul(28800);
+        const batch = [];
+        batch.push(minter.poolInfo(pid));
+        batch.push(minter.totalAllocPoint());
+        batch.push(getAsset(bundleToken.address, bundleToken.provider));
+        batch.push(getAsset(token0, bundleToken.provider));
+        batch.push(getAsset(token1, bundleToken.provider));
+        batch.push(stakeToken.totalSupply());
+        batch.push(stakeToken.getReserves());
+
+        const batchResult = await Promise.all(batch).then((values) => values);
+
+        const pInfo = batchResult[0];
+        const totalAllocPoint = batchResult[1];
+        const bundleAsset = batchResult[2];
+        const token0Asset = batchResult[3];
+        const token1Asset = batchResult[4];
+        const stakeTokenSupply = batchResult[5];
+        const token0Supply = batchResult[6][0];
+        const token1Supply = batchResult[6][1];
+
+        const stakeTokenPrice = token0Supply
+            .mul(token0Asset.price)
+            .add(token1Supply.mul(token1Asset.price))
+            .mul(parseEther('1'))
+            .div(stakeTokenSupply);
+
+        const staked = (await stakeToken.balanceOf(minterAddress)).mul(stakeTokenPrice).div(parseEther('1'));
+        const rewardsPerDay = (await minter.blockRewards()).mul(bundleAsset.price).mul(28800);
 
         const stakedFormatted = parseFloat(formatUnits(staked));
         const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
@@ -191,9 +222,13 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const bundleTokenAddress = getNamedAddress(chainId, 'BundleToken');
     const minter = useContract(minterAddress!, MinterABI, true);
     const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI, true);
-    const stakeToken = useERC20Contract(props.stakeToken, true);
+    const stakeToken = useContract(props.stakeToken, PairABI, true);
 
-    getApyApr(props.pid, setApy, setApr, minter, bundleToken, stakeToken, chainId);
+    useEffect(() => {
+        if (!props.disabled) {
+            getApyApr(props.pid, setApy, setApr, minter, bundleToken, stakeToken, chainId, props.tokenA, props.tokenB);
+        }
+    }, [chainId]);
 
     const stakedBalance = useStakedBalance(minter, props.pid).data;
     const pendingRewards = usePendingRewards(minter, props.pid).data;
@@ -244,7 +279,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
             </StakingInfoRow>
             <StakingDisplay expanded={expanded}>
                 <Divider style={{ margin: '5px 0px' }} />
-                <Row justify="center" style={{ padding: '10px 20px' }}>
+                <Row justify="center" style={{ padding: '10px 20px 0px 20px' }}>
                     <Col xs={24} sm={24} md={5} flex="">
                         <Text style={{ margin: '0px' }}>Available: {`${parseBalance(unstakedBalance) || '0.00'}`}</Text>
                         <InputNumber
@@ -448,6 +483,23 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         </FilledButton>
                     </Col>
                 </Row>
+                {props.tokenA && props.tokenB ? (
+                    <Row style={{ padding: '0px 20px 10px 20px', marginTop: '-10px' }}>
+                        <BdlCol align="flex-start" span={24} padding="5px 0px 0px 0px" mobilePadding="10px 0px 0px 0px">
+                            <a
+                                href={`https://exchange.pancakeswap.finance/#/add/${props.tokenA}/${
+                                    props.tokenB == '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' ? 'BNB' : props.tokenB
+                                }`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <LiquidityText>Add Liquidity</LiquidityText>
+                            </a>
+                        </BdlCol>
+                    </Row>
+                ) : (
+                    <></>
+                )}
             </StakingDisplay>
         </StakingCardContainer>
     );

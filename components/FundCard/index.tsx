@@ -76,9 +76,7 @@ const FundCard: React.FC<Props> = (props: Props): React.ReactElement => {
     for (let i = 0; i < Math.min(props.fund.assets.length, 6); i++) {
         if (i == 5 && props.fund.assets.length > 6) {
             assets.push(
-                <ImageContainer key={i} index={i}>
-                    <img src="/assets/ETC.png" width="40px" height="40px" />
-                </ImageContainer>
+                <span style={{ fontSize: '14px', paddingLeft: '5px' }}>{`+${props.fund.assets.length - i}`}</span>
             );
         } else {
             assets.push(

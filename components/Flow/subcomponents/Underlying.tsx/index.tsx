@@ -4,9 +4,7 @@ import { formatUnits, parseEther } from '@ethersproject/units';
 import { InputNumber } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
-import useApproved from '../../../../hooks/useApproved';
 import useERC20Contract from '../../../../hooks/useERC20Contract';
-import useRawBalance from '../../../../hooks/useRawBalance';
 import { Asset } from '../../../../lib/asset';
 import { Fund } from '../../../../lib/fund';
 import { parseBalance } from '../../../../util';
@@ -22,6 +20,7 @@ interface Props {
     fund: Fund | undefined;
     approved?: boolean;
     disabled?: boolean;
+    balance?: BigNumber;
 }
 
 const InputContainer = styled.div`
@@ -45,7 +44,6 @@ const Field = styled.span`
 
 const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
     const assetContract = useERC20Contract(props.asset.address, true);
-    const assetBalance = useRawBalance(assetContract).data;
 
     return (
         <Col span={24}>
@@ -78,7 +76,7 @@ const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
                 </Col>
                 <Col span={12} style={{ alignItems: 'flex-start', justifyContent: 'flex-start', paddingLeft: '10px' }}>
                     <Field>
-                        {`Balance: ${assetBalance ? parseBalance(assetBalance) : '0.00'} ${props.asset.symbol}`}
+                        {`Balance: ${props.balance ? parseBalance(props.balance) : '0.00'} ${props.asset.symbol}`}
                     </Field>
                 </Col>
                 <Col span={12}>
@@ -86,9 +84,9 @@ const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
                         style={{
                             width: '100%',
                             display:
-                                props.isMinting && props.approved != undefined && !props.approved && !props.disabled
-                                    ? 'default'
-                                    : 'none',
+                                props.isMinting && props.approved != undefined && !props.approved ? 'flex' : 'none',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         }}
                         disabled={!props.fund}
                         onClick={() => {
@@ -105,7 +103,7 @@ const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
                                     approveMessage(tx);
                                 })
                                 .catch((e: any) => {
-                                    errorMessage(e.data.message);
+                                    errorMessage(e.message || e.data.message);
                                 });
                         }}
                     >
