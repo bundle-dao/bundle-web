@@ -229,7 +229,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 tokenB="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
                             />
                             <StakingCard
-                                image="/assets/logo.svg"
+                                image="/assets/primary_logo_token.svg"
                                 imageSecondary="/assets/BUSD.png"
                                 name="bDEFI-BUSD"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
@@ -241,7 +241,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 tokenB="0xe9e7cea3dedca5984780bafc599bd69add087d56"
                             />
                             <StakingCard
-                                image="/assets/logo.svg"
+                                image="/assets/primary_logo_token.svg"
                                 imageSecondary="/assets/BUSD.png"
                                 name="bCHAIN-BUSD"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
@@ -253,7 +253,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 tokenB="0xe9e7cea3dedca5984780bafc599bd69add087d56"
                             />
                             <StakingCard
-                                image="/assets/logo.svg"
+                                image="/assets/primary_logo_token.svg"
                                 imageSecondary="/assets/BUSD.png"
                                 name="bSTBL-BUSD"
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
