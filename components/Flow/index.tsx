@@ -113,7 +113,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                 disabled={
                     props.assets.reduce((a: boolean, b: Asset) => {
                         return a || !b.amount || b.amount?.isZero();
-                    }, false) || !props.fundAsset
+                    }, false) ||
+                    !props.fundAsset ||
+                    true
                 }
                 setValue={(value: BigNumber) => {
                     const newAmounts = [...amounts];
@@ -202,11 +204,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                         }
                                     }}
                                     disabled={
-                                        props.isMinting ||
                                         props.assets.reduce((a: boolean, b: Asset) => {
                                             return a || !b.amount || b.amount?.isZero();
-                                        }, false) ||
-                                        !props.fundAsset
+                                        }, false) || !props.fundAsset
                                     }
                                     size="large"
                                 />
@@ -228,6 +228,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                 style={{ width: '100%' }}
                                 disabled={
                                     !props.fund ||
+                                    fundAmount.isZero() ||
                                     (props.isMinting && approvals.reduce((a, b) => a && !b, true)) ||
                                     (props.isMinting &&
                                         balances.reduce(
@@ -252,7 +253,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 mintMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     } else {
                                         fundContract
@@ -268,7 +269,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 burnMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     }
                                 }}

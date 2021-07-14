@@ -84,9 +84,7 @@ const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
                         style={{
                             width: '100%',
                             display:
-                                props.isMinting && props.approved != undefined && !props.approved && !props.disabled
-                                    ? 'flex'
-                                    : 'none',
+                                props.isMinting && props.approved != undefined && !props.approved ? 'flex' : 'none',
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}
@@ -105,7 +103,7 @@ const Underlying: React.FC<Props> = (props: Props): React.ReactElement => {
                                     approveMessage(tx);
                                 })
                                 .catch((e: any) => {
-                                    errorMessage(e.data.message);
+                                    errorMessage(e.message || e.data.message);
                                 });
                         }}
                     >

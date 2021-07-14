@@ -349,7 +349,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else if (selected == SELL && fundApproved) {
                                     router
@@ -368,7 +368,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                             swapMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else {
                                     if (selected == BUY) {
@@ -387,7 +387,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     } else {
                                         fundContract
@@ -405,7 +405,7 @@ const Swap: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 approveMessage(tx);
                                             })
                                             .catch((e: any) => {
-                                                errorMessage(e.data.message);
+                                                errorMessage(e.message || e.data.message);
                                             });
                                     }
                                 }

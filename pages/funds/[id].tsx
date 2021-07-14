@@ -92,7 +92,15 @@ const Landing: React.FC = (): React.ReactElement => {
         }
     }, [fundAsset, assets]);
 
-    const assetCards = assets.map((asset, index) => <AssetCard asset={asset} nav={nav} index={index} />);
+    const assetCards = [...assets]
+        .sort((a: Asset, b: Asset): number => {
+            if (a.amount!.mul(a.price!).gte(b.amount!.mul(b.price!))) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+        .map((asset, index) => <AssetCard asset={asset} nav={nav} index={index} />);
 
     return (
         <Layout.Content>

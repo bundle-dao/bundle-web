@@ -75,14 +75,6 @@ export const getAssets = async (fund: Fund | undefined, provider: any, setAssets
         });
     });
 
-    assets.sort((a: Asset, b: Asset): number => {
-        if (a.amount!.mul(a.price!).gte(b.amount!.mul(b.price!))) {
-            return -1;
-        } else {
-            return 0;
-        }
-    });
-
     if (setAssets) {
         setAssets(assets);
     }
