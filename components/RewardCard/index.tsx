@@ -22,6 +22,7 @@ const Card = styled.div<CardProps>`
     height: 75px;
     background-color: ${(props) => props.theme.spaceGrey};
     padding-left: 10px;
+    margin: 10px;
 
     h1 {
         font-size: 15px;

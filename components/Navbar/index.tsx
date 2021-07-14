@@ -138,7 +138,7 @@ const Navbar: React.FC = (): React.ReactElement => {
                     </a>
                 </MenuCol>
                 <NavMenuCol xs={14} sm={14} md={0} style={{ height: '100%' }}>
-                    <Menu mode="horizontal">
+                    <Menu mode="horizontal" triggerSubMenuAction="click">
                         <SubMenu key="SubMenu" icon={<MenuOutlined />} title="Menu">
                             <Menu.ItemGroup title="Bundle">
                                 <Menu.Item key="bdl">

@@ -9,8 +9,9 @@ import MinterABI from '../contracts/Minter.json';
 import BundleTokenABI from '../contracts/BundleToken.json';
 import { Contract } from '@ethersproject/contracts';
 import Link from 'next/link';
-import useERC20Contract from '../hooks/useERC20Contract';
-import { formatUnits } from '@ethersproject/units';
+import PairABI from '../contracts/Pair.json';
+import { formatUnits, parseEther } from '@ethersproject/units';
+import { getAsset } from '../lib/asset';
 
 const CHAINID = 56;
 
@@ -81,30 +82,55 @@ const BoxMain = styled.img`
 
 const getApy = async (
     pid: string,
-    setState: React.Dispatch<React.SetStateAction<string>>,
+    setApy: React.Dispatch<React.SetStateAction<string>>,
     minter: Contract | undefined,
     bundleToken: Contract | undefined,
-    stakeToken: Contract | undefined
+    stakeToken: Contract | undefined,
+    token0: string | undefined,
+    token1: string | undefined
 ) => {
-    if (!!minter && !!bundleToken && !!stakeToken) {
-        const minterAddress = getNamedAddress(CHAINID, 'Minter');
-        const pInfo = await minter.poolInfo(pid);
-        const totalAllocPoint = await minter.totalAllocPoint();
+    try {
+        if (!!minter && !!bundleToken && !!stakeToken) {
+            const minterAddress = getNamedAddress(CHAINID, 'Minter');
 
-        const staked = (await bundleToken.balanceOf(pInfo.stakeToken))
-            .mul(await stakeToken.balanceOf(minterAddress))
-            .mul(2)
-            .div(await stakeToken.totalSupply());
-        const rewardsPerDay = (await minter.blockRewards()).mul(28800);
+            const batch = [];
+            batch.push(minter.poolInfo(pid));
+            batch.push(minter.totalAllocPoint());
+            batch.push(getAsset(bundleToken.address, bundleToken.provider));
+            batch.push(getAsset(token0, bundleToken.provider));
+            batch.push(getAsset(token1, bundleToken.provider));
+            batch.push(stakeToken.totalSupply());
+            batch.push(stakeToken.getReserves());
 
-        const stakedFormatted = parseFloat(formatUnits(staked));
-        const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
+            const batchResult = await Promise.all(batch).then((values) => values);
 
-        const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint + 1;
-        const apy = dpr ** 365 - 1;
+            const pInfo = batchResult[0];
+            const totalAllocPoint = batchResult[1];
+            const bundleAsset = batchResult[2];
+            const token0Asset = batchResult[3];
+            const token1Asset = batchResult[4];
+            const stakeTokenSupply = batchResult[5];
+            const token0Supply = batchResult[6][0];
+            const token1Supply = batchResult[6][1];
 
-        setState(`${formatNumber(apy * 100)}%`);
-    }
+            const stakeTokenPrice = token0Supply
+                .mul(token0Asset.price)
+                .add(token1Supply.mul(token1Asset.price))
+                .mul(parseEther('1'))
+                .div(stakeTokenSupply);
+
+            const staked = (await stakeToken.balanceOf(minterAddress)).mul(stakeTokenPrice).div(parseEther('1'));
+            const rewardsPerDay = (await minter.blockRewards()).mul(bundleAsset.price).mul(28800);
+
+            const stakedFormatted = parseFloat(formatUnits(staked));
+            const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
+
+            const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint;
+            const apy = (1 + dpr) ** 365 - 1;
+
+            setApy(`${formatNumber(apy * 100)}%`);
+        }
+    } catch (e) {}
 };
 
 const Landing: React.FC = (): React.ReactElement => {
@@ -112,11 +138,54 @@ const Landing: React.FC = (): React.ReactElement => {
     const bundleTokenAddress = getNamedAddress(CHAINID, 'BundleToken');
     const minter = useContract(minterAddress!, MinterABI);
     const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI);
-    const stakeToken = useERC20Contract('0x693e745700D278Bf7e180D3fD94FA1A740807926', false);
+
+    const stakeToken = useContract('0x693e745700D278Bf7e180D3fD94FA1A740807926', PairABI, false);
+    const bDEFIStakeToken = useContract('0x107a78f4e90141bb4aacdb6b4c903f27baf43e58', PairABI, false);
+    const bCHAINStakeToken = useContract('0x3666d1eE816852A6BD08196243567D3945058E40', PairABI, false);
+    const bSTBLStakeToken = useContract('0xaF748cE79E2c966a660A34c803e63A3e6553E670', PairABI, false);
+
     const [bdlApy, setBdlApy] = useState('...');
+    const [bDEFIApy, setbDEFIApy] = useState('...');
+    const [bCHAINApy, setbChainApy] = useState('...');
+    const [bSTBLApy, setbSTBLApy] = useState('...');
 
     if (minter != undefined && bundleToken != undefined) {
-        getApy('0', setBdlApy, minter, bundleToken, stakeToken);
+        getApy(
+            '0',
+            setBdlApy,
+            minter,
+            bundleToken,
+            stakeToken,
+            '0x7ff78e1cab9a2710eb6486ecbf3d94d125039364',
+            '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
+        );
+        getApy(
+            '1',
+            setbDEFIApy,
+            minter,
+            bundleToken,
+            bDEFIStakeToken,
+            '0x9eeA2a500455cb08BfdF20D1000a0B5CFF63A495',
+            '0xe9e7cea3dedca5984780bafc599bd69add087d56'
+        );
+        getApy(
+            '2',
+            setbChainApy,
+            minter,
+            bundleToken,
+            bCHAINStakeToken,
+            '0x3E96F79a607d0d2199976c292f9CDF73991A3439',
+            '0xe9e7cea3dedca5984780bafc599bd69add087d56'
+        );
+        getApy(
+            '3',
+            setbSTBLApy,
+            minter,
+            bundleToken,
+            bSTBLStakeToken,
+            '0x934C7F600d6eE2fb60CdFf61d1b9fC82C6b8C011',
+            '0xe9e7cea3dedca5984780bafc599bd69add087d56'
+        );
     }
 
     return (
@@ -180,6 +249,48 @@ const Landing: React.FC = (): React.ReactElement => {
                                     name="Bundle"
                                     ticker="BDL-BNB"
                                     apy={bdlApy}
+                                    width="100%"
+                                    imgStyle={{ marginTop: '2px', marginLeft: '2px' }}
+                                    cardStyle={{ maxWidth: '550px' }}
+                                />
+                            </a>
+                        </Link>
+                        <Link href="/staking">
+                            <a style={{ width: '85%' }}>
+                                <RewardCard
+                                    image="/assets/primary_logo_token.svg"
+                                    imageSecondary="/assets/BUSD.png"
+                                    name="bDefi Index"
+                                    ticker="bDEFI-BNB"
+                                    apy={bDEFIApy}
+                                    width="100%"
+                                    imgStyle={{ marginTop: '2px', marginLeft: '2px' }}
+                                    cardStyle={{ maxWidth: '550px' }}
+                                />
+                            </a>
+                        </Link>
+                        <Link href="/staking">
+                            <a style={{ width: '85%' }}>
+                                <RewardCard
+                                    image="/assets/primary_logo_token.svg"
+                                    imageSecondary="/assets/BUSD.png"
+                                    name="bChain Index"
+                                    ticker="bCHAIN-BNB"
+                                    apy={bCHAINApy}
+                                    width="100%"
+                                    imgStyle={{ marginTop: '2px', marginLeft: '2px' }}
+                                    cardStyle={{ maxWidth: '550px' }}
+                                />
+                            </a>
+                        </Link>
+                        <Link href="/staking">
+                            <a style={{ width: '85%' }}>
+                                <RewardCard
+                                    image="/assets/primary_logo_token.svg"
+                                    imageSecondary="/assets/BUSD.png"
+                                    name="bStable"
+                                    ticker="bSTBL-BNB"
+                                    apy={bSTBLApy}
                                     width="100%"
                                     imgStyle={{ marginTop: '2px', marginLeft: '2px' }}
                                     cardStyle={{ maxWidth: '550px' }}
