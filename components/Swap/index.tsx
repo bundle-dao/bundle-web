@@ -20,6 +20,7 @@ import { useWeb3React } from '@web3-react/core';
 import useToken from '../../hooks/pcs';
 import useContract from '../../hooks/useContract';
 import PancakeRouter from '../../contracts/PancakeRouter.json';
+import Selector from '../Button/Selector';
 
 interface Props {
     fund: Fund | undefined;
@@ -28,36 +29,11 @@ interface Props {
     disabled?: boolean;
 }
 
-interface SelectorProps {
-    selected?: boolean;
-}
-
 const TextBold = styled.div`
     font-size: 16px;
     font-weight: bold;
     font-family: 'Visuelt';
     margin: 3px 10px 0px 10px;
-`;
-
-const Selector = styled.div<SelectorProps>`
-    width: 100px;
-    height: 35px;
-    margin: 10px;
-    padding: 5px 20px 8px 20px;
-    border-radius: 10px;
-    border: ${(props) => '2px solid ' + (props.selected ? props.theme.primary : props.theme.grey)};
-    color: ${(props) => (props.selected ? props.theme.primary : props.theme.grey)};
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &:hover {
-        cursor: pointer;
-        border: ${(props) => '2px solid ' + props.theme.primary};
-        color: ${(props) => props.theme.primary};
-    }
-
-    transition: color 100ms linear, border 100ms linear;
 `;
 
 const InputContainer = styled.div`

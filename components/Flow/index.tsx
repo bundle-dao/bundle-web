@@ -83,13 +83,20 @@ const Primary = styled.span`
     }
 `;
 
+interface OutlineSelectorProps {
+    active?: boolean;
+}
+
 export const MINT = 'MINT';
 export const BURN = 'BURN';
+
+export const AUTO = 'AUTO';
+export const MANUAL = 'MANUAL';
 
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
-    const [disabled, setDisabled] = useState(false);
+    const [mode, setMode] = useState(AUTO);
 
     const approvals: (boolean | undefined)[] = [];
     const balances: (BigNumber | undefined)[] = [];
@@ -171,14 +178,29 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                     style={{
                         height: '227.5px',
                         display: 'flex',
-                        justifyContent: 'space-evenly',
-                        alignItems: 'flex-start',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                        alignItems: 'space-evenly',
                         padding: '20px 30px',
                         overflowY: 'scroll',
                         overflowX: 'hidden',
                     }}
                 >
-                    <Row>{underlying}</Row>
+                    <Row>
+                        <Col span={12} align="flex-end">
+                            <Selector selected={mode == AUTO} onClick={() => {setMode(AUTO)}}>
+                                Auto
+                            </Selector>
+                        </Col>
+                        <Col span={12} align="flex-start">
+                            <Selector selected={mode == MANUAL} onClick={() => {setMode(MANUAL)}}>
+                                Manual
+                            </Selector>
+                        </Col>
+                    </Row>
+                    <Row>
+                        {underlying}
+                    </Row>
                 </Card>
             </Col>
             <Col span={24}>
