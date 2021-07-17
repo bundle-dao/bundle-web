@@ -2,7 +2,7 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { formatUnits, parseEther } from '@ethersproject/units';
-import { InputNumber } from 'antd';
+import { InputNumber, Modal } from 'antd';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useApproved from '../../hooks/useApproved';
@@ -22,6 +22,7 @@ import BundleRouterABI from '../../contracts/BundleRouter.json';
 import useBalance from '../../hooks/useBalance';
 import { parseBalance } from '../../util';
 import { Contract } from '@ethersproject/contracts';
+import Filled from '../Button/Filled';
 
 interface Props {
     fund: Fund | undefined;
@@ -90,9 +91,57 @@ export const BURN = 'BURN';
 export const AUTO = 'AUTO';
 export const MANUAL = 'MANUAL';
 
-const BUNDLE_ROUTER = '0xDAd29604fE666e6713eC997676C8a1dE89B6FF9C';
+const BUNDLE_ROUTER = '0x2C5AA923AFE279D8bDcA4419BAe52D2eE1E2f72c';
 
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleOk = () => {
+        if (props.isMinting) {
+            bundleRouter?.mint(
+                fundContract?.address,
+                PEG,
+                pegAmount,
+                fundAmount,
+                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                paths
+            ).then((tx: TransactionResponse) => {
+                txMessage(tx);
+                return tx.wait(1);
+            })
+            .then((tx: TransactionReceipt) => {
+                mintMessage(tx);
+            })
+            .catch((e: any) => {
+                errorMessage(e.message || e.data.message);
+            });
+        } else {
+            bundleRouter?.redeem(
+                fundContract?.address,
+                PEG,
+                fundAmount,
+                pegAmount,
+                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                paths
+            ).then((tx: TransactionResponse) => {
+                txMessage(tx);
+                return tx.wait(1);
+            })
+            .then((tx: TransactionReceipt) => {
+                burnMessage(tx);
+            })
+            .catch((e: any) => {
+                errorMessage(e.message || e.data.message);
+            });
+        }
+
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
     const [pegAmount, setPegAmount] = useState(BigNumber.from('0'));
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
@@ -135,9 +184,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
         if (props.fundAsset) {
             if (props.isMinting) {
-                setPegAmount(amount.mul(props.nav).mul(10000).div(9000).div(props.fundAsset.cap!));
+                setPegAmount(amount.mul(props.nav).mul(10000).div(9900).div(props.fundAsset.cap!));
             } else {
-                setPegAmount(amount.mul(props.nav).mul(9000).div(10000).mul(980).div(1000).div(props.fundAsset.cap!));
+                setPegAmount(amount.mul(props.nav).mul(9900).div(10000).mul(980).div(1000).div(props.fundAsset.cap!));
             }
         }
     };
@@ -210,8 +259,8 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
                             if (props.fundAsset) {
                                 const tempFundAmount = (props.isMinting)
-                                    ? amount.mul(props.fundAsset.cap!).mul(9000).div(10000).div(props.nav)
-                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9000).div(980).div(props.nav);
+                                    ? amount.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
+                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9900).div(980).div(props.nav);
 
                                 setFundAmount(tempFundAmount);
 
@@ -235,7 +284,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         size="large"
                     />
                     <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
-                        {props.isMinting ? 'Input' : 'Min Output'}
+                        {props.isMinting ? 'Expected Input' : 'Min Output'}
                     </Field>
                     <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
                         BUSD
@@ -251,6 +300,25 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
     return (
         <Row>
+            <Modal 
+                style={{borderRadius: '15px'}} 
+                title="Confirmation" 
+                visible={isModalVisible} 
+                onOk={handleOk} 
+                onCancel={handleCancel}
+                footer={
+                    <Filled onClick={handleOk}>
+                        {(props.isMinting) ? 'Mint' : 'Redeem'}
+                    </Filled>
+                }
+            >
+                <p>
+                    Automated minting has a limit of <b>1%</b> slippage configured by default. 
+                    Before continuing, understand that neither input nor output amounts are guaranteed (as this call results in a number of swaps),
+                    however the ratio between these two amounts is preserved (in other words, you may see a smaller amount of index token than expected, 
+                    though a corresponding amount of BUSD will be returned to your wallet).
+                </p>
+            </Modal>
             <Col span={24} style={{ width: '100%', flexGrow: 1 }}>
                 <Card
                     style={{
@@ -260,7 +328,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         justifyContent: 'flex-start',
                         alignItems: 'space-evenly',
                         padding: '20px 30px',
-                        overflowY: 'scroll',
+                        overflowY: (mode == AUTO) ? 'hidden' : 'scroll',
                         overflowX: 'hidden',
                     }}
                 >
@@ -334,24 +402,28 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Col span={12} style={{ alignItems: 'flex-end', paddingRight: '10px', marginBottom: '10px' }}>
                             <Primary
                                 onClick={() => {
-                                    if (props.isMinting && balances.length > 0 && props.fundAsset) {
-                                        let min = BigNumber.from(
-                                            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-                                        );
-                                        balances.forEach((bal, i) => {
-                                            if (props.assets.length > 0) {
-                                                const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
-                                                const fundAmount = portion
-                                                    .mul(props.fundAsset!.cap!)
-                                                    .div(parseEther('1'))
-                                                    .mul(10000)
-                                                    .div(10001);
-                                                if (min.gte(fundAmount)) {
-                                                    min = fundAmount;
+                                    if (props.isMinting && mode == MANUAL) {
+                                        if (balances.length > 0 && props.fundAsset) {
+                                            let min = BigNumber.from(
+                                                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                            );
+                                            balances.forEach((bal, i) => {
+                                                if (props.assets.length > 0) {
+                                                    const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
+                                                    const fundAmount = portion
+                                                        .mul(props.fundAsset!.cap!)
+                                                        .div(parseEther('1'))
+                                                        .mul(10000)
+                                                        .div(10001);
+                                                    if (min.gte(fundAmount)) {
+                                                        min = fundAmount;
+                                                    }
                                                 }
-                                            }
-                                        });
-                                        fundAdjustAmounts(min);
+                                            });
+                                            fundAdjustAmounts(min);
+                                        }
+                                    } else if (props.isMinting && mode == AUTO && props.fundAsset) {
+                                        fundAdjustAmounts(pegBalance.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav))
                                     } else {
                                         fundAdjustAmounts(fundBalance);
                                     }
@@ -377,8 +449,8 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                         (!fundBalance ||
                                             fundAmount.lte(BigNumber.from('0')) ||
                                             !fundAmount.lte(fundBalance))) ||
-                                    (props.isMinting && mode == AUTO && !pegAmount.lte(pegBalance)) ||
-                                    (!props.isMinting && mode == AUTO && !fundAmount.lte(fundBalance))) &&
+                                    (props.isMinting && mode == AUTO && pegAmount && !pegAmount.lte(pegBalance)) ||
+                                    (!props.isMinting && mode == AUTO && fundAmount && !fundAmount.lte(fundBalance))) &&
                                     (props.isMinting && ((mode == AUTO && pegApproved) || mode == MANUAL) ||
                                         !props.isMinting && ((mode == AUTO && fundApproved) || mode == MANUAL))
                                 }
@@ -402,23 +474,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 errorMessage(e.message || e.data.message);
                                             });
                                         } else if (mode == AUTO) {
-                                            bundleRouter?.mint(
-                                                fundContract?.address,
-                                                PEG,
-                                                pegAmount,
-                                                fundAmount,
-                                                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
-                                                paths
-                                            ).then((tx: TransactionResponse) => {
-                                                txMessage(tx);
-                                                return tx.wait(1);
-                                            })
-                                            .then((tx: TransactionReceipt) => {
-                                                mintMessage(tx);
-                                            })
-                                            .catch((e: any) => {
-                                                errorMessage(e.message || e.data.message);
-                                            });
+                                            setIsModalVisible(true);
                                         } else {
                                             fundContract
                                                 ?.joinPool(fundAmount, amounts)
@@ -452,23 +508,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 errorMessage(e.message || e.data.message);
                                             });
                                         } else if (mode == AUTO) {
-                                            bundleRouter?.redeem(
-                                                fundContract?.address,
-                                                PEG,
-                                                fundAmount,
-                                                pegAmount,
-                                                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
-                                                paths
-                                            ).then((tx: TransactionResponse) => {
-                                                txMessage(tx);
-                                                return tx.wait(1);
-                                            })
-                                            .then((tx: TransactionReceipt) => {
-                                                burnMessage(tx);
-                                            })
-                                            .catch((e: any) => {
-                                                errorMessage(e.message || e.data.message);
-                                            });
+                                            setIsModalVisible(true);
                                         } else {
                                             fundContract
                                                 ?.exitPool(
