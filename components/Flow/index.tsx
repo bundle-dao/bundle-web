@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import useApproved from '../../hooks/useApproved';
 import useERC20Contract from '../../hooks/useERC20Contract';
 import useRawBalance from '../../hooks/useRawBalance';
-import { Asset, PEG } from '../../lib/asset';
+import { Asset, PEG, SWAP_PATHS } from '../../lib/asset';
 import { Fund, getAssets } from '../../lib/fund';
 import Outline from '../Button/Outline';
 import Card from '../Card';
@@ -90,7 +90,7 @@ export const BURN = 'BURN';
 export const AUTO = 'AUTO';
 export const MANUAL = 'MANUAL';
 
-const BUNDLE_ROUTER = '0x094cd6f984e5ef5ae8C0dd7086b79DaE54Ffb401';
+const BUNDLE_ROUTER = '0xDAd29604fE666e6713eC997676C8a1dE89B6FF9C';
 
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
@@ -135,9 +135,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
         if (props.fundAsset) {
             if (props.isMinting) {
-                setPegAmount(amount.mul(props.nav).mul(10000).div(9900).div(props.fundAsset.cap!));
+                setPegAmount(amount.mul(props.nav).mul(10000).div(9000).div(props.fundAsset.cap!));
             } else {
-                setPegAmount(amount.mul(props.nav).mul(9900).div(10000).mul(980).div(1000).div(props.fundAsset.cap!));
+                setPegAmount(amount.mul(props.nav).mul(9000).div(10000).mul(980).div(1000).div(props.fundAsset.cap!));
             }
         }
     };
@@ -147,6 +147,10 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
         setFundAmount(BigNumber.from('0'));
         setPegAmount(BigNumber.from('0'));
     }, [props.isMinting]);
+
+    const paths = (props.isMinting) ? 
+        props.assets.map(asset => [...[...SWAP_PATHS[asset.symbol]].reverse(), asset.address]) 
+        : props.assets.map(asset => [asset.address, ...SWAP_PATHS[asset.symbol]]);
 
     const underlying = (mode == MANUAL) ? props.assets.map((asset, index) => {
         return (
@@ -206,8 +210,8 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
                             if (props.fundAsset) {
                                 const tempFundAmount = (props.isMinting)
-                                    ? amount.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
-                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9900).div(980).div(props.nav);
+                                    ? amount.mul(props.fundAsset.cap!).mul(9000).div(10000).div(props.nav)
+                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9000).div(980).div(props.nav);
 
                                 setFundAmount(tempFundAmount);
 
@@ -398,7 +402,23 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 errorMessage(e.message || e.data.message);
                                             });
                                         } else if (mode == AUTO) {
-
+                                            bundleRouter?.mint(
+                                                fundContract?.address,
+                                                PEG,
+                                                pegAmount,
+                                                fundAmount,
+                                                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                                                paths
+                                            ).then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionReceipt) => {
+                                                mintMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.message || e.data.message);
+                                            });
                                         } else {
                                             fundContract
                                                 ?.joinPool(fundAmount, amounts)
@@ -432,7 +452,23 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                                 errorMessage(e.message || e.data.message);
                                             });
                                         } else if (mode == AUTO) {
-
+                                            bundleRouter?.redeem(
+                                                fundContract?.address,
+                                                PEG,
+                                                fundAmount,
+                                                pegAmount,
+                                                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                                                paths
+                                            ).then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionReceipt) => {
+                                                burnMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.message || e.data.message);
+                                            });
                                         } else {
                                             fundContract
                                                 ?.exitPool(

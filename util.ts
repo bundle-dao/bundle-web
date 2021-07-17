@@ -35,7 +35,7 @@ export function getNamedAddress(chainId: number | undefined, name: string): stri
 
 export const parseBalance = (balance: BigNumberish, decimals: number = 18, decimalsToDisplay: number = 2): string => {
     if (balance) {
-        return Number(formatUnits(balance, decimals)).toFixed(decimalsToDisplay);
+        return (Number(formatUnits(balance, decimals)) * 10**decimalsToDisplay / 10**decimalsToDisplay).toFixed(decimalsToDisplay);
     } else {
         return '0.00';
     }

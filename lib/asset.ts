@@ -23,7 +23,7 @@ export const SWAP_ASSETS: Asset[] = [
     },
 ];
 
-const SWAP_PATHS: { [key: string]: string[] } = {
+export const SWAP_PATHS: { [key: string]: string[] } = {
     WBNB: [PEG],
     BTCB: [PEG],
     ETH: [WBNB, PEG],
@@ -45,6 +45,7 @@ const SWAP_PATHS: { [key: string]: string[] } = {
     bSTBL: [PEG],
     bCHAIN: [PEG],
     BDL: [WBNB, PEG],
+    BUSD: []
 };
 
 export interface Asset {
