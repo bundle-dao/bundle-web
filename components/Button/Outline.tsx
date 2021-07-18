@@ -10,9 +10,9 @@ export default styled(Button)<Props>`
     background: ${(props) =>
         props.disabled
             ? props.theme.spaceGrey
-            : (props.selected
+            : props.selected
             ? props.theme.primary + ' 0% 0% no-repeat padding-box'
-            : props.theme.white + ' 0% 0% no-repeat padding-box')};
+            : props.theme.white + ' 0% 0% no-repeat padding-box'};
     border: ${(props) => '2px solid ' + (props.disabled ? props.theme.grey : props.theme.primary)} !important;
     border-radius: 10px;
     color: ${(props) =>

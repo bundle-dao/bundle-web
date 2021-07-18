@@ -98,41 +98,45 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const handleOk = () => {
         if (props.isMinting) {
-            bundleRouter?.mint(
-                fundContract?.address,
-                PEG,
-                pegAmount,
-                fundAmount,
-                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
-                paths
-            ).then((tx: TransactionResponse) => {
-                txMessage(tx);
-                return tx.wait(1);
-            })
-            .then((tx: TransactionReceipt) => {
-                mintMessage(tx);
-            })
-            .catch((e: any) => {
-                errorMessage(e.message || e.data.message);
-            });
+            bundleRouter
+                ?.mint(
+                    fundContract?.address,
+                    PEG,
+                    pegAmount,
+                    fundAmount,
+                    `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                    paths
+                )
+                .then((tx: TransactionResponse) => {
+                    txMessage(tx);
+                    return tx.wait(1);
+                })
+                .then((tx: TransactionReceipt) => {
+                    mintMessage(tx);
+                })
+                .catch((e: any) => {
+                    errorMessage(e.message || e.data.message);
+                });
         } else {
-            bundleRouter?.redeem(
-                fundContract?.address,
-                PEG,
-                fundAmount,
-                pegAmount,
-                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
-                paths
-            ).then((tx: TransactionResponse) => {
-                txMessage(tx);
-                return tx.wait(1);
-            })
-            .then((tx: TransactionReceipt) => {
-                burnMessage(tx);
-            })
-            .catch((e: any) => {
-                errorMessage(e.message || e.data.message);
-            });
+            bundleRouter
+                ?.redeem(
+                    fundContract?.address,
+                    PEG,
+                    fundAmount,
+                    pegAmount,
+                    `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                    paths
+                )
+                .then((tx: TransactionResponse) => {
+                    txMessage(tx);
+                    return tx.wait(1);
+                })
+                .then((tx: TransactionReceipt) => {
+                    burnMessage(tx);
+                })
+                .catch((e: any) => {
+                    errorMessage(e.message || e.data.message);
+                });
         }
 
         setIsModalVisible(false);
@@ -197,156 +201,175 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
         setPegAmount(BigNumber.from('0'));
     }, [props.isMinting]);
 
-    const paths = (props.isMinting) ? 
-        props.assets.map(asset => [...[...SWAP_PATHS[asset.symbol]].reverse(), asset.address]) 
-        : props.assets.map(asset => [asset.address, ...SWAP_PATHS[asset.symbol]]);
+    const paths = props.isMinting
+        ? props.assets.map((asset) => [...[...SWAP_PATHS[asset.symbol]].reverse(), asset.address])
+        : props.assets.map((asset) => [asset.address, ...SWAP_PATHS[asset.symbol]]);
 
-    const underlying = (mode == MANUAL) ? props.assets.map((asset, index) => {
-        return (
-            <Underlying
-                key={asset.symbol + '_underlying'}
-                asset={asset}
-                isMinting={props.isMinting}
-                value={amounts[index]}
-                fund={props.fund}
-                approved={approvals[index]}
-                balance={balances[index]}
-                disabled={
-                    props.assets.reduce((a: boolean, b: Asset) => {
-                        return a || !b.amount || b.amount?.isZero();
-                    }, false) ||
-                    !props.fundAsset ||
-                    true
-                }
-                setValue={(value: BigNumber) => {
-                    const newAmounts = [...amounts];
-                    newAmounts[index] = value;
-
-                    if (props.assets.length > 0) {
-                        const portion = value.mul(parseEther('1')).div(props.assets[index].amount!);
-
-                        newAmounts.forEach((_, idx) => {
-                            newAmounts[idx] = portion.mul(props.assets[idx].amount!).div(parseEther('1'));
-                        });
-
-                        if (props.fundAsset) {
-                            setFundAmount(portion.mul(props.fundAsset.cap!).div(parseEther('1')));
+    const underlying =
+        mode == MANUAL ? (
+            props.assets.map((asset, index) => {
+                return (
+                    <Underlying
+                        key={asset.symbol + '_underlying'}
+                        asset={asset}
+                        isMinting={props.isMinting}
+                        value={amounts[index]}
+                        fund={props.fund}
+                        approved={approvals[index]}
+                        balance={balances[index]}
+                        disabled={
+                            props.assets.reduce((a: boolean, b: Asset) => {
+                                return a || !b.amount || b.amount?.isZero();
+                            }, false) ||
+                            !props.fundAsset ||
+                            true
                         }
+                        setValue={(value: BigNumber | undefined) => {
+                            value = value ? value : BigNumber.from('0');
+                            const newAmounts = [...amounts];
+                            newAmounts[index] = value;
 
-                        setAmounts(newAmounts);
-                    }
-                }}
-            />
-        );
-    }) : <>
-            <Col span={24}>
-                <InputContainer>
-                    <InputNumber
-                        style={{
-                            padding: '40px 0px 0px 8px',
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: '15px',
-                            overflow: 'hidden',
-                            boxShadow: 'none',
-                        }}
-                        stringMode={true}
-                        min={'0'}
-                        value={formatUnits(pegAmount, 18)}
-                        onChange={(value) => {
-                            const amount = parseEther(value ? value : '0');
-                            setPegAmount(amount);
+                            if (props.assets.length > 0) {
+                                const portion = value.mul(parseEther('1')).div(props.assets[index].amount!);
 
-                            if (props.fundAsset) {
-                                const tempFundAmount = (props.isMinting)
-                                    ? amount.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
-                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9900).div(980).div(props.nav);
+                                newAmounts.forEach((_, idx) => {
+                                    newAmounts[idx] = portion.mul(props.assets[idx].amount!).div(parseEther('1'));
+                                });
 
-                                setFundAmount(tempFundAmount);
-
-                                if (props.assets.length > 0) {
-                                    const newAmounts = [...amounts];
-                                    const portion = tempFundAmount.mul(parseEther('1')).div(props.fundAsset.cap!);
-
-                                    newAmounts.forEach((_, idx) => {
-                                        newAmounts[idx] = props.isMinting
-                                            ? portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(10001).div(10000)
-                                            : portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(980).div(1000);
-                                    });
-
-                                    setAmounts(newAmounts);
+                                if (props.fundAsset) {
+                                    setFundAmount(portion.mul(props.fundAsset.cap!).div(parseEther('1')));
                                 }
+
+                                setAmounts(newAmounts);
                             }
                         }}
-                        disabled={
-                            (props.isMinting && (!pegBalance || pegBalance.isZero()) || !props.fundAsset)
-                        }
-                        size="large"
                     />
-                    <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
-                        {props.isMinting ? 'Expected Input' : 'Min Output'}
-                    </Field>
-                    <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
-                        BUSD
-                    </TextBold>
-                </InputContainer>
-            </Col>
-            <Col span={12} style={{ alignItems: 'flex-start', paddingLeft: '10px', marginBottom: '10px' }}>
-                <Field>{`Balance: ${pegBalance ? parseBalance(pegBalance) : '0.00'} ${
-                    'BUSD'
-                }`}</Field>
-            </Col>
-        </>;
+                );
+            })
+        ) : (
+            <>
+                <Col span={24}>
+                    <InputContainer>
+                        <InputNumber
+                            style={{
+                                padding: '40px 0px 0px 8px',
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: '15px',
+                                overflow: 'hidden',
+                                boxShadow: 'none',
+                            }}
+                            stringMode={true}
+                            min={'0'}
+                            value={formatUnits(pegAmount, 18)}
+                            onChange={(value) => {
+                                const amount = parseEther(value ? value : '0');
+                                setPegAmount(amount);
+
+                                if (props.fundAsset) {
+                                    const tempFundAmount = props.isMinting
+                                        ? amount.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
+                                        : amount
+                                              .mul(props.fundAsset.cap!)
+                                              .mul(10000)
+                                              .mul(1000)
+                                              .div(9900)
+                                              .div(980)
+                                              .div(props.nav);
+
+                                    setFundAmount(tempFundAmount);
+
+                                    if (props.assets.length > 0) {
+                                        const newAmounts = [...amounts];
+                                        const portion = tempFundAmount.mul(parseEther('1')).div(props.fundAsset.cap!);
+
+                                        newAmounts.forEach((_, idx) => {
+                                            newAmounts[idx] = props.isMinting
+                                                ? portion
+                                                      .mul(props.assets[idx].amount!)
+                                                      .div(parseEther('1'))
+                                                      .mul(10001)
+                                                      .div(10000)
+                                                : portion
+                                                      .mul(props.assets[idx].amount!)
+                                                      .div(parseEther('1'))
+                                                      .mul(980)
+                                                      .div(1000);
+                                        });
+
+                                        setAmounts(newAmounts);
+                                    }
+                                }
+                            }}
+                            disabled={(props.isMinting && (!pegBalance || pegBalance.isZero())) || !props.fundAsset}
+                            size="large"
+                        />
+                        <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
+                            {props.isMinting ? 'Expected Input' : 'Min Output'}
+                        </Field>
+                        <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>BUSD</TextBold>
+                    </InputContainer>
+                </Col>
+                <Col span={12} style={{ alignItems: 'flex-start', paddingLeft: '10px', marginBottom: '10px' }}>
+                    <Field>{`Balance: ${pegBalance ? parseBalance(pegBalance) : '0.00'} ${'BUSD'}`}</Field>
+                </Col>
+            </>
+        );
 
     return (
         <Row>
-            <Modal 
-                style={{borderRadius: '15px'}} 
-                title="Confirmation" 
-                visible={isModalVisible} 
-                onOk={handleOk} 
+            <Modal
+                style={{ borderRadius: '15px' }}
+                title="Confirmation"
+                visible={isModalVisible}
+                onOk={handleOk}
                 onCancel={handleCancel}
-                footer={
-                    <Filled onClick={handleOk}>
-                        {(props.isMinting) ? 'Mint' : 'Redeem'}
-                    </Filled>
-                }
+                footer={<Filled onClick={handleOk}>{props.isMinting ? 'Mint' : 'Redeem'}</Filled>}
             >
                 <p>
-                    Automated minting has a limit of <b>1%</b> slippage configured by default. 
-                    Before continuing, understand that neither input nor output amounts are guaranteed (as this call results in a number of swaps),
-                    however the ratio between these two amounts is preserved (in other words, you may see a smaller amount of index token than expected, 
-                    though a corresponding amount of BUSD will be returned to your wallet).
+                    Automated minting has a limit of <b>1%</b> slippage configured by default. Before continuing,
+                    understand that neither input nor output amounts are guaranteed (as this call results in a number of
+                    swaps), however the ratio between these two amounts is preserved (in other words, you may see a
+                    smaller amount of index token than expected, though a corresponding amount of BUSD will be returned
+                    to your wallet).
                 </p>
             </Modal>
             <Col span={24} style={{ width: '100%', flexGrow: 1 }}>
                 <Card
                     style={{
-                        height: (mode == MANUAL) ? '265px' : 'auto',
+                        height: mode == MANUAL ? '265px' : 'auto',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-start',
                         alignItems: 'space-evenly',
                         padding: '20px 30px',
-                        overflowY: (mode == AUTO) ? 'hidden' : 'scroll',
+                        overflowY: mode == AUTO ? 'hidden' : 'scroll',
                         overflowX: 'hidden',
                     }}
                 >
                     <Row>
                         <Col span={12} align="flex-end">
-                            <Selector selected={mode == AUTO} onClick={() => {setMode(AUTO)}}>
+                            <Selector
+                                selected={mode == AUTO}
+                                onClick={() => {
+                                    setMode(AUTO);
+                                }}
+                            >
                                 Auto
                             </Selector>
                         </Col>
                         <Col span={12} align="flex-start">
-                            <Selector selected={mode == MANUAL} onClick={() => {setMode(MANUAL)}}>
+                            <Selector
+                                selected={mode == MANUAL}
+                                onClick={() => {
+                                    setMode(MANUAL);
+                                }}
+                            >
                                 Manual
                             </Selector>
                         </Col>
                     </Row>
-                    <Row>
-                        {underlying}
-                    </Row>
+                    <Row>{underlying}</Row>
                 </Card>
             </Col>
             <Col span={24}>
@@ -409,7 +432,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                             );
                                             balances.forEach((bal, i) => {
                                                 if (props.assets.length > 0) {
-                                                    const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
+                                                    const portion = bal!
+                                                        .mul(parseEther('1'))
+                                                        .div(props.assets[i].amount!);
                                                     const fundAmount = portion
                                                         .mul(props.fundAsset!.cap!)
                                                         .div(parseEther('1'))
@@ -423,7 +448,9 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                             fundAdjustAmounts(min);
                                         }
                                     } else if (props.isMinting && mode == AUTO && props.fundAsset) {
-                                        fundAdjustAmounts(pegBalance.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav))
+                                        fundAdjustAmounts(
+                                            pegBalance.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
+                                        );
                                     } else {
                                         fundAdjustAmounts(fundBalance);
                                     }
@@ -437,42 +464,50 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                 style={{ width: '100%' }}
                                 disabled={
                                     (!props.fund ||
-                                    fundAmount.isZero() ||
-                                    (props.isMinting && mode == MANUAL && approvals.reduce((a, b) => a && !b, true)) ||
-                                    (props.isMinting && mode == MANUAL &&
-                                        balances.reduce(
-                                            (a: boolean, b: BigNumber | undefined, index: number) =>
-                                                a || !b || !amounts[index] || !amounts[index].lte(b),
-                                            false
-                                        )) ||
-                                    (!props.isMinting &&
-                                        (!fundBalance ||
-                                            fundAmount.lte(BigNumber.from('0')) ||
-                                            !fundAmount.lte(fundBalance))) ||
-                                    (props.isMinting && mode == AUTO && pegAmount && !pegAmount.lte(pegBalance)) ||
-                                    (!props.isMinting && mode == AUTO && fundAmount && !fundAmount.lte(fundBalance))) &&
-                                    (props.isMinting && ((mode == AUTO && pegApproved) || mode == MANUAL) ||
-                                        !props.isMinting && ((mode == AUTO && fundApproved) || mode == MANUAL))
+                                        fundAmount?.isZero() ||
+                                        (props.isMinting &&
+                                            mode == MANUAL &&
+                                            approvals.reduce((a, b) => a && !b, true)) ||
+                                        (props.isMinting &&
+                                            mode == MANUAL &&
+                                            balances.reduce(
+                                                (a: boolean, b: BigNumber | undefined, index: number) =>
+                                                    a || !b || !amounts[index] || !amounts[index].lte(b),
+                                                false
+                                            )) ||
+                                        (!props.isMinting &&
+                                            (!fundBalance ||
+                                                !fundAmount ||
+                                                fundAmount.lte(BigNumber.from('0')) ||
+                                                !fundAmount.lte(fundBalance))) ||
+                                        (props.isMinting && mode == AUTO && pegAmount && !pegAmount.lte(pegBalance)) ||
+                                        (!props.isMinting &&
+                                            mode == AUTO &&
+                                            fundAmount &&
+                                            !fundAmount.lte(fundBalance))) &&
+                                    ((props.isMinting && ((mode == AUTO && pegApproved) || mode == MANUAL)) ||
+                                        (!props.isMinting && ((mode == AUTO && fundApproved) || mode == MANUAL)))
                                 }
                                 onClick={() => {
                                     if (props.isMinting) {
                                         if (mode == AUTO && !pegApproved) {
-                                            pegContract?.approve(
-                                                BUNDLE_ROUTER,
-                                                BigNumber.from(
-                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                            pegContract
+                                                ?.approve(
+                                                    BUNDLE_ROUTER,
+                                                    BigNumber.from(
+                                                        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                    )
                                                 )
-                                            )
-                                            .then((tx: TransactionResponse) => {
-                                                txMessage(tx);
-                                                return tx.wait(1);
-                                            })
-                                            .then((tx: TransactionReceipt) => {
-                                                approveMessage(tx);
-                                            })
-                                            .catch((e: any) => {
-                                                errorMessage(e.message || e.data.message);
-                                            });
+                                                .then((tx: TransactionResponse) => {
+                                                    txMessage(tx);
+                                                    return tx.wait(1);
+                                                })
+                                                .then((tx: TransactionReceipt) => {
+                                                    approveMessage(tx);
+                                                })
+                                                .catch((e: any) => {
+                                                    errorMessage(e.message || e.data.message);
+                                                });
                                         } else if (mode == AUTO) {
                                             setIsModalVisible(true);
                                         } else {
@@ -491,22 +526,23 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                         }
                                     } else {
                                         if (mode == AUTO && !fundApproved) {
-                                            fundContract?.approve(
-                                                BUNDLE_ROUTER,
-                                                BigNumber.from(
-                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                            fundContract
+                                                ?.approve(
+                                                    BUNDLE_ROUTER,
+                                                    BigNumber.from(
+                                                        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                    )
                                                 )
-                                            )
-                                            .then((tx: TransactionResponse) => {
-                                                txMessage(tx);
-                                                return tx.wait(1);
-                                            })
-                                            .then((tx: TransactionReceipt) => {
-                                                approveMessage(tx);
-                                            })
-                                            .catch((e: any) => {
-                                                errorMessage(e.message || e.data.message);
-                                            });
+                                                .then((tx: TransactionResponse) => {
+                                                    txMessage(tx);
+                                                    return tx.wait(1);
+                                                })
+                                                .then((tx: TransactionReceipt) => {
+                                                    approveMessage(tx);
+                                                })
+                                                .catch((e: any) => {
+                                                    errorMessage(e.message || e.data.message);
+                                                });
                                         } else if (mode == AUTO) {
                                             setIsModalVisible(true);
                                         } else {
@@ -529,7 +565,13 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                     }
                                 }}
                             >
-                                {props.isMinting ? mode == AUTO && !pegApproved ? 'Approve' : 'Mint' : mode == AUTO && !fundApproved ? 'Approve' : 'Redeem'}
+                                {props.isMinting
+                                    ? mode == AUTO && !pegApproved
+                                        ? 'Approve'
+                                        : 'Mint'
+                                    : mode == AUTO && !fundApproved
+                                    ? 'Approve'
+                                    : 'Redeem'}
                             </Outline>
                         </Col>
                     </Row>
