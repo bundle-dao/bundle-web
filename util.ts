@@ -53,7 +53,8 @@ export const formatNumber = (input: number, precision = 2): string => {
     }
 
     if (count == 0 || tempInput >= 1000) {
-        return `${parseFloat(input.toPrecision(4)).toFixed(precision)}`;
+        console.log(input);
+        return `${parseFloat(input.toPrecision(4)).toExponential(precision)}`;
     } else {
         return `${parseFloat(tempInput.toPrecision(4)).toFixed(precision)}${NUMERIC_UNITS[count]}`;
     }
