@@ -91,7 +91,7 @@ export const BURN = 'BURN';
 export const AUTO = 'AUTO';
 export const MANUAL = 'MANUAL';
 
-const BUNDLE_ROUTER = '0x2C5AA923AFE279D8bDcA4419BAe52D2eE1E2f72c';
+const BUNDLE_ROUTER = '0x09a69DE410a84fD363273c716478a72C826342Ae';
 
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [isModalVisible, setIsModalVisible] = useState(false);
