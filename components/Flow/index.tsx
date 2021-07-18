@@ -2,13 +2,13 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { formatUnits, parseEther } from '@ethersproject/units';
-import { InputNumber } from 'antd';
+import { InputNumber, Modal } from 'antd';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useApproved from '../../hooks/useApproved';
 import useERC20Contract from '../../hooks/useERC20Contract';
 import useRawBalance from '../../hooks/useRawBalance';
-import { Asset } from '../../lib/asset';
+import { Asset, PEG, SWAP_PATHS } from '../../lib/asset';
 import { Fund, getAssets } from '../../lib/fund';
 import Outline from '../Button/Outline';
 import Card from '../Card';
@@ -17,10 +17,12 @@ import { approveMessage, burnMessage, errorMessage, mintMessage, txMessage } fro
 import { useWeb3React } from '@web3-react/core';
 import Underlying from './subcomponents/Underlying.tsx';
 import useContract from '../../hooks/useContract';
-import Bundle from '../../contracts/Bundle.json';
+import BundleABI from '../../contracts/Bundle.json';
+import BundleRouterABI from '../../contracts/BundleRouter.json';
 import useBalance from '../../hooks/useBalance';
 import { parseBalance } from '../../util';
 import { Contract } from '@ethersproject/contracts';
+import Filled from '../Button/Filled';
 
 interface Props {
     fund: Fund | undefined;
@@ -86,10 +88,64 @@ const Primary = styled.span`
 export const MINT = 'MINT';
 export const BURN = 'BURN';
 
+export const AUTO = 'AUTO';
+export const MANUAL = 'MANUAL';
+
+const BUNDLE_ROUTER = '0x09a69DE410a84fD363273c716478a72C826342Ae';
+
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleOk = () => {
+        if (props.isMinting) {
+            bundleRouter?.mint(
+                fundContract?.address,
+                PEG,
+                pegAmount,
+                fundAmount,
+                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                paths
+            ).then((tx: TransactionResponse) => {
+                txMessage(tx);
+                return tx.wait(1);
+            })
+            .then((tx: TransactionReceipt) => {
+                mintMessage(tx);
+            })
+            .catch((e: any) => {
+                errorMessage(e.message || e.data.message);
+            });
+        } else {
+            bundleRouter?.redeem(
+                fundContract?.address,
+                PEG,
+                fundAmount,
+                pegAmount,
+                `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
+                paths
+            ).then((tx: TransactionResponse) => {
+                txMessage(tx);
+                return tx.wait(1);
+            })
+            .then((tx: TransactionReceipt) => {
+                burnMessage(tx);
+            })
+            .catch((e: any) => {
+                errorMessage(e.message || e.data.message);
+            });
+        }
+
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
     const [amounts, setAmounts] = useState(Array(props.assets.length).fill(BigNumber.from('0')));
+    const [pegAmount, setPegAmount] = useState(BigNumber.from('0'));
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
-    const [disabled, setDisabled] = useState(false);
+    const [mode, setMode] = useState(AUTO);
 
     const approvals: (boolean | undefined)[] = [];
     const balances: (BigNumber | undefined)[] = [];
@@ -100,8 +156,15 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
         balances.push(useRawBalance(assetContract).data);
     });
 
-    const fundContract = useContract(props.fund?.address, Bundle, true);
+    const pegContract = useERC20Contract(PEG, true);
+    const pegBalance = useRawBalance(pegContract).data;
+    const pegApproved = useApproved(pegContract, BUNDLE_ROUTER).data;
+
+    const fundContract = useContract(props.fund?.address, BundleABI, true);
     const fundBalance = useRawBalance(fundContract).data;
+    const fundApproved = useApproved(fundContract, BUNDLE_ROUTER).data;
+
+    const bundleRouter = useContract(BUNDLE_ROUTER, BundleRouterABI, true);
 
     const fundAdjustAmounts = (amount: BigNumber) => {
         setFundAmount(amount);
@@ -118,14 +181,27 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
 
             setAmounts(newAmounts);
         }
+
+        if (props.fundAsset) {
+            if (props.isMinting) {
+                setPegAmount(amount.mul(props.nav).mul(10000).div(9900).div(props.fundAsset.cap!));
+            } else {
+                setPegAmount(amount.mul(props.nav).mul(9900).div(10000).mul(980).div(1000).div(props.fundAsset.cap!));
+            }
+        }
     };
 
     useEffect(() => {
         setAmounts(Array(props.assets.length).fill(BigNumber.from('0')));
         setFundAmount(BigNumber.from('0'));
+        setPegAmount(BigNumber.from('0'));
     }, [props.isMinting]);
 
-    const underlying = props.assets.map((asset, index) => {
+    const paths = (props.isMinting) ? 
+        props.assets.map(asset => [...[...SWAP_PATHS[asset.symbol]].reverse(), asset.address]) 
+        : props.assets.map(asset => [asset.address, ...SWAP_PATHS[asset.symbol]]);
+
+    const underlying = (mode == MANUAL) ? props.assets.map((asset, index) => {
         return (
             <Underlying
                 key={asset.symbol + '_underlying'}
@@ -162,23 +238,115 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                 }}
             />
         );
-    });
+    }) : <>
+            <Col span={24}>
+                <InputContainer>
+                    <InputNumber
+                        style={{
+                            padding: '40px 0px 0px 8px',
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '15px',
+                            overflow: 'hidden',
+                            boxShadow: 'none',
+                        }}
+                        stringMode={true}
+                        min={'0'}
+                        value={formatUnits(pegAmount, 18)}
+                        onChange={(value) => {
+                            const amount = parseEther(value ? value : '0');
+                            setPegAmount(amount);
+
+                            if (props.fundAsset) {
+                                const tempFundAmount = (props.isMinting)
+                                    ? amount.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav)
+                                    : amount.mul(props.fundAsset.cap!).mul(10000).mul(1000).div(9900).div(980).div(props.nav);
+
+                                setFundAmount(tempFundAmount);
+
+                                if (props.assets.length > 0) {
+                                    const newAmounts = [...amounts];
+                                    const portion = tempFundAmount.mul(parseEther('1')).div(props.fundAsset.cap!);
+
+                                    newAmounts.forEach((_, idx) => {
+                                        newAmounts[idx] = props.isMinting
+                                            ? portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(10001).div(10000)
+                                            : portion.mul(props.assets[idx].amount!).div(parseEther('1')).mul(980).div(1000);
+                                    });
+
+                                    setAmounts(newAmounts);
+                                }
+                            }
+                        }}
+                        disabled={
+                            (props.isMinting && (!pegBalance || pegBalance.isZero()) || !props.fundAsset)
+                        }
+                        size="large"
+                    />
+                    <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
+                        {props.isMinting ? 'Expected Input' : 'Min Output'}
+                    </Field>
+                    <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
+                        BUSD
+                    </TextBold>
+                </InputContainer>
+            </Col>
+            <Col span={12} style={{ alignItems: 'flex-start', paddingLeft: '10px', marginBottom: '10px' }}>
+                <Field>{`Balance: ${pegBalance ? parseBalance(pegBalance) : '0.00'} ${
+                    'BUSD'
+                }`}</Field>
+            </Col>
+        </>;
 
     return (
         <Row>
+            <Modal 
+                style={{borderRadius: '15px'}} 
+                title="Confirmation" 
+                visible={isModalVisible} 
+                onOk={handleOk} 
+                onCancel={handleCancel}
+                footer={
+                    <Filled onClick={handleOk}>
+                        {(props.isMinting) ? 'Mint' : 'Redeem'}
+                    </Filled>
+                }
+            >
+                <p>
+                    Automated minting has a limit of <b>1%</b> slippage configured by default. 
+                    Before continuing, understand that neither input nor output amounts are guaranteed (as this call results in a number of swaps),
+                    however the ratio between these two amounts is preserved (in other words, you may see a smaller amount of index token than expected, 
+                    though a corresponding amount of BUSD will be returned to your wallet).
+                </p>
+            </Modal>
             <Col span={24} style={{ width: '100%', flexGrow: 1 }}>
                 <Card
                     style={{
-                        height: '227.5px',
+                        height: (mode == MANUAL) ? '265px' : 'auto',
                         display: 'flex',
-                        justifyContent: 'space-evenly',
-                        alignItems: 'flex-start',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                        alignItems: 'space-evenly',
                         padding: '20px 30px',
-                        overflowY: 'scroll',
+                        overflowY: (mode == AUTO) ? 'hidden' : 'scroll',
                         overflowX: 'hidden',
                     }}
                 >
-                    <Row>{underlying}</Row>
+                    <Row>
+                        <Col span={12} align="flex-end">
+                            <Selector selected={mode == AUTO} onClick={() => {setMode(AUTO)}}>
+                                Auto
+                            </Selector>
+                        </Col>
+                        <Col span={12} align="flex-start">
+                            <Selector selected={mode == MANUAL} onClick={() => {setMode(MANUAL)}}>
+                                Manual
+                            </Selector>
+                        </Col>
+                    </Row>
+                    <Row>
+                        {underlying}
+                    </Row>
                 </Card>
             </Col>
             <Col span={24}>
@@ -219,7 +387,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                     size="large"
                                 />
                                 <Field style={{ position: 'absolute', top: '20px', left: '20px' }}>
-                                    {props.isMinting ? 'To' : 'From'}
+                                    {props.isMinting ? (mode == MANUAL ? 'Output' : 'Min Output') : 'Input'}
                                 </Field>
                                 <TextBold style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
                                     {props.fund ? props.fund.symbol : '...'}
@@ -234,24 +402,28 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Col span={12} style={{ alignItems: 'flex-end', paddingRight: '10px', marginBottom: '10px' }}>
                             <Primary
                                 onClick={() => {
-                                    if (props.isMinting && balances.length > 0 && props.fundAsset) {
-                                        let min = BigNumber.from(
-                                            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-                                        );
-                                        balances.forEach((bal, i) => {
-                                            if (props.assets.length > 0) {
-                                                const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
-                                                const fundAmount = portion
-                                                    .mul(props.fundAsset!.cap!)
-                                                    .div(parseEther('1'))
-                                                    .mul(10000)
-                                                    .div(10001);
-                                                if (min.gte(fundAmount)) {
-                                                    min = fundAmount;
+                                    if (props.isMinting && mode == MANUAL) {
+                                        if (balances.length > 0 && props.fundAsset) {
+                                            let min = BigNumber.from(
+                                                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                            );
+                                            balances.forEach((bal, i) => {
+                                                if (props.assets.length > 0) {
+                                                    const portion = bal!.mul(parseEther('1')).div(props.assets[i].amount!);
+                                                    const fundAmount = portion
+                                                        .mul(props.fundAsset!.cap!)
+                                                        .div(parseEther('1'))
+                                                        .mul(10000)
+                                                        .div(10001);
+                                                    if (min.gte(fundAmount)) {
+                                                        min = fundAmount;
+                                                    }
                                                 }
-                                            }
-                                        });
-                                        fundAdjustAmounts(min);
+                                            });
+                                            fundAdjustAmounts(min);
+                                        }
+                                    } else if (props.isMinting && mode == AUTO && props.fundAsset) {
+                                        fundAdjustAmounts(pegBalance.mul(props.fundAsset.cap!).mul(9900).div(10000).div(props.nav))
                                     } else {
                                         fundAdjustAmounts(fundBalance);
                                     }
@@ -264,10 +436,10 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                             <Outline
                                 style={{ width: '100%' }}
                                 disabled={
-                                    !props.fund ||
+                                    (!props.fund ||
                                     fundAmount.isZero() ||
-                                    (props.isMinting && approvals.reduce((a, b) => a && !b, true)) ||
-                                    (props.isMinting &&
+                                    (props.isMinting && mode == MANUAL && approvals.reduce((a, b) => a && !b, true)) ||
+                                    (props.isMinting && mode == MANUAL &&
                                         balances.reduce(
                                             (a: boolean, b: BigNumber | undefined, index: number) =>
                                                 a || !b || !amounts[index] || !amounts[index].lte(b),
@@ -276,42 +448,88 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                     (!props.isMinting &&
                                         (!fundBalance ||
                                             fundAmount.lte(BigNumber.from('0')) ||
-                                            !fundAmount.lte(fundBalance)))
+                                            !fundAmount.lte(fundBalance))) ||
+                                    (props.isMinting && mode == AUTO && pegAmount && !pegAmount.lte(pegBalance)) ||
+                                    (!props.isMinting && mode == AUTO && fundAmount && !fundAmount.lte(fundBalance))) &&
+                                    (props.isMinting && ((mode == AUTO && pegApproved) || mode == MANUAL) ||
+                                        !props.isMinting && ((mode == AUTO && fundApproved) || mode == MANUAL))
                                 }
                                 onClick={() => {
                                     if (props.isMinting) {
-                                        fundContract
-                                            ?.joinPool(fundAmount, amounts)
-                                            .then((tx: TransactionResponse) => {
-                                                txMessage(tx);
-                                                return tx.wait(1);
-                                            })
-                                            .then((tx: TransactionReceipt) => {
-                                                mintMessage(tx);
-                                            })
-                                            .catch((e: any) => {
-                                                errorMessage(e.message || e.data.message);
-                                            });
-                                    } else {
-                                        fundContract
-                                            ?.exitPool(
-                                                fundAmount,
-                                                amounts.map((amount) => amount.mul(970).div(1000))
+                                        if (mode == AUTO && !pegApproved) {
+                                            pegContract?.approve(
+                                                BUNDLE_ROUTER,
+                                                BigNumber.from(
+                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                )
                                             )
                                             .then((tx: TransactionResponse) => {
                                                 txMessage(tx);
                                                 return tx.wait(1);
                                             })
                                             .then((tx: TransactionReceipt) => {
-                                                burnMessage(tx);
+                                                approveMessage(tx);
                                             })
                                             .catch((e: any) => {
                                                 errorMessage(e.message || e.data.message);
                                             });
+                                        } else if (mode == AUTO) {
+                                            setIsModalVisible(true);
+                                        } else {
+                                            fundContract
+                                                ?.joinPool(fundAmount, amounts)
+                                                .then((tx: TransactionResponse) => {
+                                                    txMessage(tx);
+                                                    return tx.wait(1);
+                                                })
+                                                .then((tx: TransactionReceipt) => {
+                                                    mintMessage(tx);
+                                                })
+                                                .catch((e: any) => {
+                                                    errorMessage(e.message || e.data.message);
+                                                });
+                                        }
+                                    } else {
+                                        if (mode == AUTO && !fundApproved) {
+                                            fundContract?.approve(
+                                                BUNDLE_ROUTER,
+                                                BigNumber.from(
+                                                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+                                                )
+                                            )
+                                            .then((tx: TransactionResponse) => {
+                                                txMessage(tx);
+                                                return tx.wait(1);
+                                            })
+                                            .then((tx: TransactionReceipt) => {
+                                                approveMessage(tx);
+                                            })
+                                            .catch((e: any) => {
+                                                errorMessage(e.message || e.data.message);
+                                            });
+                                        } else if (mode == AUTO) {
+                                            setIsModalVisible(true);
+                                        } else {
+                                            fundContract
+                                                ?.exitPool(
+                                                    fundAmount,
+                                                    amounts.map((amount) => amount.mul(970).div(1000))
+                                                )
+                                                .then((tx: TransactionResponse) => {
+                                                    txMessage(tx);
+                                                    return tx.wait(1);
+                                                })
+                                                .then((tx: TransactionReceipt) => {
+                                                    burnMessage(tx);
+                                                })
+                                                .catch((e: any) => {
+                                                    errorMessage(e.message || e.data.message);
+                                                });
+                                        }
                                     }
                                 }}
                             >
-                                {props.isMinting ? 'Mint' : 'Redeem'}
+                                {props.isMinting ? mode == AUTO && !pegApproved ? 'Approve' : 'Mint' : mode == AUTO && !fundApproved ? 'Approve' : 'Redeem'}
                             </Outline>
                         </Col>
                     </Row>

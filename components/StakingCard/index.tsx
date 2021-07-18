@@ -340,7 +340,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             depositMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else {
                                     stakeToken
@@ -358,7 +358,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 }
                             }}
@@ -427,7 +427,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             withdrawMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 } else {
                                     stakeToken
@@ -445,7 +445,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             approveMessage(tx);
                                         })
                                         .catch((e: any) => {
-                                            errorMessage(e.data.message);
+                                            errorMessage(e.message || e.data.message);
                                         });
                                 }
                             }}
@@ -475,7 +475,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                         harvestMessage(tx);
                                     })
                                     .catch((e: any) => {
-                                        errorMessage(e.data.message);
+                                        errorMessage(e.message || e.data.message);
                                     });
                             }}
                         >
