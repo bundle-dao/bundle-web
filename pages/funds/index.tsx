@@ -60,13 +60,16 @@ const Landing: React.FC = (): React.ReactElement => {
         fundCards.push(
             <FundCard
                 index={index}
-                price={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!) : '0.00'}
+                price={fundAssets[fund.symbol] ? parseBalance(fundAssets[fund.symbol].price!, 18, 2, false) : '0.00'}
                 fund={fund}
                 priceChange={'N/A'}
                 marketCap={
                     fundAssets[fund.symbol]
                         ? parseBalance(
-                              fundAssets[fund.symbol].price!.mul(fundAssets[fund.symbol].cap!).div(parseEther('1'))
+                              fundAssets[fund.symbol].price!.mul(fundAssets[fund.symbol].cap!).div(parseEther('1')),
+                              18,
+                              2,
+                              false
                           )
                         : '0.00'
                 }

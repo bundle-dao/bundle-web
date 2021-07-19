@@ -106,7 +106,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                     fundAmount,
                     `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
                     paths,
-                    ( props.fund?.autoGas ) ? { gasLimit: props.fund?.autoGas } : {}
+                    props.fund?.autoGas ? { gasLimit: props.fund?.autoGas } : {}
                 )
                 .then((tx: TransactionResponse) => {
                     txMessage(tx);
@@ -127,7 +127,7 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                     pegAmount,
                     `0x${(Math.floor(new Date().getTime() / 1000) + 600).toString(16)}`,
                     paths,
-                    ( props.fund?.autoGas ) ? { gasLimit: props.fund?.autoGas } : {}
+                    props.fund?.autoGas ? { gasLimit: props.fund?.autoGas } : {}
                 )
                 .then((tx: TransactionResponse) => {
                     txMessage(tx);

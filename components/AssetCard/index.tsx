@@ -68,7 +68,7 @@ const AssetCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         <Text>{props.asset.symbol.toUpperCase()}</Text>
                     </Col>
                     <Col xs={9} md={9} lg={9} style={{ alignItems: 'flex-start' }}>
-                        <Text>{`$${parseBalance(props.asset.price!)}`}</Text>
+                        <Text>{`$${parseBalance(props.asset.price!, 18, 2, false)}`}</Text>
                     </Col>
                     <Col xs={0} md={0} lg={3} style={{ alignItems: 'center' }}>
                         <ProgressBar

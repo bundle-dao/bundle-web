@@ -33,11 +33,19 @@ export function getNamedAddress(chainId: number | undefined, name: string): stri
     }
 }
 
-export const parseBalance = (balance: BigNumberish, decimals: number = 18, decimalsToDisplay: number = 2): string => {
+export const parseBalance = (
+    balance: BigNumberish,
+    decimals: number = 18,
+    decimalsToDisplay: number = 2,
+    round: boolean = true
+): string => {
     if (balance) {
-        return (Math.max(0, Number(formatUnits(balance, decimals)) - 1 * 10 ** (-1 * decimalsToDisplay))).toFixed(
-            decimalsToDisplay
-        );
+        return Math.max(
+            0,
+            round
+                ? Number(formatUnits(balance, decimals)) - 0.5 * 10 ** (-1 * decimalsToDisplay)
+                : Number(formatUnits(balance, decimals))
+        ).toFixed(decimalsToDisplay);
     } else {
         return '0.00';
     }

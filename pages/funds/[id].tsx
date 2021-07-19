@@ -132,7 +132,7 @@ const Landing: React.FC = (): React.ReactElement => {
                     </Col>
                     <Col xs={12} md={3} style={{ justifyContent: 'flex-end' }} mobilePadding="15px 0px 0px 0px">
                         <Field>Price</Field>
-                        <Text>{`$${fundAsset ? parseBalance(fundAsset.price!) : '0.00'}`}</Text>
+                        <Text>{`$${fundAsset ? parseBalance(fundAsset.price!, 18, 2, false) : '0.00'}`}</Text>
                     </Col>
                     <Col xs={12} md={3} style={{ justifyContent: 'flex-end' }} mobilePadding="15px 0px 0px 0px">
                         <Field>24H</Field>
@@ -143,7 +143,12 @@ const Landing: React.FC = (): React.ReactElement => {
                         <Text>
                             {`$${
                                 fundAsset
-                                    ? parseBalance(fundAsset.price!.mul(fundAsset.cap!).div(parseEther('1')))
+                                    ? parseBalance(
+                                          fundAsset.price!.mul(fundAsset.cap!).div(parseEther('1')),
+                                          18,
+                                          2,
+                                          false
+                                      )
                                     : '0.00'
                             }`}
                         </Text>
@@ -151,7 +156,9 @@ const Landing: React.FC = (): React.ReactElement => {
                     <Col xs={12} md={3} style={{ justifyContent: 'flex-end' }} mobilePadding="15px 0px 0px 0px">
                         <Field>NAV</Field>
                         <Text>
-                            {fundAsset ? `$${parseBalance(nav.mul(parseEther('1')).div(fundAsset.cap!))}` : '0.00'}
+                            {fundAsset
+                                ? `$${parseBalance(nav.mul(parseEther('1')).div(fundAsset.cap!), 18, 2, false)}`
+                                : '0.00'}
                         </Text>
                     </Col>
                 </Row>
