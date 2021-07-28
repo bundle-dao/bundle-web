@@ -181,7 +181,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                         padding: '20px',
                                     }}
                                 >
-                                    <Chart id={fund?.symbol}/>
+                                    <Chart id={fund?.cgid}/>
                                 </Card>
                             </Col>
                         </Row>
