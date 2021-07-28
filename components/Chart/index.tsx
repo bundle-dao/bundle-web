@@ -15,8 +15,8 @@ const Chart: React.FC<Props> = (props: Props): React.ReactElement => {
                 console.log(lc);
                 const elem = document.getElementById("chart")!;
                 const chart = lc.createChart(elem, {
-                    width: 1200,
-                    height: 400,
+                    width: elem.clientWidth,
+                    height: elem.clientHeight,
                     grid: {
                         horzLines: {
                             color: '#ffffff',
@@ -42,8 +42,6 @@ const Chart: React.FC<Props> = (props: Props): React.ReactElement => {
                     lineColor: '#E7694C',
                     lineWidth: 2,
                 });
-
-                chart.resize(elem.clientWidth, elem.clientHeight);
         
                 fetchChartData(props.id!, 1).then(data => {
                     console.log(data);
