@@ -1,7 +1,7 @@
 import { Layout } from 'antd';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { ArrowLeftOutlined, RocketOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { RowContainer, Row, Col } from '../../components/Layout';
 import { getAssets, getFundByName, Fund } from '../../lib/fund';
 import { useRouter } from 'next/router';
@@ -15,6 +15,7 @@ import { parseBalance } from '../../util';
 import { parseEther } from '@ethersproject/units';
 import Swap from '../../components/Swap';
 import Flow from '../../components/Flow';
+import Chart from '../../components/Chart';
 
 interface SelectorProps {
     selected: boolean;
@@ -180,8 +181,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                         padding: '20px',
                                     }}
                                 >
-                                    <RocketOutlined style={{ fontSize: '50px', paddingBottom: '25px' }} />
-                                    <h2>Charting is currently under construction.</h2>
+                                    <Chart id={fund?.symbol}/>
                                 </Card>
                             </Col>
                         </Row>

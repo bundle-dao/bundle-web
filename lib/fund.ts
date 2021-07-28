@@ -10,6 +10,7 @@ export interface Fund {
     symbol: string;
     description?: string;
     autoGas?: string;
+    cgid?: string;
 }
 
 type NamedFunds = { [key: string]: Fund };
@@ -22,6 +23,7 @@ const FUNDS: NamedFunds = {
         symbol: 'bDEFI',
         description: 'A hyper-focused index containing market-leading cross-chain and BSC native DeFi protocols.',
         autoGas: '5000000',
+        cgid: 'bdefi',
     },
     bCHAIN: {
         name: 'bChain Index',
@@ -30,6 +32,7 @@ const FUNDS: NamedFunds = {
         symbol: 'bCHAIN',
         description: 'A hyper-focused index containing native assets of market-leading chains and high-cap protocols.',
         autoGas: '3000000',
+        cgid: 'bchain',
     },
     bSTBL: {
         name: 'bStable',
@@ -38,6 +41,7 @@ const FUNDS: NamedFunds = {
         symbol: 'bSTBL',
         description: 'A risk-mitigated stable index of high-cap collateralized and algorithmic stablecoins.',
         autoGas: '1500000',
+        cgid: 'bstable',
     },
 };
 
