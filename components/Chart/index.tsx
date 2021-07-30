@@ -32,7 +32,7 @@ const Chart: React.FC<Props> = (props: Props): React.ReactElement => {
                         borderVisible: false,
                     },
                     localization: {
-                        priceFormatter: (price: number) => '$' + price.toFixed(4),
+                        priceFormatter: (price: number) => '$' + price.toFixed(2),
                     },
                 });
         
@@ -43,7 +43,7 @@ const Chart: React.FC<Props> = (props: Props): React.ReactElement => {
                     lineWidth: 2,
                 });
         
-                fetchChartData(props.id!, 1).then(data => {
+                fetchChartData(props.id!, 7).then(data => {
                     console.log(data);
                     const parsedData = data.prices.map((price: any) => {
                         console.log(new Date(price[0]));
