@@ -342,11 +342,12 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                 footer={<Filled onClick={handleOk}>{props.isMinting ? 'Mint' : 'Redeem'}</Filled>}
             >
                 <p>
-                    Automated minting has a limit of <b>1%</b> slippage configured by default. Before continuing,
-                    understand that neither input nor output amounts are guaranteed (as this call results in a number of
-                    swaps), however the ratio between these two amounts is preserved (in other words, you may see a
-                    smaller amount of index token than expected, though a corresponding amount of BUSD will be returned
-                    to your wallet).
+                    Autmated minting actually automated the process of swapping for underlying tokens and manually minting a Bundle. For 
+                    this reason, the input and output amounts may deviate slightly from what's displayed on the UI. Rest assured though, the 
+                    ratio between BUSD in and {props.fund?.symbol} out won't change.
+                </p>
+                <p>
+                    Automated minting has a limit of <b>1%</b> slippage configured by default.
                 </p>
             </Modal>
             <Col span={24} style={{ width: '100%', flexGrow: 1 }}>

@@ -64,7 +64,7 @@ const Landing: React.FC = (): React.ReactElement => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [fundAsset, setFundAsset] = useState<Asset>();
     const [nav, setNav] = useState<BigNumber>(BigNumber.from('0'));
-    const [selected, setSelected] = useState(MINT);
+    const [selected, setSelected] = useState(TRADE);
     const selectorOnClick = (target: string) => {
         return () => {
             setSelected(target);
@@ -202,14 +202,14 @@ const Landing: React.FC = (): React.ReactElement => {
                                         alignItems: 'flex-end',
                                     }}
                                 >
+                                    <Selector onClick={selectorOnClick(TRADE)} selected={selected == TRADE}>
+                                        Swap
+                                    </Selector>
                                     <Selector onClick={selectorOnClick(MINT)} selected={selected == MINT}>
                                         Mint
                                     </Selector>
                                     <Selector onClick={selectorOnClick(BURN)} selected={selected == BURN}>
                                         Redeem
-                                    </Selector>
-                                    <Selector onClick={selectorOnClick(TRADE)} selected={selected == TRADE}>
-                                        Swap
                                     </Selector>
                                 </Card>
                             </Col>
