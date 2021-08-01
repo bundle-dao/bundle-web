@@ -214,7 +214,12 @@ const Landing: React.FC = (): React.ReactElement => {
                                 </Card>
                             </Col>
                             {selected == TRADE ? (
-                                <Swap fund={fund} assets={SWAP_ASSETS} account={account} />
+                                <Swap
+                                    fund={fund}
+                                    assets={SWAP_ASSETS}
+                                    account={account}
+                                    nav={nav.mul(parseEther('1')).div(fundAsset ? fundAsset.cap! : 1)}
+                                />
                             ) : (
                                 <Flow
                                     fund={fund}
