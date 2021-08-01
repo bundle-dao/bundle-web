@@ -23,6 +23,9 @@ import useBalance from '../../hooks/useBalance';
 import { parseBalance } from '../../util';
 import { Contract } from '@ethersproject/contracts';
 import Filled from '../Button/Filled';
+import useApprovals from '../../hooks/useApprovals';
+import ERC20ABI from '../../contracts/ERC20.json';
+import useRawBalances from '../../hooks/useRawBalances';
 
 interface Props {
     fund: Fund | undefined;
@@ -95,6 +98,7 @@ const BUNDLE_ROUTER = '0x09a69DE410a84fD363273c716478a72C826342Ae';
 
 const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const { library, account } = useWeb3React();
 
     const handleOk = () => {
         if (props.isMinting) {
@@ -153,14 +157,14 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
     const [fundAmount, setFundAmount] = useState(BigNumber.from('0'));
     const [mode, setMode] = useState(AUTO);
 
-    const approvals: (boolean | undefined)[] = [];
-    const balances: (BigNumber | undefined)[] = [];
+    const [contracts, setContracts] = useState(
+        props.assets.map(
+            (asset) => new Contract(asset.address, ERC20ABI, library.getSigner(account).connectUnchecked())
+        )
+    );
 
-    props.assets.forEach((asset) => {
-        const assetContract = useERC20Contract(asset.address, true);
-        approvals.push(useApproved(assetContract, props.fund?.address).data);
-        balances.push(useRawBalance(assetContract).data);
-    });
+    const approvals: boolean[] | undefined = useApprovals(contracts, props.fund?.address).data;
+    const balances: BigNumber[] | undefined = useRawBalances(contracts).data;
 
     const pegContract = useERC20Contract(PEG, true);
     const pegBalance = useRawBalance(pegContract).data;
@@ -203,6 +207,15 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
         setPegAmount(BigNumber.from('0'));
     }, [props.isMinting]);
 
+    useEffect(() => {
+        setAmounts(Array(props.assets.length).fill(BigNumber.from('0')));
+        setContracts(
+            props.assets.map(
+                (asset) => new Contract(asset.address, ERC20ABI, library.getSigner(account).connectUnchecked())
+            )
+        );
+    }, [props.assets.length]);
+
     const paths = props.isMinting
         ? props.assets.map((asset) => [...[...SWAP_PATHS[asset.symbol]].reverse(), asset.address])
         : props.assets.map((asset) => [asset.address, ...SWAP_PATHS[asset.symbol]]);
@@ -217,8 +230,8 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                         isMinting={props.isMinting}
                         value={amounts[index]}
                         fund={props.fund}
-                        approved={approvals[index]}
-                        balance={balances[index]}
+                        approved={approvals ? approvals[index] : undefined}
+                        balance={balances ? balances[index] : undefined}
                         disabled={
                             props.assets.reduce((a: boolean, b: Asset) => {
                                 return a || !b.amount || b.amount?.isZero();
@@ -428,13 +441,13 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                             <Primary
                                 onClick={() => {
                                     if (props.isMinting && mode == MANUAL) {
-                                        if (balances.length > 0 && props.fundAsset) {
+                                        if (balances && balances.length > 0 && props.fundAsset) {
                                             let min = BigNumber.from(
                                                 '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
                                             );
                                             balances.forEach((bal, i) => {
                                                 if (props.assets.length > 0) {
-                                                    const portion = bal!
+                                                    const portion = bal
                                                         .mul(parseEther('1'))
                                                         .div(props.assets[i].amount!);
                                                     const fundAmount = portion
@@ -469,12 +482,11 @@ const Flow: React.FC<Props> = (props: Props): React.ReactElement => {
                                         fundAmount?.isZero() ||
                                         (props.isMinting &&
                                             mode == MANUAL &&
-                                            approvals.reduce((a, b) => a && !b, true)) ||
+                                            approvals?.reduce((a, b) => a && !b, true)) ||
                                         (props.isMinting &&
                                             mode == MANUAL &&
-                                            balances.reduce(
-                                                (a: boolean, b: BigNumber | undefined, index: number) =>
-                                                    a || !b || !amounts[index] || !amounts[index].lte(b),
+                                            balances?.reduce<boolean>(
+                                                (a, b, index) => a || !b || !amounts[index] || !amounts[index].lte(b),
                                                 false
                                             )) ||
                                         (!props.isMinting &&

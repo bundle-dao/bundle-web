@@ -1,11 +1,9 @@
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useWeb3React } from '@web3-react/core';
 import { UserRejectedRequestError } from '@web3-react/injected-connector';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { injected } from '../../connectors';
-import useENSName from '../../hooks/useENSName';
 import { CHAIN_IDS, shortenHex } from '../../util';
-import { chainErrorMessage } from '../Messages';
 
 interface Props {
     triedToEagerConnect: boolean;
@@ -17,9 +15,9 @@ const Account = (props: Props) => {
     // initialize metamask onboarding
     const onboarding = useRef<MetaMaskOnboarding>();
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         onboarding.current = new MetaMaskOnboarding();
-    }, []);
+    });
 
     // manage connecting state for injected connector
     const [connecting, setConnecting] = useState(false);
@@ -29,8 +27,6 @@ const Account = (props: Props) => {
             onboarding.current?.stopOnboarding();
         }
     }, [active, error]);
-
-    const ENSName = useENSName(account);
 
     if (error) {
         return null;
@@ -65,13 +61,14 @@ const Account = (props: Props) => {
         );
     }
 
+    console.log('here');
     return (
         <a
             onClick={() => {
                 deactivate();
             }}
         >
-            {ENSName || `${shortenHex(account, 4)}`}
+            {`${shortenHex(account, 4)}`}
         </a>
     );
 };

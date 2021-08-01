@@ -20,7 +20,7 @@ interface Props {
     fund: Fund | undefined;
     approved?: boolean;
     disabled?: boolean;
-    balance?: BigNumber;
+    balance?: BigNumber | undefined;
 }
 
 const InputContainer = styled.div`
