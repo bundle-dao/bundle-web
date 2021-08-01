@@ -288,7 +288,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 <RewardCard
                                     image="/assets/primary_logo_token.svg"
                                     imageSecondary="/assets/BUSD.png"
-                                    name="bStable"
+                                    name="bStable Index"
                                     ticker="bSTBL-BNB"
                                     apy={bSTBLApy}
                                     width="100%"

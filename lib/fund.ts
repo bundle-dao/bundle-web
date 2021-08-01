@@ -35,7 +35,7 @@ const FUNDS: NamedFunds = {
         cgid: 'bchain',
     },
     bSTBL: {
-        name: 'bStable',
+        name: 'bStable Index',
         address: '0x934c7f600d6ee2fb60cdff61d1b9fc82c6b8c011',
         assets: ['USDC', 'DAI', 'BUSD', 'USDT'],
         symbol: 'bSTBL',
