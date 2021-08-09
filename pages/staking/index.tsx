@@ -8,7 +8,7 @@ import { getNamedAddress } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
 import { useWeb3React } from '@web3-react/core';
 import useContract from '../../hooks/useContract';
-import StakingCard from '../../components/StakingCard';
+import StakingCard, { VaultCard } from '../../components/StakingCard';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/providers';
 import { errorMessage, txMessage, unlockMessage } from '../../components/Messages';
 
@@ -216,6 +216,15 @@ const Landing: React.FC = (): React.ReactElement => {
                     <StakingCol span={24}>
                         <StakingContainer>
                             <h1>Available Staking Options</h1>
+                            <VaultCard
+                                image="/assets/logo.svg"
+                                name="BDL Vault"
+                                imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
+                                pid="0"
+                                vault={getNamedAddress(chainId, 'BundleVault')!}
+                                disabled={true}
+                                account={account!}
+                            />
                             <StakingCard
                                 image="/assets/logo.svg"
                                 imageSecondary="/assets/BNB.png"

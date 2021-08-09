@@ -21,3 +21,9 @@ export const fetchChartData = async (id: string, days: number = 1) => {
         `https://api.coingecko.com/api/v3/coins/${id.toLowerCase()}/market_chart?vs_currency=usd&days=${days}`
     );
 };
+
+export const fetchPrice = async (id: string) => {
+    return request(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`
+    );
+}

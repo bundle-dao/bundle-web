@@ -5,40 +5,32 @@ import styled from 'styled-components';
 import useContract from '../../hooks/useContract';
 import { formatNumber, getNamedAddress, parseBalance } from '../../util';
 import BundleTokenABI from '../../contracts/BundleToken.json';
-import MinterABI from '../../contracts/Minter.json';
-import PairABI from '../../contracts/Pair.json';
-import useStakedBalance from '../../hooks/useStakedBalance';
-import usePendingRewards from '../../hooks/usePendingRewards';
+import VaultABI from '../../contracts/Vault.json';
 import { Contract } from '@ethersproject/contracts';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Col, Row, InputNumber } from 'antd';
 import useRawBalance from '../../hooks/useRawBalance';
 import OutlinedButton from '../Button/Outline';
-import FilledButton from '../Button/Filled';
 import useApproved from '../../hooks/useApproved';
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
-import { approveMessage, depositMessage, errorMessage, harvestMessage, txMessage, withdrawMessage } from '../Messages';
+import { approveMessage, depositMessage, errorMessage, txMessage, withdrawMessage } from '../Messages';
 import { formatUnits, parseEther } from '@ethersproject/units';
 import { TransactionReceipt } from '@ethersproject/providers';
-import { Col as BdlCol } from '../Layout';
-import { getAsset } from '../../lib/asset';
-import VaultCard from './VaultCard';
+import { fetchPrice } from '../../lib/coingecko';
+import useVaultBalance from '../../hooks/useVaultBalance';
 
 interface Props {
     image: string;
-    imageSecondary?: string;
     name: string;
     imageStyle: React.CSSProperties;
     pid: string;
-    stakeToken: string;
+    vault: string;
     account: string | undefined;
     disabled?: boolean;
-    tokenA?: string;
-    tokenB?: string;
 }
 
-interface StakingDisplayProps {
+interface VaultDisplayProps {
     expanded: boolean;
 }
 
@@ -46,7 +38,7 @@ interface Disableable {
     disabled?: boolean;
 }
 
-const StakingCardContainer = styled.div`
+const VaultCardContainer = styled.div`
     width: 100%;
     height: auto;
     border-radius: 15px;
@@ -61,7 +53,7 @@ const StakingCardContainer = styled.div`
     transition: box-shadow 0.1s linear;
 `;
 
-const StakingInfoRow = styled(Row)`
+const VaultInfoRow = styled(Row)`
     width: 100%;
     padding: 10px 20px;
     min-height: 75px;
@@ -105,7 +97,7 @@ const ImageContainer = styled.div`
     background-color: ${(props) => props.theme.white};
 `;
 
-const StakingDisplay = styled.div<StakingDisplayProps>`
+const VaultDisplay = styled.div<VaultDisplayProps>`
     height: ${(props) => (props.expanded ? 'auto' : '0px')};
     display: flex;
     flex-direction: column;
@@ -156,109 +148,57 @@ const LiquidityText = styled.span`
     color: ${(props) => props.theme.primary};
 `;
 
-const getApyApr = async (
-    pid: string,
-    setApy: React.Dispatch<React.SetStateAction<string>>,
+const getApr = async (
     setApr: React.Dispatch<React.SetStateAction<string>>,
-    minter: Contract | undefined,
     bundleToken: Contract | undefined,
-    stakeToken: Contract | undefined,
-    chainId: number | undefined,
-    token0: string | undefined,
-    token1: string | undefined
+    vault: Contract | undefined,
+    chainId: number | undefined
 ) => {
-    if (!!minter && !!bundleToken && !!stakeToken && !!chainId) {
-        const minterAddress = getNamedAddress(chainId, 'Minter');
+    if (!!bundleToken && !!vault && !!chainId) {
+        const priceData = await fetchPrice('bundle-dao');
+        const price = priceData['bundle-dao']['usd'];
+        const total = await bundleToken.balanceOf(vault.address);
+        const tvl = price * total.div(parseEther('1'));
 
-        const batch = [];
-        batch.push(minter.poolInfo(pid));
-        batch.push(minter.totalAllocPoint());
-        batch.push(getAsset(bundleToken.address, bundleToken.provider));
-        batch.push(getAsset(token0, bundleToken.provider));
-        batch.push(getAsset(token1, bundleToken.provider));
-        batch.push(stakeToken.totalSupply());
-        batch.push(stakeToken.getReserves());
+        const apr = (2000 / tvl) * 12;
 
-        const batchResult = await Promise.all(batch).then((values) => values);
-
-        const pInfo = batchResult[0];
-        const totalAllocPoint = batchResult[1];
-        const bundleAsset = batchResult[2];
-        const token0Asset = batchResult[3];
-        const token1Asset = batchResult[4];
-        const stakeTokenSupply = batchResult[5];
-        const token0Supply = batchResult[6][0];
-        const token1Supply = batchResult[6][1];
-
-        const stakeTokenPrice = token0Supply
-            .mul(token0Asset.price)
-            .add(token1Supply.mul(token1Asset.price))
-            .mul(parseEther('1'))
-            .div(stakeTokenSupply);
-
-        const staked = (await stakeToken.balanceOf(minterAddress)).mul(stakeTokenPrice).div(parseEther('1'));
-        const rewardsPerDay = (await minter.blockRewards()).mul(bundleAsset.price).mul(28800);
-
-        const stakedFormatted = parseFloat(formatUnits(staked));
-        const rewardsFormatted = parseFloat(formatUnits(rewardsPerDay));
-
-        const dpr = ((rewardsFormatted / stakedFormatted) * pInfo.allocPoint) / totalAllocPoint;
-        const apy = (1 + dpr) ** 365 - 1;
-        const apr = dpr * 365;
-
-        setApy(`${formatNumber(apy * 100)}%`);
         setApr(`${formatNumber(apr * 100)}%`);
     }
 };
 
-const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
+const VaultCard: React.FC<Props> = (props: Props): React.ReactElement => {
     const [expanded, setExpanded] = useState(false);
-    const [apy, setApy] = useState('...');
     const [apr, setApr] = useState('...');
     const [toStake, setToStake] = useState(BigNumber.from(0));
     const [toUnstake, setToUnstake] = useState(BigNumber.from(0));
 
     const { chainId } = useWeb3React();
-    const minterAddress = getNamedAddress(chainId, 'Minter');
     const bundleTokenAddress = getNamedAddress(chainId, 'BundleToken');
-    const minter = useContract(minterAddress!, MinterABI, true);
     const bundleToken = useContract(bundleTokenAddress!, BundleTokenABI, true);
-    const stakeToken = useContract(props.stakeToken, PairABI, true);
+    const vault = useContract(props.vault, VaultABI, true);
 
     useEffect(() => {
         if (!props.disabled) {
-            getApyApr(props.pid, setApy, setApr, minter, bundleToken, stakeToken, chainId, props.tokenA, props.tokenB);
+            getApr(setApr, bundleToken, vault, chainId);
         }
     }, [chainId]);
 
-    const stakedBalance = useStakedBalance(minter, props.pid).data;
-    const pendingRewards = usePendingRewards(minter, props.pid).data;
-    const unstakedBalance = useRawBalance(stakeToken).data;
-    const approved = useApproved(stakeToken, minterAddress).data;
+    const stakedBalance = useVaultBalance(vault).data;
+    const unstakedBalance = useRawBalance(bundleToken).data;
+    const approved = useApproved(bundleToken, props.vault).data;
 
     return (
-        <StakingCardContainer>
-            <StakingInfoRow onClick={() => setExpanded(!expanded)} align="middle" gutter={[0, 10]}>
+        <VaultCardContainer>
+            <VaultInfoRow onClick={() => setExpanded(!expanded)} align="middle" gutter={[0, 10]}>
                 <InfoBlock xs={24} sm={24} md={24} lg={5} style={{ flexGrow: 1 }}>
                     <ImageContainer>
                         <img src={props.image} width="55px" height="55px" style={props.imageStyle} />
                     </ImageContainer>
-                    {props.imageSecondary ? (
-                        <ImageContainer style={{ position: 'absolute', left: '30px', zIndex: 1 }}>
-                            <img src={props.imageSecondary} height="55px" />
-                        </ImageContainer>
-                    ) : (
-                        <></>
-                    )}
-                    <TextBold style={props.imageSecondary ? { marginLeft: '40px' } : {}}>{props.name}</TextBold>
                 </InfoBlock>
                 <HideOnMobile>
                     <Divider type="vertical" style={{ height: '55px' }} />
                 </HideOnMobile>
                 <InfoBlock xs={24} sm={24} md={24} lg={8} style={{ justifyContent: 'center', flexGrow: 1 }}>
-                    <PrimaryContainer disabled={props.disabled}>
-                        <TextBold>{`APY: ${apy}`}</TextBold>
-                    </PrimaryContainer>
                     <PrimaryContainer disabled={props.disabled}>
                         <TextBold>{`APR: ${apr}`}</TextBold>
                     </PrimaryContainer>
@@ -268,7 +208,6 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                 </HideOnMobile>
                 <InfoBlock xs={23} sm={23} md={23} lg={9} style={{ justifyContent: 'center', flexGrow: 2 }}>
                     <Text>{`Staked: ${stakedBalance ? parseBalance(stakedBalance) : '0.00'} ${props.name}`}</Text>
-                    <Text>{`Rewards: ${pendingRewards ? pendingRewards : '0.00'} BDL`}</Text>
                 </InfoBlock>
                 <InfoBlock xs={1} sm={1} md={1} lg={1}>
                     {expanded ? (
@@ -277,11 +216,11 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                         <CaretDownOutlined style={{ marginBottom: '3px' }} />
                     )}
                 </InfoBlock>
-            </StakingInfoRow>
-            <StakingDisplay expanded={expanded}>
+            </VaultInfoRow>
+            <VaultDisplay expanded={expanded}>
                 <Divider style={{ margin: '5px 0px' }} />
                 <Row justify="center" style={{ padding: '10px 20px 0px 20px' }}>
-                    <Col xs={24} sm={24} md={5} flex="">
+                    <Col xs={24} sm={24} md={6} flex="">
                         <Text style={{ margin: '0px' }}>Available: {`${parseBalance(unstakedBalance) || '0.00'}`}</Text>
                         <InputNumber
                             stringMode={true}
@@ -297,7 +236,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col xs={24} sm={24} md={5}>
+                    <Col xs={24} sm={24} md={6}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToStake(unstakedBalance.div(4))}>
                                 <div>25%</div>
@@ -331,8 +270,8 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             }
                             onClick={() => {
                                 if (approved) {
-                                    minter
-                                        ?.deposit(props.pid, toStake)
+                                    vault
+                                        ?.deposit(toStake)
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
                                             return tx.wait(1);
@@ -344,9 +283,9 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             errorMessage(e.message || e.data.message);
                                         });
                                 } else {
-                                    stakeToken
+                                    bundleToken
                                         ?.approve(
-                                            minterAddress,
+                                            props.vault,
                                             BigNumber.from(
                                                 '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
                                             )
@@ -367,7 +306,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             {approved ? 'Deposit' : 'Approve'}
                         </OutlinedButton>
                     </Col>
-                    <Col xs={24} sm={24} md={5}>
+                    <Col xs={24} sm={24} md={6}>
                         <Text style={{ margin: '0px' }}>Available: {`${parseBalance(stakedBalance) || '0.00'}`}</Text>
                         <InputNumber
                             stringMode={true}
@@ -383,7 +322,7 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             size="large"
                         />
                     </Col>
-                    <Col xs={24} sm={24} md={5}>
+                    <Col xs={24} sm={24} md={6}>
                         <PercentageContainer>
                             <Percentage onClick={() => setToUnstake(stakedBalance.div(4))}>
                                 <div>25%</div>
@@ -418,8 +357,8 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             }
                             onClick={() => {
                                 if (approved) {
-                                    minter
-                                        ?.withdraw(props.pid, toUnstake)
+                                    vault
+                                        ?.withdraw(toUnstake)
                                         .then((tx: TransactionResponse) => {
                                             txMessage(tx);
                                             return tx.wait(1);
@@ -431,9 +370,9 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                                             errorMessage(e.message || e.data.message);
                                         });
                                 } else {
-                                    stakeToken
+                                    bundleToken
                                         ?.approve(
-                                            minterAddress,
+                                            props.vault,
                                             BigNumber.from(
                                                 '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
                                             )
@@ -454,57 +393,10 @@ const StakingCard: React.FC<Props> = (props: Props): React.ReactElement => {
                             {approved ? 'Withdraw' : 'Approve'}
                         </OutlinedButton>
                     </Col>
-                    <Col xs={24} sm={24} md={4} style={{ paddingBottom: '12px' }}>
-                        <FilledButton
-                            style={{
-                                height: '100%',
-                                margin: '0px auto',
-                                width: '80%',
-                                padding: '0px',
-                                display: 'block',
-                                minHeight: '38px',
-                            }}
-                            disabled={props.disabled || !pendingRewards || pendingRewards <= 0}
-                            onClick={() => {
-                                minter
-                                    ?.harvest(props.pid)
-                                    .then((tx: TransactionResponse) => {
-                                        txMessage(tx);
-                                        return tx.wait(1);
-                                    })
-                                    .then((tx: TransactionReceipt) => {
-                                        harvestMessage(tx);
-                                    })
-                                    .catch((e: any) => {
-                                        errorMessage(e.message || e.data.message);
-                                    });
-                            }}
-                        >
-                            <span color="white">Harvest</span>
-                        </FilledButton>
-                    </Col>
                 </Row>
-                {props.tokenA && props.tokenB ? (
-                    <Row style={{ padding: '0px 20px 10px 20px', marginTop: '-10px' }}>
-                        <BdlCol align="flex-start" span={24} padding="5px 0px 0px 0px" mobilePadding="10px 0px 0px 0px">
-                            <a
-                                href={`https://exchange.pancakeswap.finance/#/add/${props.tokenA}/${
-                                    props.tokenB == '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' ? 'BNB' : props.tokenB
-                                }`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <LiquidityText>Add Liquidity</LiquidityText>
-                            </a>
-                        </BdlCol>
-                    </Row>
-                ) : (
-                    <></>
-                )}
-            </StakingDisplay>
-        </StakingCardContainer>
+            </VaultDisplay>
+        </VaultCardContainer>
     );
 };
 
-export default StakingCard;
-export { VaultCard };
+export default VaultCard;
