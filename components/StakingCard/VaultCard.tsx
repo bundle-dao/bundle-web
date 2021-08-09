@@ -191,9 +191,10 @@ const VaultCard: React.FC<Props> = (props: Props): React.ReactElement => {
         <VaultCardContainer>
             <VaultInfoRow onClick={() => setExpanded(!expanded)} align="middle" gutter={[0, 10]}>
                 <InfoBlock xs={24} sm={24} md={24} lg={5} style={{ flexGrow: 1 }}>
-                    <ImageContainer>
+                    <ImageContainer style={{ marginLeft: '20px' }}>
                         <img src={props.image} width="55px" height="55px" style={props.imageStyle} />
                     </ImageContainer>
+                    <TextBold style={{ marginLeft: '20px' }}>{props.name}</TextBold>
                 </InfoBlock>
                 <HideOnMobile>
                     <Divider type="vertical" style={{ height: '55px' }} />
@@ -207,7 +208,7 @@ const VaultCard: React.FC<Props> = (props: Props): React.ReactElement => {
                     <Divider type="vertical" style={{ height: '55px' }} />
                 </HideOnMobile>
                 <InfoBlock xs={23} sm={23} md={23} lg={9} style={{ justifyContent: 'center', flexGrow: 2 }}>
-                    <Text>{`Staked: ${stakedBalance ? parseBalance(stakedBalance) : '0.00'} ${props.name}`}</Text>
+                    <Text>{`Staked: ${stakedBalance ? parseBalance(stakedBalance) : '0.00'} BDL`}</Text>
                 </InfoBlock>
                 <InfoBlock xs={1} sm={1} md={1} lg={1}>
                     {expanded ? (

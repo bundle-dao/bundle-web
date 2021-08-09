@@ -222,7 +222,7 @@ const Landing: React.FC = (): React.ReactElement => {
                                 imageStyle={{ marginTop: '3px', marginLeft: '2px', zIndex: 2 }}
                                 pid="0"
                                 vault={getNamedAddress(chainId, 'BundleVault')!}
-                                disabled={true}
+                                disabled={false}
                                 account={account!}
                             />
                             <StakingCard
